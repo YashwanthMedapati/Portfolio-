@@ -46,7 +46,7 @@ export default function Resume() {
           <Button
             variant="secondary"
             className="rounded-full gap-1.5 border border-primary/30 bg-primary-soft text-brand-cyan hover:bg-primary/20"
-            onClick={() => ask("Why should we hire him?")}
+            onClick={() => ask("Why should we hire you?")}
           >
             <Sparkles className="size-4" />
             Have Yash explain it

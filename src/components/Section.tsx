@@ -29,7 +29,7 @@ export function Section({
         scale: { duration: 0.38, ease: [0.22, 1, 0.36, 1] },
       }}
       className={cn(
-        "group/section relative scroll-mt-20 py-20 sm:py-28 px-6 max-w-5xl mx-auto",
+        "group/section relative scroll-mt-20 px-5 py-16 sm:px-6 sm:py-28 max-w-5xl mx-auto",
         className
       )}
     >

@@ -92,8 +92,9 @@ export function YashCompanion() {
   const applyDragPosition = useCallback((clientX: number, clientY: number) => {
     const spriteSize = isMobile ? MOBILE_SPRITE_SIZE : DESKTOP_SPRITE_SIZE;
     const stageWidth = isMobile ? MOBILE_STAGE_WIDTH : DESKTOP_STAGE_WIDTH;
+    const stageHeight = Math.round(spriteSize * 1.55);
     const nextX = clamp(clientX - dragRef.current.offsetX, CORNER_PADDING, window.innerWidth - stageWidth - CORNER_PADDING);
-    const nextY = clamp(clientY - dragRef.current.offsetY, CORNER_PADDING, window.innerHeight - spriteSize - CORNER_PADDING);
+    const nextY = clamp(clientY - dragRef.current.offsetY, CORNER_PADDING, window.innerHeight - stageHeight - CORNER_PADDING);
     const movementX = nextX - positionRef.current.x;
     if (Math.abs(movementX) >= MOVE_THRESHOLD) {
       setMoveDir(movementX < 0 ? "left" : "right");
@@ -125,8 +126,9 @@ export function YashCompanion() {
       const edgeOffset = mobile ? MOBILE_EDGE_OFFSET : DESKTOP_EDGE_OFFSET;
       const spriteSize = mobile ? MOBILE_SPRITE_SIZE : DESKTOP_SPRITE_SIZE;
       const stageWidth = mobile ? MOBILE_STAGE_WIDTH : DESKTOP_STAGE_WIDTH;
+      const stageHeight = Math.round(spriteSize * 1.55);
       setX(clamp(window.innerWidth - edgeOffset, CORNER_PADDING, window.innerWidth - stageWidth - CORNER_PADDING));
-      setY(clamp(window.innerHeight - spriteSize - BOTTOM_OFFSET, CORNER_PADDING, window.innerHeight - spriteSize - CORNER_PADDING));
+      setY(clamp(window.innerHeight - stageHeight - BOTTOM_OFFSET, CORNER_PADDING, window.innerHeight - stageHeight - CORNER_PADDING));
     };
     onResize();
     window.addEventListener("resize", onResize);
@@ -242,6 +244,7 @@ export function YashCompanion() {
       wakeDarkYash();
       const spriteSize = DESKTOP_SPRITE_SIZE;
       const stageWidth = DESKTOP_STAGE_WIDTH;
+      const stageHeight = Math.round(spriteSize * 1.55);
       const currentX = positionRef.current.x;
       const dx = e.clientX - (currentX + stageWidth / 2);
       let targetX = e.clientX + (dx < 0 ? FOLLOW_GAP : -FOLLOW_GAP);
@@ -259,7 +262,7 @@ export function YashCompanion() {
       }
 
       const nextX = clamp(targetX, CORNER_PADDING, window.innerWidth - stageWidth - CORNER_PADDING);
-      const nextY = clamp(targetY, CORNER_PADDING, window.innerHeight - spriteSize - CORNER_PADDING);
+      const nextY = clamp(targetY, CORNER_PADDING, window.innerHeight - stageHeight - CORNER_PADDING);
       const movementX = nextX - currentX;
       if (Math.abs(movementX) >= MOVE_THRESHOLD) {
         setMoveDir(movementX < 0 ? "left" : "right");
@@ -298,9 +301,10 @@ export function YashCompanion() {
     const frame = requestAnimationFrame(() => {
       const spriteSize = isMobile ? MOBILE_SPRITE_SIZE : DESKTOP_SPRITE_SIZE;
       const stageWidth = isMobile ? MOBILE_STAGE_WIDTH : DESKTOP_STAGE_WIDTH;
+      const stageHeight = Math.round(spriteSize * 1.55);
       const edgeOffset = isMobile ? MOBILE_EDGE_OFFSET : DESKTOP_EDGE_OFFSET;
       setX(clamp(window.innerWidth - edgeOffset, CORNER_PADDING, window.innerWidth - stageWidth - CORNER_PADDING));
-      setY(clamp(window.innerHeight - spriteSize - BOTTOM_OFFSET, CORNER_PADDING, window.innerHeight - spriteSize - CORNER_PADDING));
+      setY(clamp(window.innerHeight - stageHeight - BOTTOM_OFFSET, CORNER_PADDING, window.innerHeight - stageHeight - CORNER_PADDING));
       setMoveDir(null);
     });
     return () => cancelAnimationFrame(frame);
@@ -373,12 +377,13 @@ export function YashCompanion() {
   const compactDock = !isNearHero && !isFollowingCursor && !isDragging && !hasCustomPosition && !isOpen;
   const spriteSize = isMobile ? MOBILE_SPRITE_SIZE : compactDock ? 68 : DESKTOP_SPRITE_SIZE;
   const stageWidth = isMobile ? MOBILE_STAGE_WIDTH : compactDock ? 136 : DESKTOP_STAGE_WIDTH;
+  const lockedStageHeight = Math.round(spriteSize * 1.55);
   const isDarkAwake = theme === "dark" && darkAwakeUntil > now;
   const panelHeight = Math.min(viewport.height * 0.68, 540);
   const openX = clamp(viewport.width - stageWidth - 20, CORNER_PADDING, viewport.width - stageWidth - CORNER_PADDING);
-  const openY = clamp(viewport.height - panelHeight - spriteSize - 30, CORNER_PADDING, viewport.height - spriteSize - CORNER_PADDING);
+  const openY = clamp(viewport.height - panelHeight - lockedStageHeight - 30, CORNER_PADDING, viewport.height - lockedStageHeight - CORNER_PADDING);
   const dockX = clamp(viewport.width - stageWidth - 18, CORNER_PADDING, viewport.width - stageWidth - CORNER_PADDING);
-  const dockY = Math.max(CORNER_PADDING, viewport.height - 52);
+  const dockY = clamp(viewport.height - lockedStageHeight - 12, CORNER_PADDING, viewport.height - lockedStageHeight - CORNER_PADDING);
   const renderX = isOpen && !isFollowingCursor ? openX : compactDock ? dockX : x;
   const renderY = isOpen && !isFollowingCursor ? openY : compactDock ? dockY : y;
 
@@ -394,7 +399,7 @@ export function YashCompanion() {
             : "idle";
 
   const displayAction = override?.type ?? baseAction;
-  const stageHeight = spriteSize + (displayAction === "jump" ? 30 : 20);
+  const stageHeight = lockedStageHeight;
 
   let frames = YASH_FRAMES.idle;
   let fps = 2;
@@ -462,11 +467,13 @@ export function YashCompanion() {
 
   return (
     <div
-      className="fixed z-50 flex flex-col items-center"
+      className="fixed z-50"
       aria-hidden={isOpen}
       style={{
         left: renderX,
         top: renderY,
+        width: stageWidth,
+        height: stageHeight,
         opacity: 1,
         pointerEvents: isOpen ? "none" : "auto",
         transition: reducedMotion || isDragging ? "opacity 150ms" : "left 140ms cubic-bezier(0.22, 1, 0.36, 1), top 140ms cubic-bezier(0.22, 1, 0.36, 1), opacity 150ms",
@@ -480,7 +487,7 @@ export function YashCompanion() {
             initial={{ opacity: 0, y: 8, pointerEvents: "none" }}
             animate={{ opacity: 1, y: 0, pointerEvents: "auto" }}
             exit={{ opacity: 0, y: 8, pointerEvents: "none" }}
-            className="relative mb-2 max-w-[168px] bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
+            className="absolute bottom-[calc(100%+8px)] left-1/2 z-10 w-max max-w-[168px] -translate-x-1/2 bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
           >
             <button
               onClick={(e) => {
@@ -502,7 +509,7 @@ export function YashCompanion() {
             initial={{ opacity: 0, y: 8, pointerEvents: "none" }}
             animate={{ opacity: 1, y: 0, pointerEvents: "none" }}
             exit={{ opacity: 0, y: 8, pointerEvents: "none" }}
-            className="relative mb-2 max-w-[176px] bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
+            className="absolute bottom-[calc(100%+8px)] left-1/2 z-10 w-max max-w-[176px] -translate-x-1/2 bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
           >
             Good night. I&apos;ll be right here.
           </motion.div>
@@ -521,7 +528,7 @@ export function YashCompanion() {
         aria-haspopup="dialog"
         aria-controls="jr-yash-panel"
         tabIndex={isOpen ? -1 : 0}
-        className="flex touch-none items-end justify-center bg-transparent border-none p-0 cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
+        className="absolute inset-0 flex touch-none items-end justify-center bg-transparent border-none p-0 cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
         style={{ width: stageWidth, height: stageHeight }}
       >
         <YashSprite

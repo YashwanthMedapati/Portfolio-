@@ -27,7 +27,7 @@ export default function Hero() {
     <section
       id={sectionIds.hero}
       aria-label="Introduction"
-      className="relative min-h-[100svh] flex flex-col items-center justify-center px-6 bg-grid overflow-hidden"
+      className="relative min-h-[100svh] flex flex-col items-center justify-center px-5 sm:px-6 bg-grid overflow-hidden"
     >
       <div
         aria-hidden
@@ -62,14 +62,14 @@ export default function Hero() {
             className="text-base sm:text-lg text-muted-foreground max-w-xl mb-10 leading-relaxed text-pretty"
           />
 
-          <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
-            <Button size="lg" className="rounded-full h-11 px-6" onClick={() => scrollTo(sectionIds.projects)}>
+          <div className="mb-10 flex w-full max-w-xs flex-col items-stretch justify-center gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center">
+            <Button size="lg" className="h-11 justify-center rounded-full px-6" onClick={() => scrollTo(sectionIds.projects)}>
               View Projects
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="rounded-full h-11 px-6 gap-1.5"
+              className="h-11 justify-center rounded-full px-6 gap-1.5"
               onClick={() => scrollTo(sectionIds.resume)}
             >
               <FileText className="size-4" />
@@ -78,7 +78,7 @@ export default function Hero() {
             <Button
               size="lg"
               variant="outline"
-              className="rounded-full h-11 px-6 gap-1.5"
+              className="h-11 justify-center rounded-full px-6 gap-1.5"
               nativeButton={false}
               render={
                 <a href={personal.github} target="_blank" rel="noopener noreferrer" />
@@ -90,7 +90,7 @@ export default function Hero() {
             <Button
               size="lg"
               variant="secondary"
-              className="rounded-full h-11 px-6 gap-1.5 border border-primary/30 bg-primary-soft text-brand-cyan hover:bg-primary/20"
+              className="h-11 justify-center rounded-full px-6 gap-1.5 border border-primary/30 bg-primary-soft text-brand-cyan hover:bg-primary/20"
               onClick={open}
             >
               <Sparkles className="size-4" />

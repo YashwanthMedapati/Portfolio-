@@ -39,9 +39,9 @@ const intents: Intent[] = [
       "portfolio",
     ],
     answer: () => ({
-      text: `I would start with NutriDent AI and AI Resume Intelligence. NutriDent AI is the healthcare ML story: real NHANES data, caries-risk prediction, and a React + FastAPI app around it. AI Resume Intelligence is the NLP story: parsing resumes, comparing them to job descriptions, and ranking candidates. The nice thing is that both projects show Yash building the product around the model, not just stopping at the model.`,
+      text: `I would start with NutriDent AI and AI Resume Intelligence. NutriDent AI is my healthcare ML story: real NHANES data, caries-risk prediction, and a React + FastAPI app around it. AI Resume Intelligence is my NLP story: parsing resumes, comparing them to job descriptions, and ranking candidates. The nice thing is that both projects show me building the product around the model, not just stopping at the model.`,
       action: { type: "scroll", target: "projects" },
-      followUps: ["Which project best shows his ML skills?", "What tech stack does he use?"],
+      followUps: ["Which project best shows my ML skills?", "What tech stack do I use?"],
     }),
   },
   {
@@ -50,34 +50,34 @@ const intents: Intent[] = [
     answer: () => ({
       text: `If this is for a recruiter, I would lead with NutriDent AI. It is the easiest project to explain quickly: real health data, a trained model, and a usable app around nutrition and dental risk. If the role is more NLP or hiring-tech focused, then AI Resume Intelligence deserves the spotlight because the resume parsing and semantic matching are more relevant.`,
       action: { type: "scroll", target: "projects" },
-      followUps: ["Show me Yash's AI projects", "What tech stack does he use?"],
+      followUps: ["Show me my AI projects", "What tech stack do I use?"],
     }),
   },
   {
     id: "tech-stack",
-    keywords: ["tech stack", "what technologies", "what languages", "what does he use", "stack does he use", "tools does he use"],
+    keywords: ["tech stack", "what technologies", "what languages", "what do you use", "what does he use", "stack do you use", "stack does he use", "tools do you use", "tools does he use"],
     answer: () => ({
-      text: `His day-to-day stack is pretty practical: Python and FastAPI for services, React for interfaces, PostgreSQL for data, and ML tools like scikit-learn or Sentence Transformers when the app needs intelligence. He also works with ${skills.Languages.join(", ")} and tools like ${skills["Databases, Cloud & Tools"].join(", ")}.`,
+      text: `My day-to-day stack is pretty practical: Python and FastAPI for services, React for interfaces, PostgreSQL for data, and ML tools like scikit-learn or Sentence Transformers when the app needs intelligence. I also work with ${skills.Languages.join(", ")} and tools like ${skills["Databases, Cloud & Tools"].join(", ")}.`,
       action: { type: "scroll", target: "skills" },
-      followUps: ["Show me Yash's AI projects", "What's his education background?"],
+      followUps: ["Show me my AI projects", "What's my education background?"],
     }),
   },
   {
     id: "hire-him",
     keywords: ["why should we hire", "why hire him", "why should i hire", "what makes him a good fit", "why yash"],
     answer: () => ({
-      text: `I would pitch Yash as someone who connects the pieces. A lot of junior portfolios show one layer. His work shows front ends, APIs, databases, data pipelines, and ML all talking to each other. That makes him a better fit for teams that need someone curious, adaptable, and willing to own the messy middle between idea and working product.`,
+      text: `I would pitch myself as someone who connects the pieces. A lot of junior portfolios show one layer. My work shows front ends, APIs, databases, data pipelines, and ML all talking to each other. That makes me a better fit for teams that need someone curious, adaptable, and willing to own the messy middle between idea and working product.`,
       action: { type: "scroll", target: "about" },
-      followUps: ["Open his resume", "Show me Yash's AI projects"],
+      followUps: ["Open my resume", "Show me my AI projects"],
     }),
   },
   {
     id: "resume",
-    keywords: ["open his resume", "resume", "cv", "download resume", "see his resume"],
+    keywords: ["open my resume", "open his resume", "resume", "cv", "download resume", "see my resume", "see his resume"],
     answer: () => ({
       text: `Sure. I will take you to the resume section, where you can preview it or download the PDF.`,
       action: { type: "resume" },
-      followUps: ["Why should we hire him?", "What's his education background?"],
+      followUps: ["Why should we hire you?", "What's my education background?"],
     }),
   },
   {
@@ -89,7 +89,7 @@ const intents: Intent[] = [
           .map((e) => `${e.degree} (${e.track}) from ${e.school}, GPA ${e.gpa}, ${e.dateRange}`)
           .join(". ") + ". Both are from Binghamton University's Watson College of Engineering, so the academic story is very aligned with software, AI, and security.",
       action: { type: "scroll", target: "education" },
-      followUps: ["What certifications does he have?", "What tech stack does he use?"],
+      followUps: ["What certifications do I have?", "What tech stack do I use?"],
     }),
   },
   {
@@ -98,16 +98,16 @@ const intents: Intent[] = [
     answer: () => ({
       text: `${certifications.map((c) => `${c.name} (${c.date})`).join("; ")}.`,
       action: { type: "scroll", target: "education" },
-      followUps: ["What's his education background?"],
+      followUps: ["What's my education background?"],
     }),
   },
   {
     id: "experience",
     keywords: ["experience", "work experience", "job history", "internship", "worked as"],
     answer: () => ({
-      text: `${experience[0].role} at ${experience[0].org} (${experience[0].dateRange}) gave him hands-on operations experience with real-time availability data across 36 campus parking lots. For engineering depth, I would still point people to the projects, because that is where his full-stack, ML, and data-pipeline work is easiest to evaluate.`,
+      text: `${experience[0].role} at ${experience[0].org} (${experience[0].dateRange}) gave me hands-on operations experience with real-time availability data across 36 campus parking lots. For engineering depth, I would still point people to my projects, because that is where my full-stack, ML, and data-pipeline work is easiest to evaluate.`,
       action: { type: "scroll", target: "about" },
-      followUps: ["Show me Yash's AI projects", "What tech stack does he use?"],
+      followUps: ["Show me my AI projects", "What tech stack do I use?"],
     }),
   },
   {
@@ -126,9 +126,9 @@ const intents: Intent[] = [
       "open to work",
     ],
     answer: () => ({
-      text: `Yash is actively applying for entry-level Machine Learning Engineer, Software Development Engineer, Software Engineer, and Data Analyst roles. The strongest fit is work where he can combine Python, full-stack product building, data pipelines, and ML/NLP systems.`,
+      text: `I am actively applying for entry-level Machine Learning Engineer, Software Development Engineer, Software Engineer, and Data Analyst roles. The strongest fit is work where I can combine Python, full-stack product building, data pipelines, and ML/NLP systems.`,
       action: { type: "scroll", target: "resume" },
-      followUps: ["Does Yash need sponsorship?", "Why should we hire him?"],
+      followUps: ["Do I need sponsorship?", "Why should we hire you?"],
     }),
   },
   {
@@ -146,18 +146,18 @@ const intents: Intent[] = [
       "citizenship",
     ],
     answer: () => ({
-      text: `Yash is a green card holder, so he is authorized to work in the United States and does not need visa sponsorship now or in the future.`,
+      text: `I am a green card holder, so I am authorized to work in the United States and do not need visa sponsorship now or in the future.`,
       action: { type: "scroll", target: "contact" },
-      followUps: ["What roles is Yash applying for?", "Open his resume"],
+      followUps: ["What roles am I applying for?", "Open my resume"],
     }),
   },
   {
     id: "age-height",
     keywords: ["age", "old is yash", "how old", "height", "tall", "5ft", "5 feet"],
     answer: () => ({
-      text: `Yash is 22 years old and 5 ft 8 in tall.`,
+      text: `I am 22 years old and 5 ft 8 in tall.`,
       action: { type: "none" },
-      followUps: ["Where did Yash grow up?", "What languages does he speak?"],
+      followUps: ["Where did I grow up?", "What languages do I speak?"],
     }),
   },
   {
@@ -174,9 +174,9 @@ const intents: Intent[] = [
       "united states",
     ],
     answer: () => ({
-      text: `Yash grew up in Hyderabad, India, and moved to the United States in 2023. That background shows up in him pretty clearly: adaptable, curious, and comfortable learning fast in new environments.`,
+      text: `I grew up in Hyderabad, India, and moved to the United States in 2023. That background shows up in me pretty clearly: adaptable, curious, and comfortable learning fast in new environments.`,
       action: { type: "none" },
-      followUps: ["What schools did Yash attend?", "What languages does he speak?"],
+      followUps: ["What schools did I attend?", "What languages do I speak?"],
     }),
   },
   {
@@ -194,18 +194,18 @@ const intents: Intent[] = [
       "edison",
     ],
     answer: () => ({
-      text: `Before Binghamton, Yash studied at St. Joseph's in Malakpet, Hyderabad, Sri Chaitanya in Meerpet, and John P. Stevens High School in Edison, New Jersey. His college education is both B.S. and M.S. Computer Science at Binghamton University's Watson College of Engineering.`,
+      text: `Before Binghamton, I studied at St. Joseph's in Malakpet, Hyderabad, Sri Chaitanya in Meerpet, and John P. Stevens High School in Edison, New Jersey. My college education is both B.S. and M.S. Computer Science at Binghamton University's Watson College of Engineering.`,
       action: { type: "scroll", target: "education" },
-      followUps: ["What's his education background?", "When did he move to the US?"],
+      followUps: ["What's my education background?", "When did I move to the US?"],
     }),
   },
   {
     id: "languages-personal",
     keywords: ["languages", "speak", "fluent", "english", "hindi", "telugu"],
     answer: () => ({
-      text: `Yash speaks English, Hindi, and Telugu fluently.`,
+      text: `I speak English, Hindi, and Telugu fluently.`,
       action: { type: "none" },
-      followUps: ["Where did Yash grow up?", "What roles is Yash applying for?"],
+      followUps: ["Where did I grow up?", "What roles am I applying for?"],
     }),
   },
   {
@@ -224,9 +224,9 @@ const intents: Intent[] = [
       "what does yash like",
     ],
     answer: () => ({
-      text: `Outside coding, Yash likes playing sports, especially cricket, playing video games, watching anime, movies, and series, and yes, still coding for fun when an idea gets stuck in his head.`,
+      text: `Outside coding, I like playing sports, especially cricket, playing video games, watching anime, movies, and series, and yes, still coding for fun when an idea gets stuck in my head.`,
       action: { type: "none" },
-      followUps: ["What are Yash's hidden talents?", "What is his favorite anime?"],
+      followUps: ["What are my hidden talents?", "What is my favorite anime?"],
     }),
   },
   {
@@ -244,9 +244,9 @@ const intents: Intent[] = [
       "fly",
     ],
     answer: () => ({
-      text: `Two fun facts: Yash writes screenplays and is a genuinely good chef. A bigger dream of his is to travel the world and fly in a jet someday.`,
+      text: `Two fun facts: I write screenplays and I am a genuinely good chef. A bigger dream of mine is to travel the world and fly in a jet someday.`,
       action: { type: "none" },
-      followUps: ["What does Yash do outside coding?", "What is Yash's favorite color?"],
+      followUps: ["What do I do outside coding?", "What is my favorite color?"],
     }),
   },
   {
@@ -263,18 +263,18 @@ const intents: Intent[] = [
       "favorite song",
     ],
     answer: () => ({
-      text: `Yash's favorite color is black. For anime, movies, and music, the list is too big for me to answer cleanly here, so it is better to contact him directly if you want the full conversation.`,
+      text: `My favorite color is black. For anime, movies, and music, the list is too big for me to answer cleanly here, so it is better to contact me directly if you want the full conversation.`,
       action: { type: "scroll", target: "contact" },
-      followUps: ["Contact Yash", "What does Yash do outside coding?"],
+      followUps: ["Contact me", "What do I do outside coding?"],
     }),
   },
   {
     id: "contact",
     keywords: ["contact", "email", "phone", "instagram", "reach him", "get in touch", "linkedin", "github profile", "hire him contact"],
     answer: () => ({
-      text: `Best place is email: ${personal.email}. You can also call ${personal.phone}, connect on LinkedIn at ${personal.linkedinHandle}, message him on Instagram at ${personal.instagramHandle}, or check the code on GitHub at ${personal.githubHandle}.`,
+      text: `Best place is email: ${personal.email}. You can also call ${personal.phone}, connect with me on LinkedIn at ${personal.linkedinHandle}, message me on Instagram at ${personal.instagramHandle}, or check my code on GitHub at ${personal.githubHandle}.`,
       action: { type: "scroll", target: "contact" },
-      followUps: ["Why should we hire him?", "Open his resume"],
+      followUps: ["Why should we hire you?", "Open my resume"],
     }),
   },
   {
@@ -283,7 +283,7 @@ const intents: Intent[] = [
     answer: () => ({
       text: personal.summary,
       action: { type: "scroll", target: "about" },
-      followUps: ["Show me Yash's AI projects", "Why should we hire him?"],
+      followUps: ["Show me my AI projects", "Why should we hire you?"],
     }),
   },
   {
@@ -292,7 +292,7 @@ const intents: Intent[] = [
     answer: () => ({
       text: `I'm Yash, the little portfolio guide. I can answer from the resume and project data here, and I can jump you to the right section when it helps. I try to be useful without making things up.`,
       action: { type: "none" },
-      followUps: ["Show me Yash's AI projects", "What tech stack does he use?"],
+      followUps: ["Show me my AI projects", "What tech stack do I use?"],
     }),
   },
   {
@@ -313,17 +313,17 @@ const intents: Intent[] = [
       "fun fact",
     ],
     answer: () => ({
-      text: `I know a few personal basics now: Yash grew up in Hyderabad, moved to the US in 2023, speaks English, Hindi, and Telugu, likes cricket, games, anime, movies, series, and coding, and is actively applying for ML Engineer, SDE, Software Engineer, and Data Analyst roles. If you want deeper personal details, contact him directly.`,
+      text: `I know a few personal basics now: I grew up in Hyderabad, moved to the US in 2023, speak English, Hindi, and Telugu, like cricket, games, anime, movies, series, and coding, and I am actively applying for ML Engineer, SDE, Software Engineer, and Data Analyst roles. If you want deeper personal details, contact me directly.`,
       action: { type: "scroll", target: "contact" },
-      followUps: ["Does Yash need sponsorship?", "What are Yash's hidden talents?", "Contact Yash"],
+      followUps: ["Do I need sponsorship?", "What are my hidden talents?", "Contact me"],
     }),
   },
 ];
 
 const fallback: YashAnswer = {
-  text: `I do not know that from the portfolio data yet. I can answer best about Yash's projects, skills, education, resume, and contact info. I will take you to the contact section so you can ask him directly.`,
+  text: `I do not know that from the portfolio data yet. I can answer best about my projects, skills, education, resume, and contact info. I will take you to the contact section so you can ask me directly.`,
   action: { type: "scroll", target: "contact" },
-  followUps: ["Contact Yash", "Show me Yash's AI projects", "What tech stack does he use?"],
+  followUps: ["Contact me", "Show me my AI projects", "What tech stack do I use?"],
 };
 
 function score(query: string, keywords: string[]): number {
@@ -362,18 +362,18 @@ export const suggestedPrompts = [
   "follow me",
   "break",
   "priya",
-  "Show me Yash's AI projects",
-  "Does Yash need sponsorship?",
-  "What roles is Yash applying for?",
-  "Where did Yash grow up?",
-  "What tech stack does he use?",
-  "Why should we hire him?",
-  "Open his resume",
-  "Which project best shows his ML skills?",
+  "Show me my AI projects",
+  "Do I need sponsorship?",
+  "What roles am I applying for?",
+  "Where did I grow up?",
+  "What tech stack do I use?",
+  "Why should we hire you?",
+  "Open my resume",
+  "Which project best shows my ML skills?",
 ];
 
 export const greeting: YashAnswer = {
-  text: `Hey, I'm Yash. Ask me about projects, skills, education, the resume, or why he is a fit. You can also try "follow me" if you want the little Yash to trail your cursor.`,
+  text: `Hey, I'm Yash. Ask me about my projects, skills, education, resume, or why I am a fit. You can also try "follow me" if you want the little Yash to trail your cursor.`,
   action: { type: "none" },
   followUps: suggestedPrompts,
 };

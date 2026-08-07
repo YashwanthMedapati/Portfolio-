@@ -107,25 +107,25 @@ export function JrYashProvider({ children }: { children: ReactNode }) {
       ? {
           text: "Follow mode is on. Move your cursor and I will run after it from my little spot. You can also drag me anywhere to park me there. Type \"stop following\" if you want me to stop chasing the cursor.",
           action: { type: "none" },
-          followUps: ["stop following", "What tech stack does he use?"],
+          followUps: ["stop following", "What tech stack do I use?"],
         }
       : isStopFollowCommand
         ? {
             text: "Parking back in the corner. Type \"follow me\" anytime you want me to chase the cursor again.",
             action: { type: "none" },
-          followUps: ["follow me", "Show me Yash's AI projects"],
+          followUps: ["follow me", "Show me my AI projects"],
         }
       : isBreakCommand
         ? {
             text: "Hammer mode armed. Click anywhere on the site and I will crack the page for fun. Refresh the page when you want everything perfectly back in place.",
             action: { type: "none" },
-            followUps: ["priya", "stop following", "Show me Yash's AI projects"],
+            followUps: ["priya", "stop following", "Show me my AI projects"],
           }
         : isPriyaCommand
           ? {
               text: "Okay, that one gets the secret heart burst. I will keep it sweet and dramatic for a few seconds.",
               action: { type: "none" },
-              followUps: ["break", "What tech stack does he use?"],
+              followUps: ["break", "What tech stack do I use?"],
             }
       : askJrYash(query);
     setTimeout(() => {

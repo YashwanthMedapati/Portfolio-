@@ -15,6 +15,7 @@ The centerpiece is **Yash**, a rule-based portfolio guide that answers visitor q
 - **Section navigation** - sticky scroll-spy navigation, mobile drawer, smooth section jumps, and hover micro-interactions.
 - **Resume snapshot + PDF preview** - recruiter-friendly highlights before the embedded resume viewer.
 - **Contact shortcuts** - copy-email action plus an email-draft form that never sends silently.
+- **Opt-in sound** - lightweight interface and character sound effects behind an explicit toggle.
 - **SEO/social metadata** - Open Graph and Twitter metadata with `NEXT_PUBLIC_SITE_URL` support.
 
 ## Tech Stack
@@ -72,6 +73,8 @@ Edit [`src/data/resume.ts`](src/data/resume.ts) for projects, links, skills, edu
 Edit [`src/lib/jrYashBrain.ts`](src/lib/jrYashBrain.ts) when adding a new bot answer. Keep answers factual and avoid inventing metrics.
 
 To add real project screenshots, set a project's `image` field to a path under `public/`. To add a live demo, set `demoUrl`.
+
+For a running history of the larger portfolio changes, see [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Sprite Assets
 

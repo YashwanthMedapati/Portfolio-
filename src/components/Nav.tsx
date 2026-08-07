@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sheet";
 import { useJrYash } from "./JrYash/JrYashContext";
 import { ThemeToggle } from "./ThemeToggle";
+import { SoundToggle } from "./SoundToggle";
 import { cn } from "@/lib/utils";
 
 const links: { id: string; label: string }[] = [
@@ -159,6 +160,7 @@ export default function Nav() {
 
         <div className="hidden md:flex items-center gap-2">
           <ThemeToggle />
+          <SoundToggle />
           <Button variant="ghost" size="sm" onClick={openJrYash} className="gap-1.5">
             <Sparkles className="size-3.5 text-primary" />
             Ask Yash
@@ -176,6 +178,7 @@ export default function Nav() {
 
         <div className="flex items-center gap-1 md:hidden">
           <ThemeToggle />
+          <SoundToggle />
         </div>
 
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>

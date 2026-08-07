@@ -16,7 +16,7 @@
   instagramHandle: "instagram.com/yashwanth_medapati_",
   resumeFile: "/Yashwanth_Reddy_Medapati_Resume.pdf",
   summary:
-    "Computer Science graduate with an M.S. and hands-on experience building full-stack applications, machine learning systems, and distributed data pipelines. Skilled in Python, Java, JavaScript, React, FastAPI, PostgreSQL, and AWS. Seeking entry-level Software Engineer or Machine Learning Engineer roles.",
+    "I am a Computer Science graduate with an M.S. and hands-on experience building full-stack applications, machine learning systems, and distributed data pipelines. I work with Python, Java, JavaScript, React, FastAPI, PostgreSQL, and AWS, and I am seeking entry-level Software Engineer or Machine Learning Engineer roles.",
 };
 
 export type Project = {
@@ -30,6 +30,8 @@ export type Project = {
   image?: string;
   /** Optional link to a live, publicly reachable demo. */
   demoUrl?: string;
+  /** Optional path under /public to a local demo video. */
+  demoVideo?: string;
   stack: string[];
   bullets: string[];
   highlights: { label: string; value: string }[];
@@ -44,6 +46,7 @@ export const projects: Project[] = [
     type: "Personal Project",
     dateRange: "Jul 2026 - Present",
     github: "https://github.com/YashwanthMedapati/NutridentAI",
+    demoVideo: "/demos/nutrident-demo.mp4",
     stack: [
       "React",
       "FastAPI",

@@ -10,6 +10,5 @@ export const YASH_FRAMES = {
   runRight: frames("run-right", 6),
   sleep: frames("sleep", 3),
   think: ["/yash/think/1.png"],
-  thinkResolved: ["/yash/think/4.png"],
   emotes: frames("emote", 10),
 };

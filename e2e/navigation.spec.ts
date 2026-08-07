@@ -25,6 +25,16 @@ test.describe("Navigation", () => {
     await page.getByRole("button", { name: "Contact", exact: true }).click();
     await expect(page.locator(`#${sectionIds.contact}`)).toBeInViewport();
   });
+
+  test("sound toggle switches state", async ({ page }) => {
+    await page.goto("/");
+
+    const toggle = page.getByRole("button", { name: "Turn sound on" });
+    await expect(toggle).toHaveAttribute("aria-pressed", "false");
+
+    await toggle.click();
+    await expect(page.getByRole("button", { name: "Turn sound off" })).toHaveAttribute("aria-pressed", "true");
+  });
 });
 
 test.describe("Resume", () => {
@@ -51,6 +61,19 @@ test.describe("Projects", () => {
 
     for (let i = 0; i < projects.length; i++) {
       await expect(codeLinks.nth(i)).toHaveAttribute("href", projects[i].github);
+    }
+  });
+
+  test("project demo videos point to reachable media", async ({ page, request }) => {
+    await page.goto("/");
+
+    for (const project of projects.filter((p) => p.demoVideo)) {
+      const demo = page.getByRole("button", { name: "Demo" });
+      await expect(demo).toHaveAttribute("href", project.demoVideo!);
+
+      const response = await request.get(project.demoVideo!);
+      expect(response.status()).toBe(200);
+      expect(response.headers()["content-type"]).toContain("video");
     }
   });
 

@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Cpu, Layers, Server } from "lucide-react";
 import { personal, sectionIds, experience } from "@/data/resume";
@@ -30,17 +31,38 @@ export default function About() {
     <Section id={sectionIds.about}>
       <SectionHeader sectionId={sectionIds.about} title="About Me" className="mb-8" />
 
-      <div className="max-w-3xl mb-12">
-        <p className="text-muted-foreground text-lg leading-relaxed mb-5 text-pretty">
-          {personal.summary}
-        </p>
-        <p className="text-muted-foreground text-base leading-relaxed text-pretty">
-          Alongside his coursework and projects, Yash worked as a{" "}
-          <span className="text-foreground">{experience[0].role}</span> at{" "}
-          {experience[0].org}, managing real-time data across 36 campus parking
-          lots serving 20,800+ students and staff - early, practical experience
-          with operational data and reliability under real usage.
-        </p>
+      <div className="mb-12 grid items-center gap-8 md:grid-cols-[minmax(0,1fr)_240px]">
+        <div className="max-w-3xl">
+          <p className="text-muted-foreground text-lg leading-relaxed mb-5 text-pretty">
+            {personal.summary}
+          </p>
+          <p className="text-muted-foreground text-base leading-relaxed text-pretty">
+            Alongside my coursework and projects, I worked as a{" "}
+            <span className="text-foreground">{experience[0].role}</span> at{" "}
+            {experience[0].org}, managing real-time data across 36 campus parking
+            lots serving 20,800+ students and staff - early, practical experience
+            with operational data and reliability under real usage.
+          </p>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.94, y: 10 }}
+          whileInView={{ opacity: 1, scale: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="mx-auto md:mx-0"
+        >
+          <div className="relative size-44 overflow-hidden rounded-full border border-primary/35 bg-card p-1 shadow-[0_18px_48px_rgba(0,0,0,0.28)] sm:size-52 md:size-60">
+            <Image
+              src="/profile/yash-profile.jpeg"
+              alt="Profile photo of me, Yashwanth Reddy Medapati"
+              fill
+              sizes="(min-width: 768px) 240px, 208px"
+              className="rounded-full object-cover"
+              style={{ objectPosition: "52% 42%", transform: "scale(1.16)" }}
+            />
+          </div>
+        </motion.div>
       </div>
 
       <div className="grid sm:grid-cols-3 gap-5">

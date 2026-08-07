@@ -23,7 +23,7 @@ const plexMono = IBM_Plex_Mono({
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 const title = "Yashwanth Reddy Medapati - Software Engineer / ML Engineer";
 const description =
-  "Portfolio of Yashwanth Reddy Medapati - full-stack AI systems, machine learning, and distributed data pipelines. Featuring Yash, an AI guide that answers questions about his work.";
+  "Portfolio of Yashwanth Reddy Medapati - my full-stack AI systems, machine learning work, and distributed data pipelines. Featuring Yash, an AI guide that answers questions about my work.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

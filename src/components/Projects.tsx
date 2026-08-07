@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ExternalLink, Sparkles } from "lucide-react";
+import { ExternalLink, Play, Sparkles } from "lucide-react";
 import { projects, sectionIds } from "@/data/resume";
 import { GithubIcon } from "./icons";
 import { Section } from "./Section";
@@ -17,7 +17,7 @@ const bulletLabels = ["Built", "Model", "Proof"];
 
 function ProjectProofPanel({ p }: { p: (typeof projects)[number] }) {
   return (
-    <div className="border-t border-border bg-linear-to-br from-secondary/80 via-card to-background px-7 py-6">
+    <div className="border-t border-border bg-linear-to-br from-secondary/80 via-card to-background px-5 py-5 sm:px-7 sm:py-6">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <p className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">Project data</p>
         <div className="flex flex-wrap items-center gap-2">
@@ -63,7 +63,7 @@ function ProjectCard({ p, index }: { p: (typeof projects)[number]; index: number
             />
           </div>
         )}
-        <CardHeader className="px-7 pt-7 gap-1.5">
+        <CardHeader className="px-5 pt-5 gap-1.5 sm:px-7 sm:pt-7">
           {p.mlFocused && (
             <CardAction>
               <Badge className="gap-1 bg-primary-soft text-brand-cyan border border-primary/30" variant="outline">
@@ -79,7 +79,7 @@ function ProjectCard({ p, index }: { p: (typeof projects)[number]; index: number
               </div>
               <CardDescription className="text-primary text-sm mt-1">{p.tagline}</CardDescription>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:justify-end">
               {p.demoUrl && (
                 <Button
                   variant="outline"
@@ -106,7 +106,7 @@ function ProjectCard({ p, index }: { p: (typeof projects)[number]; index: number
           </div>
         </CardHeader>
 
-        <CardContent className="px-7">
+        <CardContent className="px-5 sm:px-7">
           <ul className="space-y-2 mb-5">
             {p.bullets.map((b, i) => (
               <li key={b} className="text-sm text-muted-foreground leading-relaxed flex gap-2.5">
@@ -118,12 +118,26 @@ function ProjectCard({ p, index }: { p: (typeof projects)[number]; index: number
             ))}
           </ul>
 
-          <div className="flex flex-wrap gap-1.5">
-            {p.stack.map((s) => (
-              <Badge key={s} variant="outline" className="font-mono text-muted-foreground font-normal">
-                {s}
-              </Badge>
-            ))}
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="flex flex-wrap gap-1.5">
+              {p.stack.map((s) => (
+                <Badge key={s} variant="outline" className="font-mono text-muted-foreground font-normal">
+                  {s}
+                </Badge>
+              ))}
+            </div>
+            {p.demoVideo && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-auto gap-1.5 border-primary/35 bg-primary-soft text-primary hover:bg-primary/15"
+                nativeButton={false}
+                render={<a href={p.demoVideo} target="_blank" rel="noopener noreferrer" />}
+              >
+                <Play className="size-3.5 fill-current" />
+                Demo
+              </Button>
+            )}
           </div>
         </CardContent>
         <ProjectProofPanel p={p} />

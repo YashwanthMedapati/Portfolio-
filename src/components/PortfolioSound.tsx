@@ -1,14 +1,25 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 type PortfolioSoundType = "hi" | "yawn" | "arcade-hit" | "grow";
 
 type PortfolioSoundContextValue = {
+  enabled: boolean;
+  toggleEnabled: () => void;
   play: (type: PortfolioSoundType) => void;
 };
 
+type ToneOptions = {
+  type?: OscillatorType;
+  gain?: number;
+  attack?: number;
+  release?: number;
+  detune?: number;
+};
+
 const PortfolioSoundContext = createContext<PortfolioSoundContextValue | null>(null);
+const SOUND_STORAGE_KEY = "portfolio-sound-enabled";
 
 function supportsAudio() {
   return typeof window !== "undefined" && "AudioContext" in window;
@@ -17,6 +28,14 @@ function supportsAudio() {
 export function PortfolioSoundProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<AudioContext | null>(null);
   const unlockedRef = useRef(false);
+  const [enabled, setEnabled] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return window.localStorage.getItem(SOUND_STORAGE_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
 
   const getAudio = useCallback(() => {
     if (!supportsAudio()) return null;
@@ -31,8 +50,23 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
     unlockedRef.current = true;
   }, [getAudio]);
 
+  const setSoundEnabled = useCallback(
+    (nextEnabled: boolean) => {
+      setEnabled(nextEnabled);
+      try {
+        window.localStorage.setItem(SOUND_STORAGE_KEY, String(nextEnabled));
+      } catch {}
+      if (nextEnabled) unlock();
+    },
+    [unlock]
+  );
+
+  const toggleEnabled = useCallback(() => {
+    setSoundEnabled(!enabled);
+  }, [enabled, setSoundEnabled]);
+
   const tone = useCallback(
-    (frequency: number, startAt: number, duration: number, options?: { type?: OscillatorType; gain?: number }) => {
+    (frequency: number, startAt: number, duration: number, options?: ToneOptions) => {
       const audio = getAudio();
       if (!audio || !unlockedRef.current) return;
 
@@ -40,58 +74,81 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
       const gain = audio.createGain();
       oscillator.type = options?.type ?? "sine";
       oscillator.frequency.setValueAtTime(frequency, startAt);
+      if (options?.detune) oscillator.detune.setValueAtTime(options.detune, startAt);
       gain.gain.setValueAtTime(0.0001, startAt);
-      gain.gain.exponentialRampToValueAtTime(options?.gain ?? 0.08, startAt + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+      gain.gain.exponentialRampToValueAtTime(options?.gain ?? 0.045, startAt + (options?.attack ?? 0.018));
+      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration + (options?.release ?? 0));
       oscillator.connect(gain);
       gain.connect(audio.destination);
       oscillator.start(startAt);
-      oscillator.stop(startAt + duration + 0.03);
+      oscillator.stop(startAt + duration + (options?.release ?? 0.04));
     },
     [getAudio]
   );
 
-  const speak = useCallback((text: string, options?: { rate?: number; pitch?: number; volume?: number }) => {
-    if (!unlockedRef.current || typeof window === "undefined" || !("speechSynthesis" in window)) return;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = options?.rate ?? 1;
-    utterance.pitch = options?.pitch ?? 1;
-    utterance.volume = options?.volume ?? 0.45;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
-  }, []);
+  const noise = useCallback(
+    (startAt: number, duration: number, options?: { gain?: number; frequency?: number; type?: BiquadFilterType }) => {
+      const audio = getAudio();
+      if (!audio || !unlockedRef.current) return;
+
+      const samples = Math.max(1, Math.floor(audio.sampleRate * duration));
+      const buffer = audio.createBuffer(1, samples, audio.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < samples; i += 1) {
+        data[i] = (Math.random() * 2 - 1) * (1 - i / samples);
+      }
+
+      const source = audio.createBufferSource();
+      const filter = audio.createBiquadFilter();
+      const gain = audio.createGain();
+      filter.type = options?.type ?? "bandpass";
+      filter.frequency.setValueAtTime(options?.frequency ?? 900, startAt);
+      gain.gain.setValueAtTime(options?.gain ?? 0.025, startAt);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+      source.buffer = buffer;
+      source.connect(filter);
+      filter.connect(gain);
+      gain.connect(audio.destination);
+      source.start(startAt);
+      source.stop(startAt + duration);
+    },
+    [getAudio]
+  );
 
   const play = useCallback(
     (type: PortfolioSoundType) => {
       const audio = getAudio();
-      if (!audio || !unlockedRef.current) return;
+      if (!enabled || !audio || !unlockedRef.current) return;
       const now = audio.currentTime;
 
       if (type === "hi") {
-        tone(660, now, 0.08, { type: "triangle", gain: 0.045 });
-        tone(880, now + 0.08, 0.1, { type: "triangle", gain: 0.04 });
-        speak("Hi, I'm Yash.", { rate: 1.05, pitch: 1.18, volume: 0.5 });
+        tone(523.25, now, 0.075, { type: "triangle", gain: 0.035, release: 0.025 });
+        tone(659.25, now + 0.07, 0.075, { type: "triangle", gain: 0.034, release: 0.025 });
+        tone(783.99, now + 0.15, 0.12, { type: "sine", gain: 0.038, release: 0.06 });
+        tone(1567.98, now + 0.155, 0.09, { type: "sine", gain: 0.012, release: 0.04 });
         return;
       }
 
       if (type === "yawn") {
-        tone(220, now, 0.22, { type: "sine", gain: 0.025 });
-        tone(174, now + 0.16, 0.28, { type: "sine", gain: 0.018 });
-        speak("Good night.", { rate: 0.78, pitch: 0.82, volume: 0.38 });
+        tone(246.94, now, 0.28, { type: "sine", gain: 0.024, release: 0.1 });
+        tone(196, now + 0.18, 0.32, { type: "sine", gain: 0.02, release: 0.16 });
+        noise(now + 0.08, 0.34, { gain: 0.009, frequency: 420, type: "lowpass" });
         return;
       }
 
       if (type === "arcade-hit") {
-        tone(196, now, 0.055, { type: "square", gain: 0.05 });
-        tone(132, now + 0.045, 0.07, { type: "square", gain: 0.035 });
+        tone(164.81, now, 0.045, { type: "square", gain: 0.035, release: 0.01 });
+        tone(98, now + 0.035, 0.055, { type: "triangle", gain: 0.035, release: 0.02 });
+        noise(now, 0.055, { gain: 0.018, frequency: 1200 });
         return;
       }
 
-      tone(523, now, 0.07, { type: "square", gain: 0.04 });
-      tone(659, now + 0.07, 0.07, { type: "square", gain: 0.04 });
-      tone(784, now + 0.14, 0.12, { type: "square", gain: 0.045 });
+      tone(261.63, now, 0.075, { type: "triangle", gain: 0.032, release: 0.03 });
+      tone(329.63, now + 0.075, 0.075, { type: "triangle", gain: 0.032, release: 0.03 });
+      tone(392, now + 0.15, 0.075, { type: "triangle", gain: 0.034, release: 0.03 });
+      tone(523.25, now + 0.225, 0.14, { type: "sine", gain: 0.038, release: 0.08 });
     },
-    [getAudio, speak, tone]
+    [enabled, getAudio, noise, tone]
   );
 
   useEffect(() => {
@@ -114,7 +171,7 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
     return () => window.removeEventListener("portfolio:sound", onSound);
   }, [play]);
 
-  const value = useMemo(() => ({ play }), [play]);
+  const value = useMemo(() => ({ enabled, toggleEnabled, play }), [enabled, toggleEnabled, play]);
 
   return <PortfolioSoundContext.Provider value={value}>{children}</PortfolioSoundContext.Provider>;
 }

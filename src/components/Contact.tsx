@@ -173,7 +173,7 @@ export default function Contact() {
       </div>
 
       <p className="text-center text-xs text-muted-foreground mt-16">
-        Built by {personal.name} - with Yash watching from the corner.
+        Built by me, {personal.name} - with Yash watching from the corner.
       </p>
     </Section>
   );

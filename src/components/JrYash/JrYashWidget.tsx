@@ -90,7 +90,7 @@ export default function JrYashWidget() {
   };
 
   return (
-    <div className="fixed inset-x-3 bottom-3 z-40 flex flex-col items-end gap-3 sm:inset-x-auto sm:right-4 sm:bottom-4">
+    <div className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 flex flex-col items-end gap-3 sm:inset-x-auto sm:right-4 sm:bottom-4">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -213,7 +213,7 @@ export default function JrYashWidget() {
             </form>
             <div className="flex items-center justify-between gap-2 px-4 pb-3 -mt-1 bg-[#0a0a0a]">
               <p className="text-[10.5px] text-zinc-500 leading-snug">
-                Answers from Yash&apos;s resume, projects, and personal FAQ.
+                Answers from my resume, projects, and personal FAQ.
               </p>
               <span className="hidden sm:flex items-center gap-1 text-[10.5px] text-zinc-500 shrink-0">
                 <Kbd>Esc</Kbd> to close
