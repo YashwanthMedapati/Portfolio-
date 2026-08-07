@@ -2,6 +2,8 @@
 
 Interactive personal portfolio for **Yashwanth Reddy Medapati**, built to present full-stack engineering, machine learning projects, resume proof, and contact paths in one recruiter-friendly experience.
 
+**Live site:** [yashwanth-portfolio-yashwanth15.vercel.app](https://yashwanth-portfolio-yashwanth15.vercel.app)
+
 **Suggested GitHub description:**
 Resume-grounded Next.js portfolio with an interactive Yash assistant, ML project proof panels, animated character system, demo media, and Playwright-tested recruiter workflows.
 
