@@ -8,11 +8,11 @@ import { YASH_FRAMES } from "./yashFrames";
 import { useJrYash } from "./JrYashContext";
 import { useTheme } from "@/components/ThemeContext";
 
-const DESKTOP_SPRITE_SIZE = 104;
+const DESKTOP_SPRITE_SIZE = 92;
 const MOBILE_SPRITE_SIZE = 64;
-const DESKTOP_STAGE_WIDTH = 210;
+const DESKTOP_STAGE_WIDTH = 184;
 const MOBILE_STAGE_WIDTH = 132;
-const DESKTOP_EDGE_OFFSET = 228;
+const DESKTOP_EDGE_OFFSET = 204;
 const MOBILE_EDGE_OFFSET = 144;
 const BOTTOM_OFFSET = 118;
 const MOVE_THRESHOLD = 4;
@@ -26,6 +26,7 @@ const CORNER_PADDING = 12;
 const DARK_AWAKE_IDLE_MS = 45000;
 const DARK_START_AWAKE_MS = 14000;
 const GOOD_NIGHT_LEAD_MS = 2600;
+const GREETING_DURATION_MS = 6200;
 
 type Override = { type: "wave" } | { type: "jump" } | { type: "emote"; emoteIdx: number };
 
@@ -77,6 +78,7 @@ export function YashCompanion() {
   const [hasCustomPosition, setHasCustomPosition] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragParkedFollow, setDragParkedFollow] = useState(false);
+  const [isNearHero, setIsNearHero] = useState(true);
 
   const lastActivityRef = useRef(0);
   const overrideRef = useRef<Override | null>(null);
@@ -129,6 +131,22 @@ export function YashCompanion() {
     onResize();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    const updateSectionAwareness = () => {
+      const nearHero = window.scrollY < window.innerHeight * 0.45;
+      setIsNearHero(nearHero);
+      if (!nearHero) setShowGreeting(false);
+    };
+
+    updateSectionAwareness();
+    window.addEventListener("scroll", updateSectionAwareness, { passive: true });
+    window.addEventListener("hashchange", updateSectionAwareness);
+    return () => {
+      window.removeEventListener("scroll", updateSectionAwareness);
+      window.removeEventListener("hashchange", updateSectionAwareness);
+    };
   }, []);
 
   useEffect(() => {
@@ -196,12 +214,19 @@ export function YashCompanion() {
   useEffect(() => {
     if (reducedMotion || isMobile) return;
     const t = setTimeout(() => setOverride(null), WAVE_DURATION);
-    const g = setTimeout(() => setShowGreeting(true), WAVE_DURATION + 200);
+    const g = setTimeout(() => {
+      if (isNearHero) setShowGreeting(true);
+    }, WAVE_DURATION + 200);
+    const hide = setTimeout(() => {
+      setShowGreeting(false);
+      setDismissedGreeting(true);
+    }, WAVE_DURATION + 200 + GREETING_DURATION_MS);
     return () => {
       clearTimeout(t);
       clearTimeout(g);
+      clearTimeout(hide);
     };
-  }, [isMobile, reducedMotion]);
+  }, [isMobile, isNearHero, reducedMotion]);
 
   // Cursor follow mode: Yash trails the pointer, then dodges if it gets too close.
   useEffect(() => {
@@ -345,14 +370,17 @@ export function YashCompanion() {
   }, [theme, isTyping, moveDir, isMobile, reducedMotion, isFollowingCursor]);
 
   if (x === null || y === null) return null;
-  const spriteSize = isMobile ? MOBILE_SPRITE_SIZE : DESKTOP_SPRITE_SIZE;
-  const stageWidth = isMobile ? MOBILE_STAGE_WIDTH : DESKTOP_STAGE_WIDTH;
+  const compactDock = !isNearHero && !isFollowingCursor && !isDragging && !hasCustomPosition && !isOpen;
+  const spriteSize = isMobile ? MOBILE_SPRITE_SIZE : compactDock ? 68 : DESKTOP_SPRITE_SIZE;
+  const stageWidth = isMobile ? MOBILE_STAGE_WIDTH : compactDock ? 136 : DESKTOP_STAGE_WIDTH;
   const isDarkAwake = theme === "dark" && darkAwakeUntil > now;
   const panelHeight = Math.min(viewport.height * 0.68, 540);
   const openX = clamp(viewport.width - stageWidth - 20, CORNER_PADDING, viewport.width - stageWidth - CORNER_PADDING);
   const openY = clamp(viewport.height - panelHeight - spriteSize - 30, CORNER_PADDING, viewport.height - spriteSize - CORNER_PADDING);
-  const renderX = isOpen && !isFollowingCursor ? openX : x;
-  const renderY = isOpen && !isFollowingCursor ? openY : y;
+  const dockX = clamp(viewport.width - stageWidth - 18, CORNER_PADDING, viewport.width - stageWidth - CORNER_PADDING);
+  const dockY = Math.max(CORNER_PADDING, viewport.height - 52);
+  const renderX = isOpen && !isFollowingCursor ? openX : compactDock ? dockX : x;
+  const renderY = isOpen && !isFollowingCursor ? openY : compactDock ? dockY : y;
 
   const baseAction: "sleep" | "think" | "run-left" | "run-right" | "idle" =
     isTyping
@@ -452,7 +480,7 @@ export function YashCompanion() {
             initial={{ opacity: 0, y: 8, pointerEvents: "none" }}
             animate={{ opacity: 1, y: 0, pointerEvents: "auto" }}
             exit={{ opacity: 0, y: 8, pointerEvents: "none" }}
-            className="relative mb-2 max-w-[176px] bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
+            className="relative mb-2 max-w-[168px] bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
           >
             <button
               onClick={(e) => {
@@ -465,7 +493,7 @@ export function YashCompanion() {
             >
               <X size={10} />
             </button>
-            Hi, I&apos;m Yash - tap me if you need anything
+            Hi, I&apos;m Yash. Tap me if you need anything.
           </motion.div>
         )}
         {showSleepNotice && !isOpen && theme === "dark" && (

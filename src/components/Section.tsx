@@ -19,14 +19,14 @@ export function Section({
     <motion.section
       id={id}
       aria-labelledby={`${id}-heading`}
-      initial={reducedMotion ? false : { opacity: 0, y: 34, scale: 0.985, filter: "blur(8px)" }}
+      initial={reducedMotion ? false : { opacity: 0, y: 24, scale: 0.992, filter: "blur(4px)" }}
       whileInView={reducedMotion ? undefined : { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-      viewport={{ once: false, amount: 0.18, margin: "-8% 0px -12% 0px" }}
+      viewport={{ once: true, amount: 0.2, margin: "-8% 0px -10% 0px" }}
       transition={{
         opacity: { duration: 0.45, ease: "easeOut" },
         filter: { duration: 0.45, ease: "easeOut" },
-        y: { type: "spring", stiffness: 82, damping: 22, mass: 0.7 },
-        scale: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+        y: { type: "spring", stiffness: 90, damping: 24, mass: 0.7 },
+        scale: { duration: 0.38, ease: [0.22, 1, 0.36, 1] },
       }}
       className={cn(
         "group/section relative scroll-mt-20 py-20 sm:py-28 px-6 max-w-5xl mx-auto",
@@ -37,7 +37,7 @@ export function Section({
         aria-hidden
         initial={reducedMotion ? false : { opacity: 0, scaleX: 0 }}
         whileInView={reducedMotion ? undefined : { opacity: 1, scaleX: 1 }}
-        viewport={{ once: false, amount: 0.4 }}
+        viewport={{ once: true, amount: 0.4 }}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         className="pointer-events-none absolute left-6 right-6 top-8 h-px origin-left bg-linear-to-r from-transparent via-primary/35 to-transparent"
       />

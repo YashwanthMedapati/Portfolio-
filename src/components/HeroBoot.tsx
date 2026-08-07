@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 
 const COMMAND = "whoami";
-const TYPE_INTERVAL_MS = 70;
-const POST_TYPE_DELAY_MS = 320;
+const TYPE_INTERVAL_MS = 45;
+const POST_TYPE_DELAY_MS = 140;
 
 function prefersReducedMotion() {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;

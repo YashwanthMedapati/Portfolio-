@@ -18,7 +18,7 @@ export function SectionHeader({
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: false, margin: "-80px" }}
+      viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.38, ease: "easeOut" }}
       className={cn("mb-12", className)}
     >
@@ -30,7 +30,7 @@ export function SectionHeader({
           aria-hidden
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
-          viewport={{ once: false, margin: "-80px" }}
+          viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
           className="h-px flex-1 bg-border origin-left"
         />

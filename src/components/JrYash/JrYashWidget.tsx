@@ -90,7 +90,7 @@ export default function JrYashWidget() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-40 flex flex-col items-end gap-3">
+    <div className="fixed inset-x-3 bottom-3 z-40 flex flex-col items-end gap-3 sm:inset-x-auto sm:right-4 sm:bottom-4">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -103,7 +103,7 @@ export default function JrYashWidget() {
             aria-modal="false"
             aria-labelledby="jr-yash-title"
             id="jr-yash-panel"
-            className="w-[92vw] max-w-md h-[68vh] max-h-[540px] bg-[#050505] border border-zinc-700 rounded-md shadow-2xl shadow-black/70 flex flex-col overflow-hidden font-mono text-zinc-100"
+            className="h-[70svh] max-h-[540px] w-full max-w-md bg-[#050505] border border-zinc-700 rounded-md shadow-2xl shadow-black/70 flex flex-col overflow-hidden font-mono text-zinc-100 sm:w-[92vw]"
           >
             {/* Terminal tab bar */}
             <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-zinc-700 bg-[#111111]">

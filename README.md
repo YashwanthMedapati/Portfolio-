@@ -45,6 +45,9 @@ npm run start      # serve the production build locally
 npm run test:e2e   # run Playwright tests
 ```
 
+GitHub Actions runs the same lint, build, and Chromium Playwright checks on
+pushes and pull requests to `main`.
+
 ## Project Structure
 
 ```text

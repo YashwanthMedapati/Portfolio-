@@ -23,7 +23,7 @@ export function LetterHoverText({
         <span
           key={`${char}-${index}`}
           aria-hidden
-          className={`inline-block origin-bottom transition-transform duration-150 ease-out hover:-translate-y-1 hover:scale-125 ${letterClassName}`}
+          className={`letter-hover-char inline-block origin-bottom ${letterClassName}`}
         >
           {char === " " ? "\u00A0" : char}
         </span>

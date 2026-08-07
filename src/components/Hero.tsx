@@ -31,25 +31,29 @@ export default function Hero() {
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--primary-soft),_transparent_60%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--primary-soft),_transparent_52%),radial-gradient(circle_at_center,_rgba(79,209,197,0.08),_transparent_36%)]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-linear-to-b from-background/5 via-background/0 to-background/20"
       />
 
       <div className="relative z-10 flex w-full max-w-5xl flex-col items-center text-center">
         <HeroBootLine typed={typed} done={done} />
 
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={resolved ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
-          transition={{ duration: 0.5 }}
+          initial={{ opacity: 0.22, y: 10 }}
+          animate={resolved ? { opacity: 1, y: 0 } : { opacity: 0.22, y: 10 }}
+          transition={{ duration: 0.32 }}
           className="flex flex-col items-center"
         >
           <LetterHoverText
             as="h1"
             text={personal.name}
-            className="text-4xl sm:text-6xl font-bold tracking-tight text-balance mb-4"
+            className="glow-text text-4xl font-bold tracking-tight text-balance text-foreground drop-shadow-[0_12px_40px_rgba(0,0,0,0.45)] sm:text-6xl mb-4"
           />
 
-          <p className="text-lg sm:text-xl bg-linear-to-r from-primary to-brand-cyan bg-clip-text text-transparent font-semibold mb-5">
+          <p className="text-lg sm:text-xl bg-linear-to-r from-primary via-primary to-brand-cyan bg-clip-text text-transparent font-semibold mb-5 drop-shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
             {personal.positioning}
           </p>
 
