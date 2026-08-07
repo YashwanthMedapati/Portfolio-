@@ -2,7 +2,7 @@
   "name": "portfolio",
   "version": "0.1.0",
   "description": "Resume-grounded Next.js portfolio with an interactive Yash assistant, ML project proof panels, animated character system, demo media, and Playwright-tested recruiter workflows.",
-  "homepage": "https://yashwanth-portfolio-yashwanth15.vercel.app",
+  "homepage": "https://yashwanth-medapati.vercel.app",
   "private": true,
   "repository": {
     "type": "git",
