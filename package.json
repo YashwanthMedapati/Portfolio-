@@ -1,10 +1,11 @@
 {
   "name": "portfolio",
   "version": "0.1.0",
+  "description": "Resume-grounded Next.js portfolio with an interactive Yash assistant, ML project proof panels, animated character system, demo media, and Playwright-tested recruiter workflows.",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/YashwanthMedapati/Portfolio.git"
+    "url": "https://github.com/YashwanthMedapati/Portfolio-.git"
   },
   "scripts": {
     "dev": "next dev",
