@@ -1,0 +1,513 @@
+﻿"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { X } from "lucide-react";
+import { YashSprite, YashPlaybackMode } from "./YashSprite";
+import { YASH_FRAMES } from "./yashFrames";
+import { useJrYash } from "./JrYashContext";
+import { useTheme } from "@/components/ThemeContext";
+
+const DESKTOP_SPRITE_SIZE = 104;
+const MOBILE_SPRITE_SIZE = 64;
+const DESKTOP_STAGE_WIDTH = 210;
+const MOBILE_STAGE_WIDTH = 132;
+const DESKTOP_EDGE_OFFSET = 228;
+const MOBILE_EDGE_OFFSET = 144;
+const BOTTOM_OFFSET = 118;
+const MOVE_THRESHOLD = 4;
+const STOP_RUNNING_DELAY = 280;
+const IDLE_EMOTE_AFTER = 12000;
+const EMOTE_DURATION = 1500;
+const WAVE_DURATION = 1350;
+const FOLLOW_GAP = 96;
+const REPEL_RADIUS = 86;
+const CORNER_PADDING = 12;
+const DARK_AWAKE_IDLE_MS = 45000;
+const DARK_START_AWAKE_MS = 14000;
+const GOOD_NIGHT_LEAD_MS = 2600;
+
+type Override = { type: "wave" } | { type: "jump" } | { type: "emote"; emoteIdx: number };
+
+function playPortfolioSound(type: "hi" | "yawn") {
+  window.dispatchEvent(new CustomEvent("portfolio:sound", { detail: { type } }));
+}
+
+function prefersReducedMotionSync() {
+  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(prefersReducedMotionSync);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onChange = () => setReduced(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return reduced;
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+export function YashCompanion() {
+  const { theme } = useTheme();
+  const { isOpen, isTyping, toggle, isFollowingCursor } = useJrYash();
+  const reducedMotion = usePrefersReducedMotion();
+  const [isMobile, setIsMobile] = useState(false);
+  const [viewport, setViewport] = useState({ width: 0, height: 0 });
+
+  // Must start null on both server and client's first render (SSR has no
+  // `window` to compute a position from) - this component renders nothing
+  // until the effect below places it, right after mount. That's what keeps
+  // hydration honest: no structural difference for React to reconcile.
+  const [x, setX] = useState<number | null>(null);
+  const [y, setY] = useState<number | null>(null);
+  const [moveDir, setMoveDir] = useState<"left" | "right" | null>(null);
+  const [override, setOverride] = useState<Override | null>(() =>
+    reducedMotion ? null : { type: "wave" }
+  );
+  const [showGreeting, setShowGreeting] = useState(false);
+  const [dismissedGreeting, setDismissedGreeting] = useState(false);
+  const [showSleepNotice, setShowSleepNotice] = useState(false);
+  const [darkAwakeUntil, setDarkAwakeUntil] = useState(() => Date.now() + DARK_START_AWAKE_MS);
+  const [now, setNow] = useState(() => Date.now());
+  const [hasCustomPosition, setHasCustomPosition] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragParkedFollow, setDragParkedFollow] = useState(false);
+
+  const lastActivityRef = useRef(0);
+  const overrideRef = useRef<Override | null>(null);
+  const isOpenRef = useRef(isOpen);
+  const previousThemeRef = useRef(theme);
+  const greetingSoundPlayedRef = useRef(false);
+  const sleepSoundPlayedRef = useRef(false);
+  const positionRef = useRef({ x: 0, y: 0 });
+  const dragRef = useRef({ offsetX: 0, offsetY: 0, moved: false, pointerId: -1 });
+
+  const applyDragPosition = useCallback((clientX: number, clientY: number) => {
+    const spriteSize = isMobile ? MOBILE_SPRITE_SIZE : DESKTOP_SPRITE_SIZE;
+    const stageWidth = isMobile ? MOBILE_STAGE_WIDTH : DESKTOP_STAGE_WIDTH;
+    const nextX = clamp(clientX - dragRef.current.offsetX, CORNER_PADDING, window.innerWidth - stageWidth - CORNER_PADDING);
+    const nextY = clamp(clientY - dragRef.current.offsetY, CORNER_PADDING, window.innerHeight - spriteSize - CORNER_PADDING);
+    const movementX = nextX - positionRef.current.x;
+    if (Math.abs(movementX) >= MOVE_THRESHOLD) {
+      setMoveDir(movementX < 0 ? "left" : "right");
+    }
+    if (Math.abs(movementX) > 3 || Math.abs(nextY - positionRef.current.y) > 3) {
+      dragRef.current.moved = true;
+    }
+    setX(nextX);
+    setY(nextY);
+  }, [isMobile]);
+
+  useEffect(() => {
+    lastActivityRef.current = Date.now();
+  }, []);
+
+  const wakeDarkYash = useCallback(() => {
+    if (theme !== "dark") return;
+    const nextAwakeUntil = Date.now() + DARK_AWAKE_IDLE_MS;
+    setDarkAwakeUntil(nextAwakeUntil);
+    setNow(Date.now());
+    setShowSleepNotice(false);
+  }, [theme]);
+
+  useEffect(() => {
+    const onResize = () => {
+      const mobile = window.innerWidth < 640;
+      setIsMobile(mobile);
+      setViewport({ width: window.innerWidth, height: window.innerHeight });
+      const edgeOffset = mobile ? MOBILE_EDGE_OFFSET : DESKTOP_EDGE_OFFSET;
+      const spriteSize = mobile ? MOBILE_SPRITE_SIZE : DESKTOP_SPRITE_SIZE;
+      const stageWidth = mobile ? MOBILE_STAGE_WIDTH : DESKTOP_STAGE_WIDTH;
+      setX(clamp(window.innerWidth - edgeOffset, CORNER_PADDING, window.innerWidth - stageWidth - CORNER_PADDING));
+      setY(clamp(window.innerHeight - spriteSize - BOTTOM_OFFSET, CORNER_PADDING, window.innerHeight - spriteSize - CORNER_PADDING));
+    };
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    overrideRef.current = override;
+  }, [override]);
+
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (x !== null && y !== null) {
+      positionRef.current = { x, y };
+    }
+  }, [x, y]);
+
+  useEffect(() => {
+    if (isFollowingCursor) return;
+    const timer = window.setTimeout(() => setDragParkedFollow(false), 0);
+    return () => window.clearTimeout(timer);
+  }, [isFollowingCursor]);
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (dragRef.current.pointerId !== event.pointerId) return;
+      applyDragPosition(event.clientX, event.clientY);
+    };
+
+    const onPointerUp = (event: PointerEvent) => {
+      if (dragRef.current.pointerId !== event.pointerId) return;
+      setIsDragging(false);
+      setHasCustomPosition(true);
+      if (isFollowingCursor) setDragParkedFollow(true);
+      window.setTimeout(() => setMoveDir(null), STOP_RUNNING_DELAY);
+    };
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerUp);
+    return () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("pointercancel", onPointerUp);
+    };
+  }, [applyDragPosition, isDragging, isFollowingCursor]);
+
+  useEffect(() => {
+    if (reducedMotion || isMobile) {
+      previousThemeRef.current = theme;
+      return;
+    }
+    if (previousThemeRef.current === "dark" && theme === "light") {
+      setOverride({ type: "wave" });
+      const t = setTimeout(() => setOverride(null), WAVE_DURATION);
+      previousThemeRef.current = theme;
+      return () => clearTimeout(t);
+    }
+    previousThemeRef.current = theme;
+  }, [theme, isMobile, reducedMotion]);
+
+  // End the entrance wave (started via lazy initial state above) and reveal
+  // the greeting bubble shortly after.
+  useEffect(() => {
+    if (reducedMotion || isMobile) return;
+    const t = setTimeout(() => setOverride(null), WAVE_DURATION);
+    const g = setTimeout(() => setShowGreeting(true), WAVE_DURATION + 200);
+    return () => {
+      clearTimeout(t);
+      clearTimeout(g);
+    };
+  }, [isMobile, reducedMotion]);
+
+  // Cursor follow mode: Yash trails the pointer, then dodges if it gets too close.
+  useEffect(() => {
+    if (reducedMotion || isMobile || !isFollowingCursor || dragParkedFollow || isDragging) {
+      const t = setTimeout(() => setMoveDir(null), 0);
+      return () => clearTimeout(t);
+    }
+    let stopTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const onMove = (e: MouseEvent) => {
+      if (isOpenRef.current) return;
+      lastActivityRef.current = Date.now();
+      wakeDarkYash();
+      const spriteSize = DESKTOP_SPRITE_SIZE;
+      const stageWidth = DESKTOP_STAGE_WIDTH;
+      const currentX = positionRef.current.x;
+      const dx = e.clientX - (currentX + stageWidth / 2);
+      let targetX = e.clientX + (dx < 0 ? FOLLOW_GAP : -FOLLOW_GAP);
+      let targetY = e.clientY + 34;
+      const centerX = targetX + stageWidth / 2;
+      const centerY = targetY + spriteSize / 2;
+      const distanceX = centerX - e.clientX;
+      const distanceY = centerY - e.clientY;
+      const distance = Math.hypot(distanceX, distanceY);
+
+      if (distance < REPEL_RADIUS) {
+        const strength = (REPEL_RADIUS - Math.max(distance, 1)) * 0.8;
+        targetX += (distanceX / Math.max(distance, 1)) * strength;
+        targetY += (distanceY / Math.max(distance, 1)) * strength;
+      }
+
+      const nextX = clamp(targetX, CORNER_PADDING, window.innerWidth - stageWidth - CORNER_PADDING);
+      const nextY = clamp(targetY, CORNER_PADDING, window.innerHeight - spriteSize - CORNER_PADDING);
+      const movementX = nextX - currentX;
+      if (Math.abs(movementX) >= MOVE_THRESHOLD) {
+        setMoveDir(movementX < 0 ? "left" : "right");
+      }
+      setX(nextX);
+      setY(nextY);
+
+      clearTimeout(stopTimer);
+      stopTimer = setTimeout(() => setMoveDir(null), STOP_RUNNING_DELAY);
+    };
+
+    window.addEventListener("mousemove", onMove);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      clearTimeout(stopTimer);
+    };
+  }, [dragParkedFollow, isDragging, isFollowingCursor, isMobile, reducedMotion, wakeDarkYash]);
+
+  useEffect(() => {
+    if (theme !== "dark" || darkAwakeUntil <= 0) return;
+    const sleepDelay = Math.max(darkAwakeUntil - Date.now(), 0);
+    const noticeDelay = Math.max(sleepDelay - GOOD_NIGHT_LEAD_MS, 0);
+    const noticeTimer = setTimeout(() => setShowSleepNotice(true), noticeDelay);
+    const sleepTimer = setTimeout(() => {
+      setShowSleepNotice(false);
+      setNow(Date.now());
+    }, sleepDelay);
+    return () => {
+      clearTimeout(noticeTimer);
+      clearTimeout(sleepTimer);
+    };
+  }, [theme, darkAwakeUntil]);
+
+  useEffect(() => {
+    if (isFollowingCursor || hasCustomPosition || x === null) return;
+    const frame = requestAnimationFrame(() => {
+      const spriteSize = isMobile ? MOBILE_SPRITE_SIZE : DESKTOP_SPRITE_SIZE;
+      const stageWidth = isMobile ? MOBILE_STAGE_WIDTH : DESKTOP_STAGE_WIDTH;
+      const edgeOffset = isMobile ? MOBILE_EDGE_OFFSET : DESKTOP_EDGE_OFFSET;
+      setX(clamp(window.innerWidth - edgeOffset, CORNER_PADDING, window.innerWidth - stageWidth - CORNER_PADDING));
+      setY(clamp(window.innerHeight - spriteSize - BOTTOM_OFFSET, CORNER_PADDING, window.innerHeight - spriteSize - CORNER_PADDING));
+      setMoveDir(null);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [hasCustomPosition, isFollowingCursor, isMobile, x]);
+
+  const startDrag = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (isOpen || event.button !== 0) return;
+    lastActivityRef.current = Date.now();
+    wakeDarkYash();
+    dragRef.current = {
+      offsetX: event.clientX - renderX,
+      offsetY: event.clientY - renderY,
+      moved: false,
+      pointerId: event.pointerId,
+    };
+    setIsDragging(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const moveDrag = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (!isDragging || dragRef.current.pointerId !== event.pointerId) return;
+    applyDragPosition(event.clientX, event.clientY);
+  };
+
+  const endDrag = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (!isDragging || dragRef.current.pointerId !== event.pointerId) return;
+    setIsDragging(false);
+    setHasCustomPosition(true);
+    if (isFollowingCursor) setDragParkedFollow(true);
+    window.setTimeout(() => setMoveDir(null), STOP_RUNNING_DELAY);
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {}
+  };
+
+  useEffect(() => {
+    if (!showGreeting || dismissedGreeting || greetingSoundPlayedRef.current) return;
+    greetingSoundPlayedRef.current = true;
+    playPortfolioSound("hi");
+  }, [dismissedGreeting, showGreeting]);
+
+  useEffect(() => {
+    if (showSleepNotice) {
+      if (!sleepSoundPlayedRef.current) {
+        sleepSoundPlayedRef.current = true;
+        playPortfolioSound("yawn");
+      }
+      return;
+    }
+    sleepSoundPlayedRef.current = false;
+  }, [showSleepNotice]);
+
+  // Idle-too-long random emotes.
+  useEffect(() => {
+    if (reducedMotion || isMobile) return;
+    const iv = setInterval(() => {
+      if (isOpenRef.current || overrideRef.current) return;
+      if (theme === "dark" || isTyping || moveDir || isFollowingCursor) return;
+      if (Date.now() - lastActivityRef.current < IDLE_EMOTE_AFTER) return;
+
+      lastActivityRef.current = Date.now();
+      const emoteIdx = Math.floor(Math.random() * YASH_FRAMES.emotes.length);
+      setOverride({ type: "emote", emoteIdx });
+      setTimeout(() => setOverride(null), EMOTE_DURATION);
+    }, 1000);
+    return () => clearInterval(iv);
+  }, [theme, isTyping, moveDir, isMobile, reducedMotion, isFollowingCursor]);
+
+  if (x === null || y === null) return null;
+  const spriteSize = isMobile ? MOBILE_SPRITE_SIZE : DESKTOP_SPRITE_SIZE;
+  const stageWidth = isMobile ? MOBILE_STAGE_WIDTH : DESKTOP_STAGE_WIDTH;
+  const isDarkAwake = theme === "dark" && darkAwakeUntil > now;
+  const panelHeight = Math.min(viewport.height * 0.68, 540);
+  const openX = clamp(viewport.width - stageWidth - 20, CORNER_PADDING, viewport.width - stageWidth - CORNER_PADDING);
+  const openY = clamp(viewport.height - panelHeight - spriteSize - 30, CORNER_PADDING, viewport.height - spriteSize - CORNER_PADDING);
+  const renderX = isOpen && !isFollowingCursor ? openX : x;
+  const renderY = isOpen && !isFollowingCursor ? openY : y;
+
+  const baseAction: "sleep" | "think" | "run-left" | "run-right" | "idle" =
+    isTyping
+      ? "think"
+      : moveDir === "left"
+        ? "run-left"
+        : moveDir === "right"
+          ? "run-right"
+          : theme === "dark" && !isDarkAwake
+            ? "sleep"
+            : "idle";
+
+  const displayAction = override?.type ?? baseAction;
+  const stageHeight = spriteSize + (displayAction === "jump" ? 30 : 20);
+
+  let frames = YASH_FRAMES.idle;
+  let fps = 2;
+  let mode: YashPlaybackMode = "loop";
+
+  switch (displayAction) {
+    case "wave":
+      frames = YASH_FRAMES.wave;
+      fps = 5;
+      break;
+    case "jump":
+      frames = YASH_FRAMES.jump;
+      fps = 10;
+      mode = "once";
+      break;
+    case "emote":
+      frames = [YASH_FRAMES.emotes[(override as Extract<Override, { type: "emote" }>).emoteIdx]];
+      break;
+    case "sleep":
+      frames = YASH_FRAMES.sleep;
+      fps = 1.2;
+      mode = "once";
+      break;
+    case "think":
+      frames = YASH_FRAMES.think;
+      break;
+    case "run-left":
+      frames = YASH_FRAMES.runLeft;
+      fps = 9;
+      break;
+    case "run-right":
+      frames = YASH_FRAMES.runRight;
+      fps = 9;
+      break;
+    default:
+      frames = YASH_FRAMES.idle;
+      fps = 1.5;
+  }
+
+  const handleClick = () => {
+    if (dragRef.current.moved) {
+      dragRef.current.moved = false;
+      return;
+    }
+    lastActivityRef.current = Date.now();
+    wakeDarkYash();
+    setShowGreeting(false);
+    setDismissedGreeting(true);
+    if (reducedMotion) {
+      toggle();
+      return;
+    }
+    if (override?.type === "jump") return;
+    setOverride({ type: "jump" });
+  };
+
+  const handleSpriteComplete = () => {
+    if (override?.type === "jump") {
+      setOverride(null);
+      toggle();
+    } else if (override?.type === "wave") {
+      setOverride(null);
+    }
+  };
+
+  return (
+    <div
+      className="fixed z-50 flex flex-col items-center"
+      aria-hidden={isOpen}
+      style={{
+        left: renderX,
+        top: renderY,
+        opacity: 1,
+        pointerEvents: isOpen ? "none" : "auto",
+        transition: reducedMotion || isDragging ? "opacity 150ms" : "left 140ms cubic-bezier(0.22, 1, 0.36, 1), top 140ms cubic-bezier(0.22, 1, 0.36, 1), opacity 150ms",
+        willChange: reducedMotion ? undefined : "left, top, opacity",
+      }}
+    >
+      <AnimatePresence>
+        {showGreeting && !dismissedGreeting && !showSleepNotice && !isOpen && (
+          <motion.div
+            key="yash-greeting"
+            initial={{ opacity: 0, y: 8, pointerEvents: "none" }}
+            animate={{ opacity: 1, y: 0, pointerEvents: "auto" }}
+            exit={{ opacity: 0, y: 8, pointerEvents: "none" }}
+            className="relative mb-2 max-w-[176px] bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
+          >
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowGreeting(false);
+                setDismissedGreeting(true);
+              }}
+              aria-label="Dismiss greeting"
+              className="absolute -top-1.5 -right-1.5 bg-secondary border border-border rounded-full p-0.5 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <X size={10} />
+            </button>
+            Hi, I&apos;m Yash - tap me if you need anything
+          </motion.div>
+        )}
+        {showSleepNotice && !isOpen && theme === "dark" && (
+          <motion.div
+            key="yash-sleep-notice"
+            initial={{ opacity: 0, y: 8, pointerEvents: "none" }}
+            animate={{ opacity: 1, y: 0, pointerEvents: "none" }}
+            exit={{ opacity: 0, y: 8, pointerEvents: "none" }}
+            className="relative mb-2 max-w-[176px] bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
+          >
+            Good night. I&apos;ll be right here.
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <button
+        onClick={handleClick}
+        onPointerDown={startDrag}
+        onPointerMove={moveDrag}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onMouseEnter={wakeDarkYash}
+        onFocus={wakeDarkYash}
+        aria-label="Yash, an AI guide - click to chat"
+        aria-haspopup="dialog"
+        aria-controls="jr-yash-panel"
+        tabIndex={isOpen ? -1 : 0}
+        className="flex touch-none items-end justify-center bg-transparent border-none p-0 cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
+        style={{ width: stageWidth, height: stageHeight }}
+      >
+        <YashSprite
+          frames={frames}
+          fps={fps}
+          mode={mode}
+          size={spriteSize}
+          stageWidth={stageWidth}
+          stageHeight={stageHeight}
+          onComplete={handleSpriteComplete}
+          className="drop-shadow-[0_10px_18px_rgba(0,0,0,0.7)]"
+          alt="Yash"
+        />
+      </button>
+    </div>
+  );
+}

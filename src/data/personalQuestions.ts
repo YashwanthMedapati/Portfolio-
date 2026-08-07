@@ -1,0 +1,18 @@
+export const personalQuestionnaire = [
+  "How old is Yash?",
+  "How tall is Yash?",
+  "Where did Yash grow up?",
+  "When did Yash move to the United States?",
+  "What schools did Yash attend?",
+  "What languages does Yash speak?",
+  "Does Yash need visa sponsorship?",
+  "What roles is Yash applying for?",
+  "What does Yash do outside coding?",
+  "What sports does Yash play?",
+  "What are Yash's hidden talents?",
+  "What is Yash's dream?",
+  "What is Yash's favorite color?",
+  "What are Yash's favorite anime, movies, or music?",
+  "What kind of engineering problems does Yash enjoy?",
+  "What should recruiters know before interviewing Yash?",
+];
