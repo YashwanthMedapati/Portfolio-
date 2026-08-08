@@ -67,9 +67,13 @@ test.describe("Projects", () => {
   test("project demo videos point to reachable media", async ({ page, request }) => {
     await page.goto("/");
 
-    for (const project of projects.filter((p) => p.demoVideo)) {
-      const demo = page.getByRole("button", { name: "Demo" });
-      await expect(demo).toHaveAttribute("href", project.demoVideo!);
+    const demoProjects = projects.filter((p) => p.demoVideo);
+    const demoLinks = page.getByRole("button", { name: "Demo" });
+    await expect(demoLinks).toHaveCount(demoProjects.length);
+
+    for (let i = 0; i < demoProjects.length; i++) {
+      const project = demoProjects[i];
+      await expect(demoLinks.nth(i)).toHaveAttribute("href", project.demoVideo!);
 
       const response = await request.get(project.demoVideo!);
       expect(response.status()).toBe(200);

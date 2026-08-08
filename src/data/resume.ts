@@ -74,6 +74,7 @@ export const projects: Project[] = [
     type: "Personal Project",
     dateRange: "Feb 2026 - May 2026",
     github: "https://github.com/YashwanthMedapati/ai-resume-intelligence",
+    demoVideo: "/demos/ai-resume-intelligence-demo.mp4",
     stack: [
       "React",
       "FastAPI",
