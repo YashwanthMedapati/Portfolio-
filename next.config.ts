@@ -1,6 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  productionBrowserSourceMaps: false,
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: "/:path*.map",
+          destination: "/404-source-map-blocked",
+        },
+      ],
+    };
+  },
   async headers() {
     return [
       {

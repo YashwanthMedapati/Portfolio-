@@ -8,6 +8,13 @@ import { EasterEggs } from "@/components/EasterEggs";
 import { PortfolioSoundProvider } from "@/components/PortfolioSound";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeContext";
+import {
+  absoluteUrl,
+  siteDescription,
+  siteKeywords,
+  siteTitle,
+  siteUrl,
+} from "@/lib/site";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -20,34 +27,38 @@ const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-const title = "Yashwanth Reddy Medapati - Software Engineer / ML Engineer";
-const description =
-  "Portfolio of Yashwanth Reddy Medapati - my full-stack AI systems, machine learning work, and distributed data pipelines. Featuring Yash, an AI guide that answers questions about my work.";
+const title = siteTitle;
+const description = siteDescription;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title,
+  title: {
+    default: title,
+    template: `%s | ${title}`,
+  },
   description,
-  keywords: [
-    "Yashwanth Reddy Medapati",
-    "Software Engineer",
-    "Machine Learning Engineer",
-    "Full-Stack Developer",
-    "Portfolio",
-    "React",
-    "FastAPI",
-    "Python",
-  ],
+  applicationName: title,
+  keywords: siteKeywords,
   authors: [{ name: "Yashwanth Reddy Medapati" }],
+  creator: "Yashwanth Reddy Medapati",
+  publisher: "Yashwanth Reddy Medapati",
+  category: "technology",
   alternates: {
-    canonical: "/",
+    canonical: absoluteUrl("/"),
   },
   openGraph: {
     title,
     description,
-    url: "/",
-    siteName: "Yashwanth Reddy Medapati - Portfolio",
+    url: absoluteUrl("/"),
+    siteName: title,
+    images: [
+      {
+        url: absoluteUrl("/opengraph-image"),
+        width: 1200,
+        height: 630,
+        alt: "Yashwanth Medapati portfolio preview",
+      },
+    ],
     locale: "en_US",
     type: "website",
   },
@@ -55,6 +66,26 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title,
     description,
+    images: [absoluteUrl("/twitter-image")],
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
   },
 };
 

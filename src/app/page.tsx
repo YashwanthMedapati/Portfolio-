@@ -7,10 +7,12 @@ import Education from "@/components/Education";
 import Resume from "@/components/Resume";
 import Contact from "@/components/Contact";
 import { YashFinale } from "@/components/YashFinale";
+import { StructuredData } from "@/components/StructuredData";
 
 export default function Home() {
   return (
     <>
+      <StructuredData />
       <Nav />
       <main id="main-content" className="flex-1">
         <Hero />
