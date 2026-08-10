@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
-type PortfolioSoundType = "hi" | "yawn" | "goodnight" | "arcade-hit" | "grow";
+type PortfolioSoundType = "hi" | "need-help" | "yawn" | "goodnight" | "arcade-hit" | "grow";
 
 type PortfolioSoundContextValue = {
   enabled: boolean;
@@ -27,6 +27,12 @@ type ToneOptions = {
 
 const PortfolioSoundContext = createContext<PortfolioSoundContextValue | null>(null);
 const SOUND_STORAGE_KEY = "portfolio-sound-enabled";
+const VOICE_SOUNDS: Partial<Record<PortfolioSoundType, string>> = {
+  hi: "/sounds/yash-intro.mp3",
+  "need-help": "/sounds/yash-need-help.mp3",
+  yawn: "/sounds/yash-goodnight-yawn.mp3",
+  goodnight: "/sounds/yash-goodnight.mp3",
+};
 
 function supportsAudio() {
   return (
@@ -44,6 +50,7 @@ function createAudioContext() {
 
 export function PortfolioSoundProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<AudioContext | null>(null);
+  const voiceRefs = useRef<Partial<Record<PortfolioSoundType, HTMLAudioElement>>>({});
   const unlockedRef = useRef(false);
   // Must start false on both server and client's first render - SSR has no
   // localStorage, so a lazy initializer reading it here is exactly what
@@ -108,6 +115,18 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
   const toggleEnabled = useCallback(() => {
     setSoundEnabled(!enabled);
   }, [enabled, setSoundEnabled]);
+
+  const playVoiceSound = useCallback((type: PortfolioSoundType) => {
+    const src = VOICE_SOUNDS[type];
+    if (!src) return false;
+
+    const voice = voiceRefs.current[type] ?? new Audio(src);
+    voiceRefs.current[type] = voice;
+    voice.volume = type === "yawn" ? 0.85 : 1;
+    voice.currentTime = 0;
+    void voice.play().catch(() => {});
+    return true;
+  }, []);
 
   const tone = useCallback(
     (frequency: number, startAt: number, duration: number, options?: ToneOptions) => {
@@ -177,8 +196,10 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
 
   const play = useCallback(
     (type: PortfolioSoundType) => {
+      if (!enabled) return;
       const audio = getAudio();
-      if (!enabled || !audio) return;
+      if (unlockedRef.current && playVoiceSound(type)) return;
+      if (!audio) return;
       if (!unlockedRef.current || audio.state === "suspended") {
         void audio.resume().then(() => {
           unlockedRef.current = true;
@@ -186,6 +207,7 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
         }).catch(() => {});
         return;
       }
+      if (playVoiceSound(type)) return;
       const now = audio.currentTime;
 
       if (type === "hi") {
@@ -229,8 +251,17 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
       tone(392, now + 0.15, 0.08, { type: "triangle", gain: 0.034, attack: 0.02, release: 0.035, chorus: true, filterHz: 3200 });
       tone(523.25, now + 0.225, 0.15, { type: "sine", gain: 0.038, attack: 0.025, release: 0.09, chorus: true, filterHz: 3600 });
     },
-    [enabled, getAudio, noise, tone]
+    [enabled, getAudio, noise, playVoiceSound, tone]
   );
+
+  useEffect(() => {
+    if (!enabled || typeof window === "undefined") return;
+    Object.entries(VOICE_SOUNDS).forEach(([type, src]) => {
+      const voice = voiceRefs.current[type as PortfolioSoundType] ?? new Audio(src);
+      voice.preload = "auto";
+      voiceRefs.current[type as PortfolioSoundType] = voice;
+    });
+  }, [enabled]);
 
   useEffect(() => {
     window.addEventListener("pointerdown", unlock, { once: true });
