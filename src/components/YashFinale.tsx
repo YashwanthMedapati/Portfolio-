@@ -22,6 +22,17 @@ const stars = Array.from({ length: 72 }, (_, index) => ({
 
 type FinaleIntroPhase = "waiting" | "run" | "jump" | "done";
 
+// Named timeline instead of magic-number setTimeout delays: RUN is the
+// dash-in, JUMP is the leap arc, and HIT is the exact instant little-Yash's
+// head reaches the block (half the jump, since the arc is symmetric) - the
+// sound effect and the block's own bump react off HIT_MS, not a guessed
+// fixed offset, so they can never drift out of sync with the visual again.
+const RUN_MS = 1200;
+const JUMP_MS = 1000;
+const JUMP_PEAK_MS = JUMP_MS / 2;
+const HIT_MS = RUN_MS + JUMP_PEAK_MS;
+const DONE_MS = RUN_MS + JUMP_MS;
+
 function playPortfolioSound(type: "arcade-hit" | "grow") {
   window.dispatchEvent(new CustomEvent("portfolio:sound", { detail: { type } }));
 }
@@ -55,6 +66,7 @@ export function YashFinale() {
   const reducedMotion = useReducedMotion();
   const { open } = useJrYash();
   const [introPhase, setIntroPhase] = useState<FinaleIntroPhase>("waiting");
+  const [blockHit, setBlockHit] = useState(false);
   const pupilTargetRef = useRef({ x: 0, y: 0 });
   const pupilCurrentRef = useRef({ x: 0, y: 0 });
 
@@ -104,10 +116,15 @@ export function YashFinale() {
 
     const timers = [
       window.setTimeout(() => setIntroPhase("run"), 0),
-      window.setTimeout(() => setIntroPhase("jump"), 1120),
-      window.setTimeout(() => playPortfolioSound("arcade-hit"), 1280),
-      window.setTimeout(() => playPortfolioSound("grow"), 1760),
-      window.setTimeout(() => setIntroPhase("done"), 1760),
+      window.setTimeout(() => setIntroPhase("jump"), RUN_MS),
+      window.setTimeout(() => {
+        setBlockHit(true);
+        playPortfolioSound("arcade-hit");
+      }, HIT_MS),
+      window.setTimeout(() => {
+        playPortfolioSound("grow");
+        setIntroPhase("done");
+      }, DONE_MS),
     ];
 
     return () => {
@@ -126,7 +143,10 @@ export function YashFinale() {
       className="relative min-h-[92svh] overflow-hidden bg-[#050608] px-6 py-24 text-white"
     >
       <div aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,#050608_0%,#07080c_54%,#401f48_100%)]" />
-      <div aria-hidden className="absolute inset-x-0 bottom-0 z-[1] h-44 bg-[#050608] sm:h-52" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-56 bg-gradient-to-t from-[#050608] via-[#050608]/70 to-transparent sm:h-72"
+      />
       <div aria-hidden className="absolute inset-0">
         {stars.map((star) => (
           <span
@@ -183,7 +203,7 @@ export function YashFinale() {
           </SocialButton>
         </div>
 
-        <div className="relative z-10 flex min-h-[330px] w-full items-end justify-center sm:min-h-[410px]">
+        <div className="relative z-10 flex min-h-[min(78vw,430px)] w-full items-end justify-center">
           <motion.div
             aria-hidden
             className="absolute bottom-3 left-1/2 z-20 flex h-24 w-32 -translate-x-1/2 items-end justify-center sm:h-28 sm:w-40"
@@ -191,8 +211,12 @@ export function YashFinale() {
             animate={
               littleYashVisible
                 ? {
-                    x: introPhase === "jump" ? [52, 94, 86] : [-390, -210, -70, 52],
-                    y: introPhase === "jump" ? [0, -110, -40, 0] : 0,
+                    // x/y share the same 3-keyframe shape (liftoff, peak, landing) so
+                    // the horizontal and vertical apex land on the SAME instant -
+                    // that instant is tuned to put Yash's head into the block's
+                    // underside, not just somewhere in its general vicinity.
+                    x: introPhase === "jump" ? [52, 98, 90] : [-390, -210, -70, 52],
+                    y: introPhase === "jump" ? [0, -44, 0] : 0,
                     opacity: 1,
                     scale: introPhase === "jump" ? 1.02 : 1,
                   }
@@ -200,13 +224,13 @@ export function YashFinale() {
             }
             transition={
               introPhase === "jump"
-                ? { duration: 0.66, ease: "easeOut" }
-                : { duration: 1.12, ease: [0.22, 1, 0.36, 1] }
+                ? { duration: JUMP_MS / 1000, ease: ["easeOut", "easeIn"] }
+                : { duration: RUN_MS / 1000, ease: [0.22, 1, 0.36, 1] }
             }
           >
             <YashSprite
               frames={littleYashFrames}
-              fps={introPhase === "jump" ? 10 : 11}
+              fps={introPhase === "jump" ? 8 : 11}
               mode={introPhase === "jump" ? "once" : "loop"}
               size={72}
               stageWidth={132}
@@ -223,11 +247,14 @@ export function YashFinale() {
               introPhase === "run" || introPhase === "jump"
                 ? {
                     opacity: 1,
-                    y: introPhase === "jump" ? [0, -12, 0] : 0,
+                    // The block only reacts once blockHit flips true, which the
+                    // timeline fires at HIT_MS - the exact moment little-Yash's
+                    // arc peaks - instead of guessing a fixed early delay.
+                    y: blockHit ? [0, -14, 0] : 0,
                   }
                 : { opacity: 0, y: 0 }
             }
-            transition={{ duration: introPhase === "jump" ? 0.22 : 0.2, ease: "easeOut" }}
+            transition={{ duration: blockHit ? 0.26 : 0.2, ease: "easeOut" }}
           >
             <Image
               src="/avatar/question-block.jpg"

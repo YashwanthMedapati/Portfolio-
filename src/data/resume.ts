@@ -137,7 +137,7 @@ export const education: Education[] = [
     track: "Cybersecurity Track",
     school: "Binghamton University",
     college: "Thomas J. Watson College of Engineering and Applied Science, NY",
-    gpa: "3.2/4.0",
+    gpa: "3.5/4.0",
     dateRange: "Aug 2025 - May 2026",
   },
   {

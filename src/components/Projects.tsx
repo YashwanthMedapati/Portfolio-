@@ -8,22 +8,25 @@ import { projects, sectionIds } from "@/data/resume";
 import { GithubIcon } from "./icons";
 import { Section } from "./Section";
 import { SectionHeader } from "./SectionHeader";
+import { SectionWatermark } from "./SectionWatermark";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardAction } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+const bulletLabels = ["Built", "Model", "Proof"];
+
 function ProjectProofPanel({ p }: { p: (typeof projects)[number] }) {
   return (
     <div className="border-t border-border bg-card px-5 py-5 sm:px-7 sm:py-6">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-        <p className="code-label">project.metrics</p>
+        <p className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">Project data</p>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge className="code-chip font-normal" variant="outline">
+          <Badge className="bg-primary-soft text-primary border border-primary/30" variant="outline">
             {p.type}
           </Badge>
           {p.mlFocused && (
-            <Badge className="code-chip font-normal" variant="outline">
+            <Badge className="bg-brand-cyan-soft text-brand-cyan border border-brand-cyan/30" variant="outline">
               ML workflow
             </Badge>
           )}
@@ -32,9 +35,9 @@ function ProjectProofPanel({ p }: { p: (typeof projects)[number] }) {
 
       <div className="grid sm:grid-cols-3 gap-3">
         {p.highlights.map((h) => (
-          <div key={h.label} className="rounded-md border border-border bg-background/45 px-3 py-3">
-            <p className="font-mono text-base font-semibold leading-tight text-foreground">{h.value}</p>
-            <p className="code-label mt-1">{h.label}</p>
+          <div key={h.label} className="rounded-lg border border-border bg-background px-3 py-3">
+            <p className="text-lg font-semibold text-foreground leading-tight">{h.value}</p>
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground mt-1">{h.label}</p>
           </div>
         ))}
       </div>
@@ -50,7 +53,7 @@ function ProjectCard({ p, index }: { p: (typeof projects)[number]; index: number
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.45, delay: index * 0.06 }}
     >
-      <Card className="editor-panel py-0 gap-5 overflow-hidden hover:border-primary/45 transition-colors">
+      <Card className="border border-border ring-0 hover:border-primary/40 transition-colors py-0 gap-5 overflow-hidden">
         {p.image && (
           <div className="relative aspect-video w-full bg-secondary border-b border-border">
             <Image
@@ -64,7 +67,7 @@ function ProjectCard({ p, index }: { p: (typeof projects)[number]; index: number
         <CardHeader className="px-5 pt-5 gap-1.5 sm:px-7 sm:pt-7">
           {p.mlFocused && (
             <CardAction>
-              <Badge className="code-chip gap-1 font-normal" variant="outline">
+              <Badge className="gap-1 bg-primary-soft text-brand-cyan border border-primary/30" variant="outline">
                 <Sparkles className="size-3" /> ML
               </Badge>
             </CardAction>
@@ -72,7 +75,7 @@ function ProjectCard({ p, index }: { p: (typeof projects)[number]; index: number
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <CardTitle className="text-2xl font-semibold tracking-[-0.03em]">{p.name}</CardTitle>
+                <CardTitle className="text-xl font-semibold">{p.name}</CardTitle>
                 <span className="text-xs text-muted-foreground font-mono">{p.dateRange}</span>
               </div>
               <CardDescription className="text-primary text-sm mt-1">{p.tagline}</CardDescription>
@@ -105,10 +108,12 @@ function ProjectCard({ p, index }: { p: (typeof projects)[number]; index: number
         </CardHeader>
 
         <CardContent className="px-5 sm:px-7">
-          <ul className="space-y-2 mb-5 border-l border-border pl-4">
-            {p.bullets.map((b) => (
-              <li key={b} className="flex gap-2.5 text-sm leading-relaxed text-muted-foreground">
-                <span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
+          <ul className="space-y-2 mb-5">
+            {p.bullets.map((b, i) => (
+              <li key={b} className="text-sm text-muted-foreground leading-relaxed flex gap-2.5">
+                <span className="mt-0.5 shrink-0 rounded-md border border-primary/30 bg-primary-soft px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-primary">
+                  {bulletLabels[i] ?? "Note"}
+                </span>
                 <span>{b}</span>
               </li>
             ))}
@@ -117,7 +122,7 @@ function ProjectCard({ p, index }: { p: (typeof projects)[number]; index: number
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="flex flex-wrap gap-1.5">
               {p.stack.map((s) => (
-                <Badge key={s} variant="outline" className="code-chip h-auto px-2.5 py-1 font-normal">
+                <Badge key={s} variant="outline" className="font-mono text-muted-foreground font-normal">
                   {s}
                 </Badge>
               ))}
@@ -148,6 +153,7 @@ export default function Projects() {
 
   return (
     <Section id={sectionIds.projects}>
+      <SectionWatermark icon={Sparkles} corner="bottom-left" rotate={6} />
       <div className="flex flex-wrap items-end justify-between gap-6 mb-12">
         <SectionHeader
           sectionId={sectionIds.projects}

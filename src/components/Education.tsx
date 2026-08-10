@@ -5,12 +5,14 @@ import { GraduationCap, Award } from "lucide-react";
 import { education, certifications, sectionIds } from "@/data/resume";
 import { Section } from "./Section";
 import { SectionHeader } from "./SectionHeader";
+import { SectionWatermark } from "./SectionWatermark";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export default function Education() {
   return (
     <Section id={sectionIds.education}>
+      <SectionWatermark icon={GraduationCap} corner="bottom-right" rotate={8} />
       <SectionHeader sectionId={sectionIds.education} title="Education" />
 
       <div className="flex flex-col gap-5 mb-10">
@@ -22,9 +24,9 @@ export default function Education() {
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.4, delay: i * 0.08 }}
           >
-            <Card className="editor-panel">
+            <Card className="ring-0 border border-border">
               <CardContent className="flex gap-4">
-                <div className="shrink-0 w-11 h-11 rounded-md bg-primary-soft border border-primary/30 flex items-center justify-center">
+                <div className="shrink-0 w-11 h-11 rounded-xl bg-primary-soft border border-primary/30 flex items-center justify-center">
                   <GraduationCap size={20} className="text-primary" />
                 </div>
                 <div className="flex-1">
@@ -34,9 +36,9 @@ export default function Education() {
                   </div>
                   <p className="text-sm text-primary mb-1">{e.track}</p>
                   <p className="text-sm text-muted-foreground">
-                    {e.school} - {e.college}
+                    {e.school} &mdash; {e.college}
                   </p>
-                  <Badge variant="secondary" className="code-chip mt-2 font-normal">
+                  <Badge variant="secondary" className="mt-2 font-mono font-normal">
                     GPA: {e.gpa}
                   </Badge>
                 </div>
@@ -52,9 +54,9 @@ export default function Education() {
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.4 }}
       >
-        <Card className="editor-panel">
+        <Card className="ring-0 border border-border">
           <CardContent>
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-4 tracking-wide uppercase flex items-center gap-2">
               <Award size={15} className="text-primary" />
               Certifications &amp; Honors
             </h3>

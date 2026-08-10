@@ -8,6 +8,7 @@ import Resume from "@/components/Resume";
 import Contact from "@/components/Contact";
 import { YashFinale } from "@/components/YashFinale";
 import { StructuredData } from "@/components/StructuredData";
+import { AmbientBackdrop } from "@/components/AmbientBackdrop";
 
 export default function Home() {
   return (
@@ -16,12 +17,14 @@ export default function Home() {
       <Nav />
       <main id="main-content" className="flex-1">
         <Hero />
-        <About />
-        <Projects />
-        <Skills />
-        <Education />
-        <Resume />
-        <Contact />
+        <AmbientBackdrop>
+          <About />
+          <Projects />
+          <Skills />
+          <Education />
+          <Resume />
+          <Contact />
+        </AmbientBackdrop>
         <YashFinale />
       </main>
     </>

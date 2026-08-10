@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
-type PortfolioSoundType = "hi" | "yawn" | "arcade-hit" | "grow";
+type PortfolioSoundType = "hi" | "yawn" | "goodnight" | "arcade-hit" | "grow";
 
 type PortfolioSoundContextValue = {
   enabled: boolean;
@@ -16,6 +16,13 @@ type ToneOptions = {
   attack?: number;
   release?: number;
   detune?: number;
+  // A couple of cents-detuned voices summed together read as a warm, sung
+  // "aah" instead of one bare oscillator's flat, robotic buzz - the same
+  // trick real synths use for chorus/unison patches.
+  chorus?: boolean;
+  // Rolls off the harsh upper harmonics a raw oscillator produces, which is
+  // most of what makes a single tone sound synthetic/robotic in the first place.
+  filterHz?: number;
 };
 
 const PortfolioSoundContext = createContext<PortfolioSoundContextValue | null>(null);
@@ -70,18 +77,34 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
       const audio = getAudio();
       if (!audio || !unlockedRef.current) return;
 
-      const oscillator = audio.createOscillator();
-      const gain = audio.createGain();
-      oscillator.type = options?.type ?? "sine";
-      oscillator.frequency.setValueAtTime(frequency, startAt);
-      if (options?.detune) oscillator.detune.setValueAtTime(options.detune, startAt);
-      gain.gain.setValueAtTime(0.0001, startAt);
-      gain.gain.exponentialRampToValueAtTime(options?.gain ?? 0.045, startAt + (options?.attack ?? 0.018));
-      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration + (options?.release ?? 0));
-      oscillator.connect(gain);
-      gain.connect(audio.destination);
-      oscillator.start(startAt);
-      oscillator.stop(startAt + duration + (options?.release ?? 0.04));
+      const voices = options?.chorus ? [0, -8, 8] : [0];
+      const peakGain = (options?.gain ?? 0.045) * (options?.chorus ? 0.6 : 1);
+
+      for (const detuneOffset of voices) {
+        const oscillator = audio.createOscillator();
+        const gain = audio.createGain();
+        oscillator.type = options?.type ?? "sine";
+        oscillator.frequency.setValueAtTime(frequency, startAt);
+        oscillator.detune.setValueAtTime((options?.detune ?? 0) + detuneOffset, startAt);
+        gain.gain.setValueAtTime(0.0001, startAt);
+        gain.gain.exponentialRampToValueAtTime(peakGain, startAt + (options?.attack ?? 0.018));
+        gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration + (options?.release ?? 0));
+
+        let outputNode: AudioNode = gain;
+        if (options?.filterHz) {
+          const filter = audio.createBiquadFilter();
+          filter.type = "lowpass";
+          filter.frequency.setValueAtTime(options.filterHz, startAt);
+          filter.Q.setValueAtTime(0.7, startAt);
+          gain.connect(filter);
+          outputNode = filter;
+        }
+
+        oscillator.connect(gain);
+        outputNode.connect(audio.destination);
+        oscillator.start(startAt);
+        oscillator.stop(startAt + duration + (options?.release ?? 0.04));
+      }
     },
     [getAudio]
   );
@@ -122,31 +145,45 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
       const now = audio.currentTime;
 
       if (type === "hi") {
-        tone(523.25, now, 0.075, { type: "triangle", gain: 0.035, release: 0.025 });
-        tone(659.25, now + 0.07, 0.075, { type: "triangle", gain: 0.034, release: 0.025 });
-        tone(783.99, now + 0.15, 0.12, { type: "sine", gain: 0.038, release: 0.06 });
-        tone(1567.98, now + 0.155, 0.09, { type: "sine", gain: 0.012, release: 0.04 });
+        // A soft, sung-feeling greeting blip: chorus voices instead of one
+        // bare oscillator, gentler triangle/sine waves (no square anywhere
+        // here), a slower attack, and a lowpass to round off the buzz.
+        tone(523.25, now, 0.09, { type: "triangle", gain: 0.036, attack: 0.03, release: 0.045, chorus: true, filterHz: 2600 });
+        tone(659.25, now + 0.08, 0.09, { type: "triangle", gain: 0.035, attack: 0.03, release: 0.045, chorus: true, filterHz: 2600 });
+        tone(783.99, now + 0.17, 0.16, { type: "sine", gain: 0.038, attack: 0.035, release: 0.09, chorus: true, filterHz: 3200 });
+        tone(1567.98, now + 0.175, 0.12, { type: "sine", gain: 0.01, attack: 0.035, release: 0.06 });
         return;
       }
 
       if (type === "yawn") {
-        tone(246.94, now, 0.28, { type: "sine", gain: 0.024, release: 0.1 });
-        tone(196, now + 0.18, 0.32, { type: "sine", gain: 0.02, release: 0.16 });
-        noise(now + 0.08, 0.34, { gain: 0.009, frequency: 420, type: "lowpass" });
+        tone(246.94, now, 0.32, { type: "sine", gain: 0.022, attack: 0.05, release: 0.14, chorus: true, filterHz: 1400 });
+        tone(196, now + 0.2, 0.36, { type: "sine", gain: 0.019, attack: 0.06, release: 0.2, chorus: true, filterHz: 1200 });
+        noise(now + 0.08, 0.34, { gain: 0.007, frequency: 380, type: "lowpass" });
+        return;
+      }
+
+      if (type === "goodnight") {
+        // A soft, descending two-note "mm, night" cadence - warm and
+        // resolved, distinct from the airy yawn exhale that precedes it.
+        tone(392, now, 0.22, { type: "sine", gain: 0.026, attack: 0.05, release: 0.16, chorus: true, filterHz: 1500 });
+        tone(293.66, now + 0.24, 0.34, { type: "sine", gain: 0.022, attack: 0.07, release: 0.28, chorus: true, filterHz: 1200 });
         return;
       }
 
       if (type === "arcade-hit") {
-        tone(164.81, now, 0.045, { type: "square", gain: 0.035, release: 0.01 });
-        tone(98, now + 0.035, 0.055, { type: "triangle", gain: 0.035, release: 0.02 });
-        noise(now, 0.055, { gain: 0.018, frequency: 1200 });
+        // A bright, snappy "tink-tink" - the classic ? -block tap - instead
+        // of a low descending thud. Percussive on purpose: this one voice
+        // should stay a crisp mechanical bonk, not warmed up like the others.
+        tone(1046.5, now, 0.028, { type: "square", gain: 0.03, attack: 0.002, release: 0.012 });
+        tone(830.61, now + 0.024, 0.032, { type: "square", gain: 0.026, attack: 0.002, release: 0.016 });
+        noise(now, 0.035, { gain: 0.022, frequency: 2400, type: "highpass" });
         return;
       }
 
-      tone(261.63, now, 0.075, { type: "triangle", gain: 0.032, release: 0.03 });
-      tone(329.63, now + 0.075, 0.075, { type: "triangle", gain: 0.032, release: 0.03 });
-      tone(392, now + 0.15, 0.075, { type: "triangle", gain: 0.034, release: 0.03 });
-      tone(523.25, now + 0.225, 0.14, { type: "sine", gain: 0.038, release: 0.08 });
+      tone(261.63, now, 0.08, { type: "triangle", gain: 0.032, attack: 0.02, release: 0.035, chorus: true, filterHz: 3000 });
+      tone(329.63, now + 0.075, 0.08, { type: "triangle", gain: 0.032, attack: 0.02, release: 0.035, chorus: true, filterHz: 3000 });
+      tone(392, now + 0.15, 0.08, { type: "triangle", gain: 0.034, attack: 0.02, release: 0.035, chorus: true, filterHz: 3200 });
+      tone(523.25, now + 0.225, 0.15, { type: "sine", gain: 0.038, attack: 0.025, release: 0.09, chorus: true, filterHz: 3600 });
     },
     [enabled, getAudio, noise, tone]
   );

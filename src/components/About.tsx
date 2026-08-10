@@ -6,6 +6,7 @@ import { Cpu, Layers, Server } from "lucide-react";
 import { personal, sectionIds, experience } from "@/data/resume";
 import { Section } from "./Section";
 import { SectionHeader } from "./SectionHeader";
+import { SectionWatermark } from "./SectionWatermark";
 import { Card, CardContent } from "@/components/ui/card";
 
 const pillars = [
@@ -29,10 +30,11 @@ const pillars = [
 export default function About() {
   return (
     <Section id={sectionIds.about}>
+      <SectionWatermark icon={Layers} corner="top-right" rotate={-8} />
       <SectionHeader sectionId={sectionIds.about} title="About Me" className="mb-8" />
 
       <div className="mb-12 grid items-center gap-8 md:grid-cols-[minmax(0,1fr)_240px]">
-        <div className="max-w-3xl border-l border-border pl-5">
+        <div className="max-w-3xl">
           <p className="text-muted-foreground text-lg leading-relaxed mb-5 text-pretty">
             {personal.summary}
           </p>
@@ -52,7 +54,7 @@ export default function About() {
           transition={{ duration: 0.4, ease: "easeOut" }}
           className="mx-auto md:mx-0"
         >
-          <div className="relative size-44 overflow-hidden rounded-full border border-primary/35 bg-card p-1 shadow-[0_18px_42px_rgba(0,0,0,0.22)] sm:size-52 md:size-60">
+          <div className="relative size-44 overflow-hidden rounded-full border border-primary/35 bg-card p-1 shadow-[0_18px_48px_rgba(0,0,0,0.28)] sm:size-52 md:size-60">
             <Image
               src="/profile/yash-profile.jpeg"
               alt="Profile photo of me, Yashwanth Reddy Medapati"
@@ -61,7 +63,7 @@ export default function About() {
               quality={100}
               unoptimized
               className="rounded-full object-cover"
-              style={{ objectPosition: "52% 43%", transform: "scale(1.06)" }}
+              style={{ objectPosition: "52% 42%", transform: "scale(1.16)" }}
             />
           </div>
         </motion.div>
@@ -76,10 +78,10 @@ export default function About() {
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.4, delay: i * 0.08 }}
           >
-            <Card className="editor-panel h-full">
+            <Card className="ring-0 border border-border h-full">
               <CardContent>
-                <p.icon size={22} className="mb-4 text-primary" />
-                <h3 className="mb-2 font-semibold tracking-[-0.02em]">{p.title}</h3>
+                <p.icon size={22} className="text-primary mb-4" />
+                <h3 className="font-semibold mb-2">{p.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{p.body}</p>
               </CardContent>
             </Card>

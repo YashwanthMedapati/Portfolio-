@@ -7,6 +7,8 @@ import { YashSprite, YashPlaybackMode } from "./YashSprite";
 import { YASH_FRAMES } from "./yashFrames";
 import { useJrYash } from "./JrYashContext";
 import { useTheme } from "@/components/ThemeContext";
+import { useActiveSectionIntro } from "@/lib/useActiveSectionIntro";
+import { sectionIntros } from "@/lib/sectionIntros";
 
 const DESKTOP_SPRITE_SIZE = 92;
 const MOBILE_SPRITE_SIZE = 64;
@@ -26,11 +28,12 @@ const CORNER_PADDING = 12;
 const DARK_AWAKE_IDLE_MS = 45000;
 const DARK_START_AWAKE_MS = 14000;
 const GOOD_NIGHT_LEAD_MS = 2600;
+const GOODNIGHT_SOUND_DELAY_MS = 950;
 const GREETING_DURATION_MS = 6200;
 
 type Override = { type: "wave" } | { type: "jump" } | { type: "emote"; emoteIdx: number };
 
-function playPortfolioSound(type: "hi" | "yawn") {
+function playPortfolioSound(type: "hi" | "yawn" | "goodnight") {
   window.dispatchEvent(new CustomEvent("portfolio:sound", { detail: { type } }));
 }
 
@@ -79,6 +82,9 @@ export function YashCompanion() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragParkedFollow, setDragParkedFollow] = useState(false);
   const [isNearHero, setIsNearHero] = useState(true);
+  const [showSectionIntro, setShowSectionIntro] = useState(false);
+  const lastIntroKeyRef = useRef<string | null>(null);
+  const sectionIntro = useActiveSectionIntro(sectionIntros, { enabled: !reducedMotion });
 
   const lastActivityRef = useRef(0);
   const overrideRef = useRef<Override | null>(null);
@@ -137,9 +143,7 @@ export function YashCompanion() {
 
   useEffect(() => {
     const updateSectionAwareness = () => {
-      const nearHero = window.scrollY < window.innerHeight * 0.45;
-      setIsNearHero(nearHero);
-      if (!nearHero) setShowGreeting(false);
+      setIsNearHero(window.scrollY < window.innerHeight * 0.45);
     };
 
     updateSectionAwareness();
@@ -150,6 +154,30 @@ export function YashCompanion() {
       window.removeEventListener("hashchange", updateSectionAwareness);
     };
   }, []);
+
+  // The entry greeting and the goodnight are "must" episodes: scrolling
+  // away no longer cuts the greeting short, and any real activity - not
+  // just hovering Yash directly - counts as "not idle" so he only sleeps
+  // once the user has genuinely stepped away. Throttled so a continuous
+  // scroll doesn't re-render on every pixel.
+  useEffect(() => {
+    let lastWakeCall = 0;
+    const onActivity = () => {
+      lastActivityRef.current = Date.now();
+      const now = Date.now();
+      if (now - lastWakeCall < 1000) return;
+      lastWakeCall = now;
+      wakeDarkYash();
+    };
+    window.addEventListener("scroll", onActivity, { passive: true });
+    window.addEventListener("pointerdown", onActivity, { passive: true });
+    window.addEventListener("keydown", onActivity);
+    return () => {
+      window.removeEventListener("scroll", onActivity);
+      window.removeEventListener("pointerdown", onActivity);
+      window.removeEventListener("keydown", onActivity);
+    };
+  }, [wakeDarkYash]);
 
   useEffect(() => {
     overrideRef.current = override;
@@ -212,12 +240,13 @@ export function YashCompanion() {
   }, [theme, isMobile, reducedMotion]);
 
   // End the entrance wave (started via lazy initial state above) and reveal
-  // the greeting bubble shortly after.
+  // the greeting bubble shortly after. A "must" episode: it always shows,
+  // regardless of where the user has scrolled to by then.
   useEffect(() => {
-    if (reducedMotion || isMobile) return;
+    if (reducedMotion) return;
     const t = setTimeout(() => setOverride(null), WAVE_DURATION);
     const g = setTimeout(() => {
-      if (isNearHero) setShowGreeting(true);
+      setShowGreeting(true);
     }, WAVE_DURATION + 200);
     const hide = setTimeout(() => {
       setShowGreeting(false);
@@ -228,7 +257,7 @@ export function YashCompanion() {
       clearTimeout(g);
       clearTimeout(hide);
     };
-  }, [isMobile, isNearHero, reducedMotion]);
+  }, [reducedMotion]);
 
   // Cursor follow mode: Yash trails the pointer, then dodges if it gets too close.
   useEffect(() => {
@@ -346,13 +375,28 @@ export function YashCompanion() {
     playPortfolioSound("hi");
   }, [dismissedGreeting, showGreeting]);
 
+  // A brief, one-line intro bubble each time a new section scrolls in -
+  // gated behind the entry greeting, the sleep notice, and the chat panel
+  // so it never stacks with them, and only re-fires on an actual section
+  // change (lastIntroKeyRef), not on every intersection tick.
+  useEffect(() => {
+    if (!sectionIntro) return;
+    if (lastIntroKeyRef.current === sectionIntro.id) return;
+    if (showGreeting || showSleepNotice || isOpen) return;
+    lastIntroKeyRef.current = sectionIntro.id;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reacting to an external IntersectionObserver-driven value, not derivable during render
+    setShowSectionIntro(true);
+    const hide = setTimeout(() => setShowSectionIntro(false), 4200);
+    return () => clearTimeout(hide);
+  }, [sectionIntro, showGreeting, showSleepNotice, isOpen]);
+
   useEffect(() => {
     if (showSleepNotice) {
-      if (!sleepSoundPlayedRef.current) {
-        sleepSoundPlayedRef.current = true;
-        playPortfolioSound("yawn");
-      }
-      return;
+      if (sleepSoundPlayedRef.current) return;
+      sleepSoundPlayedRef.current = true;
+      playPortfolioSound("yawn");
+      const goodnight = setTimeout(() => playPortfolioSound("goodnight"), GOODNIGHT_SOUND_DELAY_MS);
+      return () => clearTimeout(goodnight);
     }
     sleepSoundPlayedRef.current = false;
   }, [showSleepNotice]);
@@ -512,6 +556,17 @@ export function YashCompanion() {
             className="absolute bottom-[calc(100%+8px)] left-1/2 z-10 w-max max-w-[176px] -translate-x-1/2 bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
           >
             Good night. I&apos;ll be right here.
+          </motion.div>
+        )}
+        {showSectionIntro && sectionIntro && !isOpen && !showGreeting && !showSleepNotice && (
+          <motion.div
+            key={`yash-intro-${sectionIntro.id}`}
+            initial={{ opacity: 0, y: 8, pointerEvents: "none" }}
+            animate={{ opacity: 1, y: 0, pointerEvents: "none" }}
+            exit={{ opacity: 0, y: 8, pointerEvents: "none" }}
+            className="absolute bottom-[calc(100%+8px)] left-1/2 z-10 w-max max-w-[200px] -translate-x-1/2 bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
+          >
+            {sectionIntro.text}
           </motion.div>
         )}
       </AnimatePresence>

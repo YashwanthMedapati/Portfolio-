@@ -1,5 +1,5 @@
 ﻿import type { Metadata } from "next";
-import { Geist, IBM_Plex_Mono } from "next/font/google";
+import { Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { JrYashProvider } from "@/components/JrYash/JrYashContext";
 import JrYashWidget from "@/components/JrYash/JrYashWidget";
@@ -16,8 +16,8 @@ import {
   siteUrl,
 } from "@/lib/site";
 
-const geist = Geist({
-  variable: "--font-geist",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -94,7 +94,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`dark ${geist.variable} ${plexMono.variable} h-full antialiased`}
+      className={`dark ${inter.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <a

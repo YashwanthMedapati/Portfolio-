@@ -23,7 +23,7 @@ export function SectionHeader({
       className={cn("mb-12", className)}
     >
       <div className="flex items-center gap-3 mb-3">
-        <span className="code-label shrink-0">
+        <span className="font-mono text-xs text-muted-foreground shrink-0">
           <span className="text-brand-cyan/70">{"//"}</span> ~/{sectionId}
         </span>
         <motion.span
@@ -32,12 +32,12 @@ export function SectionHeader({
           whileInView={{ scaleX: 1 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
-          className="section-accent-line h-px flex-1 origin-left"
+          className="h-px flex-1 bg-border origin-left"
         />
       </div>
       <h2
         id={`${sectionId}-heading`}
-        className="text-3xl font-semibold tracking-[-0.035em] text-balance sm:text-4xl"
+        className="text-3xl sm:text-4xl font-bold tracking-tight text-balance"
       >
         {title}
       </h2>
