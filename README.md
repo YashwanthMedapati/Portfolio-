@@ -4,8 +4,6 @@ Interactive personal portfolio for **Yashwanth Reddy Medapati**, built to presen
 
 **Live site:** [yashwanthmedapati.com](https://yashwanthmedapati.com)
 
-**Suggested GitHub description:**
-Resume-grounded Next.js portfolio with an interactive Yash assistant, ML project proof panels, animated character system, demo media, and Playwright-tested recruiter workflows.
 
 ## Why This Exists
 
