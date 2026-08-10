@@ -30,6 +30,8 @@ const DARK_START_AWAKE_MS = 14000;
 const GOOD_NIGHT_LEAD_MS = 2600;
 const GOODNIGHT_SOUND_DELAY_MS = 950;
 const GREETING_DURATION_MS = 6200;
+const BUBBLE_MARGIN = 24;
+const BUBBLE_RESERVED_HEIGHT = 82;
 
 type Override = { type: "wave" } | { type: "jump" } | { type: "emote"; emoteIdx: number };
 
@@ -422,6 +424,7 @@ export function YashCompanion() {
   const spriteSize = isMobile ? MOBILE_SPRITE_SIZE : compactDock ? 68 : DESKTOP_SPRITE_SIZE;
   const stageWidth = isMobile ? MOBILE_STAGE_WIDTH : compactDock ? 136 : DESKTOP_STAGE_WIDTH;
   const lockedStageHeight = Math.round(spriteSize * 1.55);
+  const stageHeight = lockedStageHeight;
   const isDarkAwake = theme === "dark" && darkAwakeUntil > now;
   const panelHeight = Math.min(viewport.height * 0.68, 540);
   const openX = clamp(viewport.width - stageWidth - 20, CORNER_PADDING, viewport.width - stageWidth - CORNER_PADDING);
@@ -430,6 +433,20 @@ export function YashCompanion() {
   const dockY = clamp(viewport.height - lockedStageHeight - 12, CORNER_PADDING, viewport.height - lockedStageHeight - CORNER_PADDING);
   const renderX = isOpen && !isFollowingCursor ? openX : compactDock ? dockX : x;
   const renderY = isOpen && !isFollowingCursor ? openY : compactDock ? dockY : y;
+  const companionTop = Math.max(renderY - BUBBLE_RESERVED_HEIGHT, CORNER_PADDING);
+  const spriteTop = renderY - companionTop;
+  const companionHeight = spriteTop + stageHeight;
+  const bubbleMaxWidth = Math.min(isMobile ? 196 : 220, Math.max(140, viewport.width - BUBBLE_MARGIN * 2));
+  const bubbleLeft = clamp(
+    stageWidth / 2,
+    BUBBLE_MARGIN + bubbleMaxWidth / 2 - renderX,
+    viewport.width - BUBBLE_MARGIN - bubbleMaxWidth / 2 - renderX
+  );
+  const bubbleStyle = {
+    left: bubbleLeft,
+    width: bubbleMaxWidth,
+    maxWidth: bubbleMaxWidth,
+  };
 
   const baseAction: "sleep" | "think" | "run-left" | "run-right" | "idle" =
     isTyping
@@ -443,8 +460,6 @@ export function YashCompanion() {
             : "idle";
 
   const displayAction = override?.type ?? baseAction;
-  const stageHeight = lockedStageHeight;
-
   let frames = YASH_FRAMES.idle;
   let fps = 2;
   let mode: YashPlaybackMode = "loop";
@@ -515,9 +530,9 @@ export function YashCompanion() {
       aria-hidden={isOpen}
       style={{
         left: renderX,
-        top: renderY,
+        top: companionTop,
         width: stageWidth,
-        height: stageHeight,
+        height: companionHeight,
         opacity: 1,
         pointerEvents: isOpen ? "none" : "auto",
         transition: reducedMotion || isDragging ? "opacity 150ms" : "left 140ms cubic-bezier(0.22, 1, 0.36, 1), top 140ms cubic-bezier(0.22, 1, 0.36, 1), opacity 150ms",
@@ -528,10 +543,11 @@ export function YashCompanion() {
         {showGreeting && !dismissedGreeting && !showSleepNotice && !isOpen && (
           <motion.div
             key="yash-greeting"
-            initial={{ opacity: 0, y: 8, pointerEvents: "none" }}
-            animate={{ opacity: 1, y: 0, pointerEvents: "auto" }}
-            exit={{ opacity: 0, y: 8, pointerEvents: "none" }}
-            className="absolute bottom-[calc(100%+8px)] left-1/2 z-10 w-max max-w-[168px] -translate-x-1/2 bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-10 box-border whitespace-normal text-wrap max-w-[168px] -translate-x-1/2 bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
+            style={bubbleStyle}
           >
             <button
               onClick={(e) => {
@@ -540,7 +556,7 @@ export function YashCompanion() {
                 setDismissedGreeting(true);
               }}
               aria-label="Dismiss greeting"
-              className="absolute -top-1.5 -right-1.5 bg-secondary border border-border rounded-full p-0.5 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="pointer-events-auto absolute right-1 top-1 bg-secondary border border-border rounded-full p-0.5 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <X size={10} />
             </button>
@@ -550,10 +566,11 @@ export function YashCompanion() {
         {showSleepNotice && !isOpen && theme === "dark" && (
           <motion.div
             key="yash-sleep-notice"
-            initial={{ opacity: 0, y: 8, pointerEvents: "none" }}
-            animate={{ opacity: 1, y: 0, pointerEvents: "none" }}
-            exit={{ opacity: 0, y: 8, pointerEvents: "none" }}
-            className="absolute bottom-[calc(100%+8px)] left-1/2 z-10 w-max max-w-[176px] -translate-x-1/2 bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-10 box-border whitespace-normal text-wrap max-w-[176px] -translate-x-1/2 bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
+            style={bubbleStyle}
           >
             Good night. I&apos;ll be right here.
           </motion.div>
@@ -561,10 +578,11 @@ export function YashCompanion() {
         {showSectionIntro && sectionIntro && !isOpen && !showGreeting && !showSleepNotice && (
           <motion.div
             key={`yash-intro-${sectionIntro.id}`}
-            initial={{ opacity: 0, y: 8, pointerEvents: "none" }}
-            animate={{ opacity: 1, y: 0, pointerEvents: "none" }}
-            exit={{ opacity: 0, y: 8, pointerEvents: "none" }}
-            className="absolute bottom-[calc(100%+8px)] left-1/2 z-10 w-max max-w-[200px] -translate-x-1/2 bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-10 box-border whitespace-normal text-wrap max-w-[200px] -translate-x-1/2 bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
+            style={bubbleStyle}
           >
             {sectionIntro.text}
           </motion.div>
@@ -583,8 +601,8 @@ export function YashCompanion() {
         aria-haspopup="dialog"
         aria-controls="jr-yash-panel"
         tabIndex={isOpen ? -1 : 0}
-        className="absolute inset-0 flex touch-none items-end justify-center bg-transparent border-none p-0 cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
-        style={{ width: stageWidth, height: stageHeight }}
+        className="absolute left-0 flex touch-none items-end justify-center bg-transparent border-none p-0 cursor-grab active:cursor-grabbing focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
+        style={{ top: spriteTop, width: stageWidth, height: stageHeight }}
       >
         <YashSprite
           frames={frames}

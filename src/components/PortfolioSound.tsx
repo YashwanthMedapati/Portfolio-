@@ -29,7 +29,17 @@ const PortfolioSoundContext = createContext<PortfolioSoundContextValue | null>(n
 const SOUND_STORAGE_KEY = "portfolio-sound-enabled";
 
 function supportsAudio() {
-  return typeof window !== "undefined" && "AudioContext" in window;
+  return (
+    typeof window !== "undefined" &&
+    ("AudioContext" in window || "webkitAudioContext" in window)
+  );
+}
+
+function createAudioContext() {
+  const AudioContextCtor =
+    window.AudioContext ??
+    (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  return AudioContextCtor ? new AudioContextCtor() : null;
 }
 
 export function PortfolioSoundProvider({ children }: { children: React.ReactNode }) {
@@ -52,16 +62,34 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
 
   const getAudio = useCallback(() => {
     if (!supportsAudio()) return null;
-    audioRef.current ??= new AudioContext();
+    audioRef.current ??= createAudioContext();
     return audioRef.current;
   }, []);
 
   const unlock = useCallback(() => {
     const audio = getAudio();
-    if (!audio) return;
-    void audio.resume();
+    if (!audio) return null;
+    void audio.resume().then(() => {
+      unlockedRef.current = true;
+    }).catch(() => {});
     unlockedRef.current = true;
+    return audio;
   }, [getAudio]);
+
+  const confirmationChime = useCallback((audio: AudioContext) => {
+    const now = audio.currentTime;
+    const oscillator = audio.createOscillator();
+    const gain = audio.createGain();
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(880, now);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.035, now + 0.018);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+    oscillator.connect(gain);
+    gain.connect(audio.destination);
+    oscillator.start(now);
+    oscillator.stop(now + 0.2);
+  }, []);
 
   const setSoundEnabled = useCallback(
     (nextEnabled: boolean) => {
@@ -69,9 +97,12 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
       try {
         window.localStorage.setItem(SOUND_STORAGE_KEY, String(nextEnabled));
       } catch {}
-      if (nextEnabled) unlock();
+      if (nextEnabled) {
+        const audio = unlock();
+        if (audio) confirmationChime(audio);
+      }
     },
-    [unlock]
+    [confirmationChime, unlock]
   );
 
   const toggleEnabled = useCallback(() => {
@@ -147,7 +178,14 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
   const play = useCallback(
     (type: PortfolioSoundType) => {
       const audio = getAudio();
-      if (!enabled || !audio || !unlockedRef.current) return;
+      if (!enabled || !audio) return;
+      if (!unlockedRef.current || audio.state === "suspended") {
+        void audio.resume().then(() => {
+          unlockedRef.current = true;
+          window.dispatchEvent(new CustomEvent("portfolio:sound", { detail: { type } }));
+        }).catch(() => {});
+        return;
+      }
       const now = audio.currentTime;
 
       if (type === "hi") {
