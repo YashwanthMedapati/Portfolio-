@@ -71,14 +71,14 @@ export default function Contact() {
           transition={{ duration: 0.4 }}
           className="flex flex-col gap-3"
         >
-          <Card className="ring-0 border border-primary/30 bg-primary-soft py-0">
+          <Card className="editor-panel border-primary/30 bg-primary-soft py-0">
             <CardContent className="px-4 py-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold">Fastest way to reach me</p>
                   <p className="text-xs text-muted-foreground">{personal.email}</p>
                 </div>
-                <Button type="button" size="sm" className="gap-1.5" onClick={copyEmail}>
+                <Button type="button" size="sm" className="gap-1.5 rounded-md" onClick={copyEmail}>
                   {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
                   {copied ? "Copied" : "Copy Email"}
                 </Button>
@@ -96,7 +96,7 @@ export default function Contact() {
                   target={method.external ? "_blank" : undefined}
                   rel="noopener noreferrer"
                   aria-label={method.label}
-                  className="size-11 rounded-lg bg-card border border-border hover:border-primary/50 hover:bg-primary-soft flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="editor-panel-soft flex size-11 items-center justify-center rounded-md transition-colors hover:border-primary/50 hover:bg-primary-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <Icon size={18} className="text-primary" />
                 </a>
@@ -124,7 +124,7 @@ export default function Contact() {
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.4, delay: 0.08 }}
         >
-          <Card className="ring-0 border border-border">
+          <Card className="editor-panel">
             <CardContent>
               <form onSubmit={submit} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
@@ -159,12 +159,12 @@ export default function Contact() {
                     rows={4}
                   />
                 </div>
-                <Button type="submit" className="rounded-full gap-1.5 mt-1">
+                <Button type="submit" className="rounded-md gap-1.5 mt-1">
                   <MailOpen className="size-4" />
                   Open Email Draft
                 </Button>
                 <p className="text-xs text-muted-foreground -mt-2">
-                  Opens your email app with this message pre-filled - nothing is sent from here directly.
+                  Opens your email app with this message pre-filled. Nothing is sent from here directly.
                 </p>
               </form>
             </CardContent>

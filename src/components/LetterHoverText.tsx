@@ -16,18 +16,28 @@ export function LetterHoverText({
   letterClassName = "",
 }: LetterHoverTextProps) {
   const Tag = as as ElementType;
+  const parts = text.split(/(\s+)/);
 
   return (
     <Tag aria-label={text} className={className}>
-      {Array.from(text).map((char, index) => (
-        <span
-          key={`${char}-${index}`}
-          aria-hidden
-          className={`letter-hover-char inline-block origin-bottom ${letterClassName}`}
-        >
-          {char === " " ? "\u00A0" : char}
-        </span>
-      ))}
+      {parts.map((part, partIndex) =>
+        /^\s+$/.test(part) ? (
+          <span key={`space-${partIndex}`} aria-hidden>
+            {" "}
+          </span>
+        ) : (
+          <span key={`${part}-${partIndex}`} aria-hidden className="inline-block whitespace-nowrap">
+            {Array.from(part).map((char, index) => (
+              <span
+                key={`${char}-${partIndex}-${index}`}
+                className={`letter-hover-char inline-block origin-bottom ${letterClassName}`}
+              >
+                {char}
+              </span>
+            ))}
+          </span>
+        )
+      )}
     </Tag>
   );
 }

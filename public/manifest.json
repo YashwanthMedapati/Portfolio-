@@ -1,0 +1,17 @@
+{
+  "name": "Yashwanth Medapati",
+  "short_name": "Yashwanth",
+  "description": "Yashwanth Medapati's software engineering and machine learning portfolio, featuring full-stack AI projects, data pipelines, resume analysis tooling, and NutriDent AI.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#05070d",
+  "theme_color": "#05070d",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}

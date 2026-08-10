@@ -22,9 +22,9 @@ export default function Education() {
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.4, delay: i * 0.08 }}
           >
-            <Card className="ring-0 border border-border">
+            <Card className="editor-panel">
               <CardContent className="flex gap-4">
-                <div className="shrink-0 w-11 h-11 rounded-xl bg-primary-soft border border-primary/30 flex items-center justify-center">
+                <div className="shrink-0 w-11 h-11 rounded-md bg-primary-soft border border-primary/30 flex items-center justify-center">
                   <GraduationCap size={20} className="text-primary" />
                 </div>
                 <div className="flex-1">
@@ -34,9 +34,9 @@ export default function Education() {
                   </div>
                   <p className="text-sm text-primary mb-1">{e.track}</p>
                   <p className="text-sm text-muted-foreground">
-                    {e.school} &mdash; {e.college}
+                    {e.school} - {e.college}
                   </p>
-                  <Badge variant="secondary" className="mt-2 font-mono font-normal">
+                  <Badge variant="secondary" className="code-chip mt-2 font-normal">
                     GPA: {e.gpa}
                   </Badge>
                 </div>
@@ -52,9 +52,9 @@ export default function Education() {
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.4 }}
       >
-        <Card className="ring-0 border border-border">
+        <Card className="editor-panel">
           <CardContent>
-            <h3 className="text-sm font-semibold text-muted-foreground mb-4 tracking-wide uppercase flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-4 flex items-center gap-2">
               <Award size={15} className="text-primary" />
               Certifications &amp; Honors
             </h3>

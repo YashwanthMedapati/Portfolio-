@@ -33,9 +33,9 @@ export default function Skills() {
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.4, delay: i * 0.06 }}
             >
-              <Card className="ring-0 border border-border h-full">
+              <Card className="editor-panel h-full">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-sm font-semibold text-muted-foreground tracking-wide uppercase">
+                  <CardTitle className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                     <Icon className="size-4 text-primary" />
                     {group}
                   </CardTitle>
@@ -45,7 +45,7 @@ export default function Skills() {
                     <Badge
                       key={s}
                       variant="outline"
-                      className="font-mono text-sm font-normal px-3 py-1.5 h-auto border-border hover:border-primary/50 transition-colors"
+                      className="code-chip h-auto px-2.5 py-1 font-normal hover:border-primary/50 transition-colors"
                     >
                       {s}
                     </Badge>

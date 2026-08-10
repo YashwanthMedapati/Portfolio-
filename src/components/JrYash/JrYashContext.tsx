@@ -119,7 +119,7 @@ export function JrYashProvider({ children }: { children: ReactNode }) {
         ? {
             text: "Hammer mode armed. Click anywhere on the site and I will crack the page for fun. Refresh the page when you want everything perfectly back in place.",
             action: { type: "none" },
-            followUps: ["priya", "stop following", "Show me my AI projects"],
+            followUps: ["stop following", "Show me my AI projects"],
           }
         : isPriyaCommand
           ? {

@@ -126,6 +126,7 @@ export function YashFinale() {
       className="relative min-h-[92svh] overflow-hidden bg-[#050608] px-6 py-24 text-white"
     >
       <div aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,#050608_0%,#07080c_54%,#401f48_100%)]" />
+      <div aria-hidden className="absolute inset-x-0 bottom-0 z-[1] h-44 bg-[#050608] sm:h-52" />
       <div aria-hidden className="absolute inset-0">
         {stars.map((star) => (
           <span
@@ -182,7 +183,7 @@ export function YashFinale() {
           </SocialButton>
         </div>
 
-        <div className="relative flex min-h-[330px] w-full items-end justify-center sm:min-h-[410px]">
+        <div className="relative z-10 flex min-h-[330px] w-full items-end justify-center sm:min-h-[410px]">
           <motion.div
             aria-hidden
             className="absolute bottom-3 left-1/2 z-20 flex h-24 w-32 -translate-x-1/2 items-end justify-center sm:h-28 sm:w-40"
@@ -244,7 +245,7 @@ export function YashFinale() {
               onClick={open}
               aria-label="Open Yash chat"
               data-intro-phase={introPhase}
-              className="relative aspect-square w-[min(78vw,430px)] origin-bottom bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="relative aspect-square w-[min(78vw,430px)] origin-bottom translate-y-3 bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:translate-y-4"
             >
               <span
                 aria-hidden
@@ -290,7 +291,7 @@ export function YashFinale() {
           )}
         </div>
 
-        <div className="mt-6 flex flex-col items-center gap-3">
+        <div className="relative z-10 mt-5 flex flex-col items-center gap-3 sm:mt-6">
           <VisitorCounter />
           <p className="font-mono text-xs text-white/45">Design and built by {personal.name}.</p>
         </div>

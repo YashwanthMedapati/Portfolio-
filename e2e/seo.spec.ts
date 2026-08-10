@@ -25,6 +25,10 @@ test.describe("Launch checklist", () => {
     );
     expect(await page.locator('link[rel="icon"]').count()).toBeGreaterThan(0);
     await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(1);
+
+    const structuredData = await page.locator('script[type="application/ld+json"]').textContent();
+    expect(structuredData).not.toContain("telephone");
+    expect(structuredData).not.toContain("addressLocality");
   });
 
   test("server source contains real content", async ({ request }) => {
@@ -37,7 +41,7 @@ test.describe("Launch checklist", () => {
     expect(html).toContain('application/ld+json');
   });
 
-  test("robots, sitemap, and 404 routes are present", async ({ request, page }) => {
+  test("robots, sitemap, manifest, and 404 routes are present", async ({ request, page }) => {
     const robots = await request.get("/robots.txt");
     expect(robots.status()).toBe(200);
     expect(await robots.text()).toContain("Sitemap: https://yashwanthmedapati.com/sitemap.xml");
@@ -45,6 +49,14 @@ test.describe("Launch checklist", () => {
     const sitemap = await request.get("/sitemap.xml");
     expect(sitemap.status()).toBe(200);
     expect(await sitemap.text()).toContain("<loc>https://yashwanthmedapati.com/</loc>");
+
+    const manifest = await request.get("/manifest.json");
+    expect(manifest.status()).toBe(200);
+    expect(await manifest.json()).toMatchObject({
+      name: "Yashwanth Medapati",
+      start_url: "/",
+      display: "standalone",
+    });
 
     await page.goto("/definitely-not-a-real-page");
     await expect(page).toHaveTitle("Page Not Found | Yashwanth Medapati");

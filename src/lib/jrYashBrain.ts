@@ -361,7 +361,6 @@ export function askJrYash(query: string): YashAnswer {
 export const suggestedPrompts = [
   "follow me",
   "break",
-  "priya",
   "Show me my AI projects",
   "Do I need sponsorship?",
   "What roles am I applying for?",

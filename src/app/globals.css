@@ -5,30 +5,28 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
-  Terminal/IDE identity: the palette is drawn from a real editor's dark theme
-  (deep ink, warm amber keyword-highlight, cool teal string-highlight) rather
-  than a generic "AI product" gradient. Light mode mirrors the same amber/teal
-  brand on a warm paper background - deepened for AA text contrast - so
-  switching themes never feels like a different site.
+  Terminal/IDE identity: deep ink, warm amber keyword-highlight, and cool teal
+  string-highlight. Light mode mirrors the same brand colors on a warm paper
+  background, deepened for AA text contrast.
 */
 :root {
   color-scheme: light;
 
-  --background: #f7f5f0;
-  --foreground: #1b1e26;
+  --background: #f6f4ee;
+  --foreground: #171a20;
 
-  --card: #ffffff;
-  --card-foreground: #1b1e26;
-  --popover: #ffffff;
-  --popover-foreground: #1b1e26;
+  --card: #fbfaf7;
+  --card-foreground: #171a20;
+  --popover: #fbfaf7;
+  --popover-foreground: #171a20;
 
-  --primary: #9a5b12;
+  --primary: #b66d0d;
   --primary-foreground: #ffffff;
-  --secondary: #ece7dc;
+  --secondary: #ece8df;
   --secondary-foreground: #1b1e26;
 
-  --muted: #efeae0;
-  --muted-foreground: #6b6b63;
+  --muted: #ece8df;
+  --muted-foreground: #666a70;
 
   --accent: #e9e2d3;
   --accent-foreground: #1b1e26;
@@ -36,13 +34,13 @@
   --destructive: #c22b2b;
   --destructive-foreground: #ffffff;
 
-  --border: #ded6c4;
-  --input: #ded6c4;
-  --ring: #9a5b12;
+  --border: #d7d0c2;
+  --input: #d7d0c2;
+  --ring: #b66d0d;
 
   --brand-cyan: #106b62;
-  --primary-soft: color-mix(in oklch, var(--primary) 16%, transparent);
-  --brand-cyan-soft: color-mix(in oklch, var(--brand-cyan) 14%, transparent);
+  --primary-soft: color-mix(in oklch, var(--primary) 12%, transparent);
+  --brand-cyan-soft: color-mix(in oklch, var(--brand-cyan) 10%, transparent);
 
   --chart-1: var(--primary);
   --chart-2: var(--brand-cyan);
@@ -50,7 +48,9 @@
   --chart-4: #6a4fd1;
   --chart-5: #6b6b63;
 
-  --radius: 0.6rem;
+  --radius: 0.45rem;
+  --panel-shadow: 0 14px 34px rgba(22, 18, 10, 0.06);
+  --editor-line: rgba(23, 26, 32, 0.055);
 
   --sidebar: #ffffff;
   --sidebar-foreground: #1b1e26;
@@ -67,35 +67,35 @@
 .dark {
   color-scheme: dark;
 
-  --background: #0b0e14;
-  --foreground: #eceef4;
+  --background: #090b10;
+  --foreground: #eef0f5;
 
-  --card: #141a24;
+  --card: #10141c;
   --card-foreground: #eceef4;
-  --popover: #171e2a;
+  --popover: #10141c;
   --popover-foreground: #eceef4;
 
   --primary: #f5a524;
   --primary-foreground: #0b0e14;
-  --secondary: #1b2230;
+  --secondary: #151a23;
   --secondary-foreground: #eceef4;
 
-  --muted: #171e2a;
-  --muted-foreground: #93a0b4;
+  --muted: #111720;
+  --muted-foreground: #9aa5b7;
 
-  --accent: #1f2735;
+  --accent: #151d28;
   --accent-foreground: #eceef4;
 
   --destructive: #ff6b6b;
   --destructive-foreground: #0b0e14;
 
-  --border: #262e3d;
-  --input: #262e3d;
+  --border: #252b36;
+  --input: #252b36;
   --ring: #f5a524;
 
   --brand-cyan: #4fd1c5;
-  --primary-soft: color-mix(in oklch, var(--primary) 16%, transparent);
-  --brand-cyan-soft: color-mix(in oklch, var(--brand-cyan) 14%, transparent);
+  --primary-soft: color-mix(in oklch, var(--primary) 11%, transparent);
+  --brand-cyan-soft: color-mix(in oklch, var(--brand-cyan) 9%, transparent);
 
   --chart-1: var(--primary);
   --chart-2: var(--brand-cyan);
@@ -103,7 +103,9 @@
   --chart-4: #8f7bff;
   --chart-5: #93a0b4;
 
-  --radius: 0.6rem;
+  --radius: 0.45rem;
+  --panel-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+  --editor-line: rgba(255, 255, 255, 0.035);
 
   --sidebar: #141a24;
   --sidebar-foreground: #eceef4;
@@ -157,7 +159,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-geist);
   --font-mono: var(--font-plex-mono);
 
   --radius-sm: calc(var(--radius) * 0.6);
@@ -178,18 +180,58 @@
   }
   body {
     @apply bg-background text-foreground;
+    background:
+      radial-gradient(circle at 18% 14%, color-mix(in oklch, var(--primary), transparent 90%) 0 16rem, transparent 34rem),
+      radial-gradient(circle at 82% 28%, color-mix(in oklch, var(--brand-cyan), transparent 94%) 0 13rem, transparent 31rem),
+      radial-gradient(circle at 1px 1px, color-mix(in oklch, var(--foreground), transparent 88%) 1px, transparent 1.5px),
+      linear-gradient(90deg, transparent 0 79px, var(--editor-line) 80px, transparent 81px),
+      var(--background);
+    background-attachment: fixed, fixed, fixed, fixed, fixed;
+    background-size: auto, auto, 34px 34px, 80px 80px, auto;
+    font-feature-settings: "liga" 1, "calt" 1, "ss01" 1;
   }
 }
 
 .bg-grid {
   background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: 44px 44px;
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px);
+  background-size: 80px 80px;
 }
 
 .glow-text {
-  text-shadow: 0 0 40px var(--primary-soft);
+  text-shadow: none;
+}
+
+.editor-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  box-shadow: var(--panel-shadow);
+}
+
+.editor-panel-soft {
+  border: 1px solid color-mix(in oklch, var(--border), var(--primary) 14%);
+  background: color-mix(in oklch, var(--card), var(--background) 22%);
+}
+
+.code-label {
+  font-family: var(--font-plex-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  color: var(--muted-foreground);
+}
+
+.code-chip {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--secondary);
+  font-family: var(--font-geist);
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
+}
+
+.section-accent-line {
+  background: linear-gradient(90deg, var(--primary), color-mix(in oklch, var(--primary), transparent 72%), transparent);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -198,13 +240,13 @@
   main a[href] {
     transition-property: color, background-color, border-color, opacity, box-shadow, transform;
     transition-duration: 160ms;
-    transition-timing-function: ease-out;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   header nav button:hover,
   main button:hover,
   main a[href]:hover {
-    transform: scale(1.035);
+    transform: translateY(-1px);
   }
 
   main button:active,
@@ -213,7 +255,7 @@
   }
 
   header nav button:hover {
-    transform: scale(1.05);
+    transform: translateY(-1px);
   }
 }
 

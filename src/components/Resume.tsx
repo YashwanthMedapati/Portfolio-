@@ -36,7 +36,7 @@ export default function Resume() {
         <SectionHeader sectionId={sectionIds.resume} title="Resume" className="mb-0" />
         <div className="flex flex-wrap gap-3">
           <Button
-            className="rounded-full gap-1.5"
+            className="rounded-md gap-1.5"
             nativeButton={false}
             render={<a href={personal.resumeFile} download />}
           >
@@ -45,7 +45,7 @@ export default function Resume() {
           </Button>
           <Button
             variant="secondary"
-            className="rounded-full gap-1.5 border border-primary/30 bg-primary-soft text-brand-cyan hover:bg-primary/20"
+            className="rounded-md gap-1.5 border border-primary/30 bg-primary-soft text-primary hover:bg-primary/20"
             onClick={() => ask("Why should we hire you?")}
           >
             <Sparkles className="size-4" />
@@ -62,9 +62,9 @@ export default function Resume() {
         className="grid sm:grid-cols-3 gap-3 mb-5"
       >
         {resumeHighlights.map((item) => (
-          <Card key={item.label} className="ring-0 border border-border">
+          <Card key={item.label} className="editor-panel">
             <div className="flex gap-3 p-4">
-              <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg border border-primary/30 bg-primary-soft text-primary">
+              <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md border border-primary/30 bg-primary-soft text-primary">
                 <item.icon className="size-4" />
               </span>
               <div>
@@ -82,7 +82,7 @@ export default function Resume() {
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.5, delay: 0.05 }}
       >
-        <Card className="ring-0 border border-border p-0 overflow-hidden">
+        <Card className="editor-panel p-0 overflow-hidden">
           <object
             data={`${personal.resumeFile}#view=FitH`}
             type="application/pdf"

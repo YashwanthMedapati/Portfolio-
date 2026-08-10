@@ -27,17 +27,8 @@ export default function Hero() {
     <section
       id={sectionIds.hero}
       aria-label="Introduction"
-      className="relative min-h-[100svh] flex flex-col items-center justify-center px-5 sm:px-6 bg-grid overflow-hidden"
+      className="relative min-h-[100svh] flex flex-col items-center justify-center px-5 sm:px-6 overflow-hidden"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--primary-soft),_transparent_52%),radial-gradient(circle_at_center,_rgba(79,209,197,0.08),_transparent_36%)]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-linear-to-b from-background/5 via-background/0 to-background/20"
-      />
-
       <div className="relative z-10 flex w-full max-w-5xl flex-col items-center text-center">
         <HeroBootLine typed={typed} done={done} />
 
@@ -50,10 +41,10 @@ export default function Hero() {
           <LetterHoverText
             as="h1"
             text={personal.name}
-            className="glow-text text-4xl font-bold tracking-tight text-balance text-foreground drop-shadow-[0_12px_40px_rgba(0,0,0,0.45)] sm:text-6xl mb-4"
+            className="glow-text text-5xl font-semibold tracking-[-0.045em] leading-[0.93] text-balance text-foreground sm:text-7xl mb-4"
           />
 
-          <p className="text-lg sm:text-xl bg-linear-to-r from-primary via-primary to-brand-cyan bg-clip-text text-transparent font-semibold mb-5 drop-shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
+          <p className="text-lg sm:text-xl text-primary font-medium mb-5">
             {personal.positioning}
           </p>
 
@@ -63,13 +54,13 @@ export default function Hero() {
           />
 
           <div className="mb-10 flex w-full max-w-xs flex-col items-stretch justify-center gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center">
-            <Button size="lg" className="h-11 justify-center rounded-full px-6" onClick={() => scrollTo(sectionIds.projects)}>
+            <Button size="lg" className="h-11 justify-center rounded-md px-6" onClick={() => scrollTo(sectionIds.projects)}>
               View Projects
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="h-11 justify-center rounded-full px-6 gap-1.5"
+              className="h-11 justify-center rounded-md px-6 gap-1.5"
               onClick={() => scrollTo(sectionIds.resume)}
             >
               <FileText className="size-4" />
@@ -78,7 +69,7 @@ export default function Hero() {
             <Button
               size="lg"
               variant="outline"
-              className="h-11 justify-center rounded-full px-6 gap-1.5"
+              className="h-11 justify-center rounded-md px-6 gap-1.5"
               nativeButton={false}
               render={
                 <a href={personal.github} target="_blank" rel="noopener noreferrer" />
@@ -90,7 +81,7 @@ export default function Hero() {
             <Button
               size="lg"
               variant="secondary"
-              className="h-11 justify-center rounded-full px-6 gap-1.5 border border-primary/30 bg-primary-soft text-brand-cyan hover:bg-primary/20"
+              className="h-11 justify-center rounded-md px-6 gap-1.5 border border-primary/30 bg-primary-soft text-primary hover:bg-primary/20"
               onClick={open}
             >
               <Sparkles className="size-4" />

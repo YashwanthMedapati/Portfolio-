@@ -41,10 +41,8 @@ export function getStructuredData() {
         image: absoluteUrl("/profile/yash-profile.jpeg"),
         jobTitle: personal.positioning,
         email: `mailto:${personal.email}`,
-        telephone: personal.phone,
         address: {
           "@type": "PostalAddress",
-          addressLocality: "New York",
           addressCountry: "US",
         },
         sameAs: [personal.github, personal.linkedin, personal.instagram],

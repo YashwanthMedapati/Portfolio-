@@ -33,14 +33,6 @@ export function Section({
         className
       )}
     >
-      <motion.span
-        aria-hidden
-        initial={reducedMotion ? false : { opacity: 0, scaleX: 0 }}
-        whileInView={reducedMotion ? undefined : { opacity: 1, scaleX: 1 }}
-        viewport={{ once: true, amount: 0.4 }}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        className="pointer-events-none absolute left-6 right-6 top-8 h-px origin-left bg-linear-to-r from-transparent via-primary/35 to-transparent"
-      />
       {children}
     </motion.section>
   );

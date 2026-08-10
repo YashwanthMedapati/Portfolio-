@@ -151,7 +151,7 @@ export const education: Education[] = [
 ];
 
 export const certifications = [
-  { name: "Complete A.I. & Machine Learning, Data Science Bootcamp (ZTM)", date: "Expected Aug 2026" },
+  { name: "Complete A.I. & Machine Learning, Data Science Bootcamp (ZTM)", date: "Aug 2026" },
   { name: "BCG X Generative AI Virtual Experience Program", date: "May 2026" },
   { name: "Dean's List, Binghamton University", date: "Spring 2024" },
 ];

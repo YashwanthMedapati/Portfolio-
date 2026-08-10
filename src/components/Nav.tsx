@@ -161,13 +161,13 @@ export default function Nav() {
         <div className="hidden md:flex items-center gap-2">
           <ThemeToggle />
           <SoundToggle />
-          <Button variant="ghost" size="sm" onClick={openJrYash} className="gap-1.5">
+          <Button variant="ghost" size="sm" onClick={openJrYash} className="gap-1.5 rounded-md">
             <Sparkles className="size-3.5 text-primary" />
             Ask Yash
           </Button>
           <Button
             size="sm"
-            className="rounded-full gap-1.5"
+            className="rounded-md gap-1.5"
             nativeButton={false}
             render={<a href={personal.resumeFile} download />}
           >
