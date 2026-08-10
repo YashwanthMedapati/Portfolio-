@@ -35,14 +35,20 @@ function supportsAudio() {
 export function PortfolioSoundProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<AudioContext | null>(null);
   const unlockedRef = useRef(false);
-  const [enabled, setEnabled] = useState(() => {
-    if (typeof window === "undefined") return false;
+  // Must start false on both server and client's first render - SSR has no
+  // localStorage, so a lazy initializer reading it here is exactly what
+  // caused the SoundToggle hydration mismatch (server always rendered
+  // "off," client could immediately render "on"). Corrected via effect below.
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
     try {
-      return window.localStorage.getItem(SOUND_STORAGE_KEY) === "true";
-    } catch {
-      return false;
-    }
-  });
+      if (window.localStorage.getItem(SOUND_STORAGE_KEY) === "true") {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration-safe correction from localStorage, mirrors ThemeContext's pattern
+        setEnabled(true);
+      }
+    } catch {}
+  }, []);
 
   const getAudio = useCallback(() => {
     if (!supportsAudio()) return null;
