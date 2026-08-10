@@ -28,14 +28,14 @@ const CORNER_PADDING = 12;
 const DARK_AWAKE_IDLE_MS = 45000;
 const DARK_START_AWAKE_MS = 14000;
 const GOOD_NIGHT_LEAD_MS = 2600;
-const GOODNIGHT_SOUND_DELAY_MS = 950;
 const GREETING_DURATION_MS = 6200;
+const GREETING_DELAY_MS = 350;
 const BUBBLE_MARGIN = 24;
 const BUBBLE_RESERVED_HEIGHT = 82;
 
 type Override = { type: "wave" } | { type: "jump" } | { type: "emote"; emoteIdx: number };
 
-function playPortfolioSound(type: "hi" | "yawn" | "goodnight") {
+function playPortfolioSound(type: "hi" | "goodnight") {
   window.dispatchEvent(new CustomEvent("portfolio:sound", { detail: { type } }));
 }
 
@@ -241,19 +241,19 @@ export function YashCompanion() {
     previousThemeRef.current = theme;
   }, [theme, isMobile, reducedMotion]);
 
-  // End the entrance wave (started via lazy initial state above) and reveal
-  // the greeting bubble shortly after. A "must" episode: it always shows,
-  // regardless of where the user has scrolled to by then.
+  // End the entrance wave (started via lazy initial state above) while the
+  // greeting appears almost immediately. Browsers may still hold the MP3 until
+  // the user has enabled/interacted with sound, but the site requests it on entry.
   useEffect(() => {
     if (reducedMotion) return;
     const t = setTimeout(() => setOverride(null), WAVE_DURATION);
     const g = setTimeout(() => {
       setShowGreeting(true);
-    }, WAVE_DURATION + 200);
+    }, GREETING_DELAY_MS);
     const hide = setTimeout(() => {
       setShowGreeting(false);
       setDismissedGreeting(true);
-    }, WAVE_DURATION + 200 + GREETING_DURATION_MS);
+    }, GREETING_DELAY_MS + GREETING_DURATION_MS);
     return () => {
       clearTimeout(t);
       clearTimeout(g);
@@ -396,9 +396,7 @@ export function YashCompanion() {
     if (showSleepNotice) {
       if (sleepSoundPlayedRef.current) return;
       sleepSoundPlayedRef.current = true;
-      playPortfolioSound("yawn");
-      const goodnight = setTimeout(() => playPortfolioSound("goodnight"), GOODNIGHT_SOUND_DELAY_MS);
-      return () => clearTimeout(goodnight);
+      playPortfolioSound("goodnight");
     }
     sleepSoundPlayedRef.current = false;
   }, [showSleepNotice]);

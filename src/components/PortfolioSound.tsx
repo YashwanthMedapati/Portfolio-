@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
-type PortfolioSoundType = "hi" | "need-help" | "yawn" | "goodnight" | "arcade-hit" | "grow";
+type PortfolioSoundType = "hi" | "need-help" | "goodnight" | "arcade-hit" | "grow";
 
 type PortfolioSoundContextValue = {
   enabled: boolean;
@@ -30,7 +30,6 @@ const SOUND_STORAGE_KEY = "portfolio-sound-enabled";
 const VOICE_SOUNDS: Partial<Record<PortfolioSoundType, string>> = {
   hi: "/sounds/yash-intro.mp3",
   "need-help": "/sounds/yash-need-help.mp3",
-  yawn: "/sounds/yash-goodnight-yawn.mp3",
   goodnight: "/sounds/yash-goodnight.mp3",
 };
 
@@ -122,7 +121,7 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
 
     const voice = voiceRefs.current[type] ?? new Audio(src);
     voiceRefs.current[type] = voice;
-    voice.volume = type === "yawn" ? 0.85 : 1;
+    voice.volume = 1;
     voice.currentTime = 0;
     void voice.play().catch(() => {});
     return true;
@@ -221,16 +220,9 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
         return;
       }
 
-      if (type === "yawn") {
-        tone(246.94, now, 0.32, { type: "sine", gain: 0.022, attack: 0.05, release: 0.14, chorus: true, filterHz: 1400 });
-        tone(196, now + 0.2, 0.36, { type: "sine", gain: 0.019, attack: 0.06, release: 0.2, chorus: true, filterHz: 1200 });
-        noise(now + 0.08, 0.34, { gain: 0.007, frequency: 380, type: "lowpass" });
-        return;
-      }
-
       if (type === "goodnight") {
         // A soft, descending two-note "mm, night" cadence - warm and
-        // resolved, distinct from the airy yawn exhale that precedes it.
+        // resolved for users who have not loaded the MP3 voice clip.
         tone(392, now, 0.22, { type: "sine", gain: 0.026, attack: 0.05, release: 0.16, chorus: true, filterHz: 1500 });
         tone(293.66, now + 0.24, 0.34, { type: "sine", gain: 0.022, attack: 0.07, release: 0.28, chorus: true, filterHz: 1200 });
         return;
