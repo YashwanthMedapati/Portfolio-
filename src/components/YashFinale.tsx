@@ -33,7 +33,7 @@ const JUMP_PEAK_MS = JUMP_MS / 2;
 const HIT_MS = RUN_MS + JUMP_PEAK_MS;
 const DONE_MS = RUN_MS + JUMP_MS;
 
-function playPortfolioSound(type: "arcade-hit" | "grow") {
+function playPortfolioSound(type: "arcade-hit" | "grow" | "yash-click") {
   window.dispatchEvent(new CustomEvent("portfolio:sound", { detail: { type } }));
 }
 
@@ -69,6 +69,11 @@ export function YashFinale() {
   const [blockHit, setBlockHit] = useState(false);
   const pupilTargetRef = useRef({ x: 0, y: 0 });
   const pupilCurrentRef = useRef({ x: 0, y: 0 });
+
+  const openFromAvatar = () => {
+    playPortfolioSound("yash-click");
+    open();
+  };
 
   useEffect(() => {
     const onMove = (event: PointerEvent | MouseEvent) => {
@@ -269,7 +274,7 @@ export function YashFinale() {
             <button
               ref={avatarRef}
               type="button"
-              onClick={open}
+              onClick={openFromAvatar}
               aria-label="Open Yash chat"
               data-intro-phase={introPhase}
             className="relative aspect-square w-[min(78vw,430px)] origin-bottom translate-y-3 bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:translate-y-4"

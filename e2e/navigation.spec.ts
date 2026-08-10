@@ -29,10 +29,15 @@ test.describe("Navigation", () => {
   test("sound toggle switches state", async ({ page }) => {
     await page.goto("/");
 
-    const toggle = page.getByRole("button", { name: "Turn sound on" });
-    await expect(toggle).toHaveAttribute("aria-pressed", "false");
+    await expect(page.getByRole("button", { name: "Turn sound off" })).toHaveAttribute("aria-pressed", "true");
 
-    await toggle.click();
+    await page.getByRole("button", { name: "Turn sound off" }).click();
+    await expect(page.getByRole("button", { name: "Turn sound on" })).toHaveAttribute("aria-pressed", "false");
+
+    await page.reload();
+    await expect(page.getByRole("button", { name: "Turn sound on" })).toHaveAttribute("aria-pressed", "false");
+
+    await page.getByRole("button", { name: "Turn sound on" }).click();
     await expect(page.getByRole("button", { name: "Turn sound off" })).toHaveAttribute("aria-pressed", "true");
   });
 });

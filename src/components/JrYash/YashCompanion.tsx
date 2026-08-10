@@ -35,7 +35,7 @@ const BUBBLE_RESERVED_HEIGHT = 82;
 
 type Override = { type: "wave" } | { type: "jump" } | { type: "emote"; emoteIdx: number };
 
-function playPortfolioSound(type: "hi" | "goodnight") {
+function playPortfolioSound(type: "hi" | "goodnight" | "yash-click") {
   window.dispatchEvent(new CustomEvent("portfolio:sound", { detail: { type } }));
 }
 
@@ -506,6 +506,7 @@ export function YashCompanion() {
     wakeDarkYash();
     setShowGreeting(false);
     setDismissedGreeting(true);
+    playPortfolioSound("yash-click");
     if (reducedMotion) {
       toggle();
       return;

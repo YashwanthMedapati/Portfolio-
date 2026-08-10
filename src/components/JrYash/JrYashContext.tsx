@@ -50,10 +50,6 @@ function triggerEasterEgg(name: "break" | "hearts") {
   window.dispatchEvent(new CustomEvent(eventName));
 }
 
-function playPortfolioSound(type: "need-help") {
-  window.dispatchEvent(new CustomEvent("portfolio:sound", { detail: { type } }));
-}
-
 export function JrYashProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [hasGreeted, setHasGreeted] = useState(false);
@@ -75,8 +71,6 @@ export function JrYashProvider({ children }: { children: ReactNode }) {
           followUps: greeting.followUps,
         },
       ]);
-    } else {
-      playPortfolioSound("need-help");
     }
   }, []);
 
@@ -95,8 +89,6 @@ export function JrYashProvider({ children }: { children: ReactNode }) {
             followUps: greeting.followUps,
           },
         ]);
-      } else if (next) {
-        playPortfolioSound("need-help");
       }
       return next;
     });

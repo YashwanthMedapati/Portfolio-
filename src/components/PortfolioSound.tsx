@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
-type PortfolioSoundType = "hi" | "need-help" | "goodnight" | "arcade-hit" | "grow";
+type PortfolioSoundType = "hi" | "need-help" | "yash-click" | "goodnight" | "arcade-hit" | "grow";
 
 type PortfolioSoundContextValue = {
   enabled: boolean;
@@ -27,9 +27,10 @@ type ToneOptions = {
 
 const PortfolioSoundContext = createContext<PortfolioSoundContextValue | null>(null);
 const SOUND_STORAGE_KEY = "portfolio-sound-enabled";
-const VOICE_SOUNDS: Partial<Record<PortfolioSoundType, string>> = {
+const VOICE_SOUNDS: Partial<Record<PortfolioSoundType, string | string[]>> = {
   hi: "/sounds/yash-intro.mp3",
   "need-help": "/sounds/yash-need-help.mp3",
+  "yash-click": ["/sounds/yash-need-help.mp3", "/sounds/yash-lets-go.mp3"],
   goodnight: "/sounds/yash-goodnight.mp3",
 };
 
@@ -50,6 +51,7 @@ function createAudioContext() {
 export function PortfolioSoundProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<AudioContext | null>(null);
   const voiceRefs = useRef<Partial<Record<PortfolioSoundType, HTMLAudioElement>>>({});
+  const pendingSoundRef = useRef<PortfolioSoundType | null>(null);
   const unlockedRef = useRef(false);
   // Must start false on both server and client's first render - SSR has no
   // localStorage, so a lazy initializer reading it here is exactly what
@@ -59,7 +61,8 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
 
   useEffect(() => {
     try {
-      if (window.localStorage.getItem(SOUND_STORAGE_KEY) === "true") {
+      const storedPreference = window.localStorage.getItem(SOUND_STORAGE_KEY);
+      if (storedPreference !== "false") {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration-safe correction from localStorage, mirrors ThemeContext's pattern
         setEnabled(true);
       }
@@ -77,6 +80,11 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
     if (!audio) return null;
     void audio.resume().then(() => {
       unlockedRef.current = true;
+      if (pendingSoundRef.current) {
+        const type = pendingSoundRef.current;
+        pendingSoundRef.current = null;
+        window.dispatchEvent(new CustomEvent("portfolio:sound", { detail: { type } }));
+      }
     }).catch(() => {});
     unlockedRef.current = true;
     return audio;
@@ -116,10 +124,21 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
   }, [enabled, setSoundEnabled]);
 
   const playVoiceSound = useCallback((type: PortfolioSoundType) => {
-    const src = VOICE_SOUNDS[type];
+    const sound = VOICE_SOUNDS[type];
+    const src = Array.isArray(sound)
+      ? sound[Math.floor(Math.random() * sound.length)]
+      : sound;
     if (!src) return false;
 
     const voice = voiceRefs.current[type] ?? new Audio(src);
+    Object.values(voiceRefs.current).forEach((otherVoice) => {
+      if (!otherVoice || otherVoice === voice) return;
+      otherVoice.pause();
+      otherVoice.currentTime = 0;
+    });
+    if (voice.src !== new URL(src, window.location.origin).href) {
+      voice.src = src;
+    }
     voiceRefs.current[type] = voice;
     voice.volume = 1;
     voice.currentTime = 0;
@@ -200,6 +219,7 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
       if (unlockedRef.current && playVoiceSound(type)) return;
       if (!audio) return;
       if (!unlockedRef.current || audio.state === "suspended") {
+        pendingSoundRef.current = type;
         void audio.resume().then(() => {
           unlockedRef.current = true;
           window.dispatchEvent(new CustomEvent("portfolio:sound", { detail: { type } }));
@@ -248,7 +268,8 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
 
   useEffect(() => {
     if (!enabled || typeof window === "undefined") return;
-    Object.entries(VOICE_SOUNDS).forEach(([type, src]) => {
+    Object.entries(VOICE_SOUNDS).forEach(([type, sound]) => {
+      const src = Array.isArray(sound) ? sound[0] : sound;
       const voice = voiceRefs.current[type as PortfolioSoundType] ?? new Audio(src);
       voice.preload = "auto";
       voiceRefs.current[type as PortfolioSoundType] = voice;
