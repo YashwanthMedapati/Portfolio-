@@ -40,6 +40,35 @@ test.describe("Navigation", () => {
     await page.getByRole("button", { name: "Turn sound on" }).click();
     await expect(page.getByRole("button", { name: "Turn sound off" })).toHaveAttribute("aria-pressed", "true");
   });
+
+  test("intro voice is requested on entry", async ({ page }) => {
+    await page.addInitScript(() => {
+      const originalPlay = HTMLMediaElement.prototype.play;
+      const trackedWindow = window as unknown as Window & { __playedAudio: string[] };
+      Object.defineProperty(window, "__playedAudio", {
+        value: [] as string[],
+        configurable: true,
+      });
+      HTMLMediaElement.prototype.play = function play() {
+        trackedWindow.__playedAudio.push(this.currentSrc || this.src);
+        return originalPlay.call(this).catch(() => undefined);
+      };
+    });
+
+    await page.goto("/");
+
+    await expect
+      .poll(
+        () =>
+          page.evaluate(() =>
+            ((window as Window & { __playedAudio?: string[] }).__playedAudio ?? []).some((src) =>
+              src.includes("/sounds/yash-intro.mp3")
+            )
+          ),
+        { timeout: 4_000 }
+      )
+      .toBe(true);
+  });
 });
 
 test.describe("Resume", () => {

@@ -52,6 +52,7 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
   const audioRef = useRef<AudioContext | null>(null);
   const voiceRefs = useRef<Partial<Record<PortfolioSoundType, HTMLAudioElement>>>({});
   const pendingSoundRef = useRef<PortfolioSoundType | null>(null);
+  const soundAllowedRef = useRef(true);
   const unlockedRef = useRef(false);
   // Must start false on both server and client's first render - SSR has no
   // localStorage, so a lazy initializer reading it here is exactly what
@@ -62,6 +63,7 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
   useEffect(() => {
     try {
       const storedPreference = window.localStorage.getItem(SOUND_STORAGE_KEY);
+      soundAllowedRef.current = storedPreference !== "false";
       if (storedPreference !== "false") {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration-safe correction from localStorage, mirrors ThemeContext's pattern
         setEnabled(true);
@@ -107,6 +109,7 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
 
   const setSoundEnabled = useCallback(
     (nextEnabled: boolean) => {
+      soundAllowedRef.current = nextEnabled;
       setEnabled(nextEnabled);
       try {
         window.localStorage.setItem(SOUND_STORAGE_KEY, String(nextEnabled));
@@ -142,7 +145,9 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
     voiceRefs.current[type] = voice;
     voice.volume = 1;
     voice.currentTime = 0;
-    void voice.play().catch(() => {});
+    void voice.play().catch(() => {
+      pendingSoundRef.current = type;
+    });
     return true;
   }, []);
 
@@ -214,7 +219,11 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
 
   const play = useCallback(
     (type: PortfolioSoundType) => {
-      if (!enabled) return;
+      if (!soundAllowedRef.current) return;
+      if (!enabled) {
+        pendingSoundRef.current = type;
+        return;
+      }
       const audio = getAudio();
       if (unlockedRef.current && playVoiceSound(type)) return;
       if (!audio) return;
@@ -274,14 +283,23 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
       voice.preload = "auto";
       voiceRefs.current[type as PortfolioSoundType] = voice;
     });
+    if (pendingSoundRef.current) {
+      window.setTimeout(() => {
+        const type = pendingSoundRef.current;
+        if (!type) return;
+        window.dispatchEvent(new CustomEvent("portfolio:sound", { detail: { type } }));
+      }, 0);
+    }
   }, [enabled]);
 
   useEffect(() => {
     window.addEventListener("pointerdown", unlock, { once: true });
+    window.addEventListener("pointermove", unlock, { once: true, passive: true });
     window.addEventListener("keydown", unlock, { once: true });
     window.addEventListener("touchstart", unlock, { once: true });
     return () => {
       window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("pointermove", unlock);
       window.removeEventListener("keydown", unlock);
       window.removeEventListener("touchstart", unlock);
     };
