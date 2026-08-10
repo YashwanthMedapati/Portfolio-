@@ -20,5 +20,13 @@ test.describe("Yash section bubbles", () => {
     expect(viewport).toBeTruthy();
     expect(box!.x).toBeGreaterThanOrEqual(0);
     expect(box!.x + box!.width).toBeLessThanOrEqual(viewport!.width);
+
+    const triggerBox = await page
+      .getByRole("button", { name: "Yash, an AI guide - click to chat" })
+      .boundingBox();
+    expect(triggerBox).toBeTruthy();
+    const gapToYash = triggerBox!.y - (box!.y + box!.height);
+    expect(gapToYash).toBeGreaterThanOrEqual(0);
+    expect(gapToYash).toBeLessThanOrEqual(24);
   });
 });

@@ -444,6 +444,7 @@ export function YashCompanion() {
   );
   const bubbleStyle = {
     left: bubbleLeft,
+    bottom: stageHeight + 8,
     width: bubbleMaxWidth,
     maxWidth: bubbleMaxWidth,
   };
@@ -546,9 +547,13 @@ export function YashCompanion() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
-            className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-10 box-border whitespace-normal text-wrap max-w-[168px] -translate-x-1/2 bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
+            className="pointer-events-none absolute left-1/2 z-10 box-border whitespace-normal text-wrap max-w-[168px] -translate-x-1/2 bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 pr-6 text-xs leading-snug shadow-lg"
             style={bubbleStyle}
           >
+            <span
+              aria-hidden
+              className="absolute -bottom-1.5 left-1/2 size-3 -translate-x-1/2 rotate-45 border-b border-r border-border bg-popover"
+            />
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -560,7 +565,7 @@ export function YashCompanion() {
             >
               <X size={10} />
             </button>
-            Hi, I&apos;m Yash. Tap me if you need anything.
+            Hi, this is Yash. Tap me if you need anything.
           </motion.div>
         )}
         {showSleepNotice && !isOpen && theme === "dark" && (
@@ -569,10 +574,14 @@ export function YashCompanion() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
-            className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-10 box-border whitespace-normal text-wrap max-w-[176px] -translate-x-1/2 bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
+            className="pointer-events-none absolute left-1/2 z-10 box-border whitespace-normal text-wrap max-w-[176px] -translate-x-1/2 bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs leading-snug shadow-lg"
             style={bubbleStyle}
           >
-            Good night. I&apos;ll be right here.
+            <span
+              aria-hidden
+              className="absolute -bottom-1.5 left-1/2 size-3 -translate-x-1/2 rotate-45 border-b border-r border-border bg-popover"
+            />
+            Good night. I&apos;ll be right here when you need me.
           </motion.div>
         )}
         {showSectionIntro && sectionIntro && !isOpen && !showGreeting && !showSleepNotice && (
@@ -581,9 +590,13 @@ export function YashCompanion() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
-            className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-10 box-border whitespace-normal text-wrap max-w-[200px] -translate-x-1/2 bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs shadow-lg"
+            className="pointer-events-none absolute left-1/2 z-10 box-border whitespace-normal text-wrap max-w-[200px] -translate-x-1/2 bg-popover border border-border rounded-lg rounded-br-sm px-3 py-2 text-xs leading-snug shadow-lg"
             style={bubbleStyle}
           >
+            <span
+              aria-hidden
+              className="absolute -bottom-1.5 left-1/2 size-3 -translate-x-1/2 rotate-45 border-b border-r border-border bg-popover"
+            />
             {sectionIntro.text}
           </motion.div>
         )}
