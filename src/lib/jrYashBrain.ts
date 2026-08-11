@@ -20,6 +20,9 @@ type Intent = {
 };
 
 const allSkills = Object.values(skills).flat();
+const skillLookup = new Map(
+  allSkills.map((skill) => [skill.toLowerCase(), skill])
+);
 
 function projectList() {
   return projects.map((p) => p.name).join(", ");
@@ -55,7 +58,7 @@ const intents: Intent[] = [
   },
   {
     id: "tech-stack",
-    keywords: ["tech stack", "what technologies", "what languages", "what do you use", "what does he use", "stack do you use", "stack does he use", "tools do you use", "tools does he use"],
+    keywords: ["tech stack", "what technologies", "programming languages", "coding languages", "what do you use", "what does he use", "stack do you use", "stack does he use", "tools do you use", "tools does he use"],
     answer: () => ({
       text: `My day-to-day stack is pretty practical: Python and FastAPI for services, React for interfaces, PostgreSQL for data, and ML tools like scikit-learn or Sentence Transformers when the app needs intelligence. I also work with ${skills.Languages.join(", ")} and tools like ${skills["Databases, Cloud & Tools"].join(", ")}.`,
       action: { type: "scroll", target: "skills" },
@@ -341,8 +344,47 @@ function score(query: string, keywords: string[]): number {
   return best;
 }
 
+function spokenLanguageAnswer(query: string): YashAnswer | null {
+  const q = query.toLowerCase();
+  const asksSpokenLanguage =
+    (q.includes("language") || q.includes("speak") || q.includes("fluent")) &&
+    (q.includes("speak") || q.includes("spoken") || q.includes("fluent") || q.includes("english") || q.includes("hindi") || q.includes("telugu"));
+
+  if (!asksSpokenLanguage) return null;
+  return {
+    text: `I speak English, Hindi, and Telugu fluently.`,
+    action: { type: "none" },
+    followUps: ["Where did I grow up?", "What programming languages do I use?"],
+  };
+}
+
+function individualSkillAnswer(query: string): YashAnswer | null {
+  const q = query.toLowerCase();
+  const isSkillQuestion =
+    /\b(do you know|does he know|know|use|work with|good at|experience with|skilled in)\b/.test(q) ||
+    q.includes("can you use");
+  if (!isSkillQuestion) return null;
+
+  for (const [normalized, displayName] of skillLookup) {
+    const pattern = new RegExp(`(^|\\W)${normalized.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(\\W|$)`, "i");
+    if (!pattern.test(query)) continue;
+    return {
+      text: `Yes. I work with ${displayName}. In this portfolio, ${displayName} fits into my broader stack across ${skills.Languages.join(", ")}, plus frameworks, ML libraries, databases, cloud, and tools like ${skills["Frameworks & Libraries"].slice(0, 5).join(", ")} and ${skills["Databases, Cloud & Tools"].slice(0, 4).join(", ")}.`,
+      action: { type: "scroll", target: "skills" },
+      followUps: ["What tech stack do I use?", "Show me my AI projects"],
+    };
+  }
+
+  return null;
+}
+
 export function askJrYash(query: string): YashAnswer {
   if (!query.trim()) return fallback;
+  const spoken = spokenLanguageAnswer(query);
+  if (spoken) return spoken;
+  const skill = individualSkillAnswer(query);
+  if (skill) return skill;
+
   let bestIntent: Intent | null = null;
   let bestScore = 0;
   for (const intent of intents) {

@@ -1,11 +1,11 @@
 ﻿"use client";
 
 import { useState } from "react";
-import type { ComponentType } from "react";
+import type { ComponentType, MouseEvent } from "react";
 import { motion } from "framer-motion";
-import { Check, Copy, Mail, MailOpen, Phone } from "lucide-react";
+import { Mail, MailOpen, Phone } from "lucide-react";
 import { personal, sectionIds } from "@/data/resume";
-import { contactMethods, ContactMethodId } from "@/lib/contactMethods";
+import { contactMethods, ContactMethodId, emailDraftHref } from "@/lib/contactMethods";
 import { GithubIcon, InstagramIcon, LinkedinIcon } from "./icons";
 import { Section } from "./Section";
 import { SectionHeader } from "./SectionHeader";
@@ -28,24 +28,22 @@ export default function Contact() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [copied, setCopied] = useState(false);
   const [copiedDetail, setCopiedDetail] = useState<string | null>(null);
+  const [phoneNotice, setPhoneNotice] = useState(false);
+
+  const isPhoneCapable = () =>
+    /Android|iPhone|iPad|iPod|Mobile/i.test(window.navigator.userAgent) ||
+    window.matchMedia("(pointer: coarse)").matches;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    const subject = encodeURIComponent(`Portfolio contact from ${name || "a visitor"}`);
-    const body = encodeURIComponent(`${message}\n\n- ${name} (${email})`);
-    window.location.href = `mailto:${personal.email}?subject=${subject}&body=${body}`;
+    const subject = `Portfolio contact from ${name || "a visitor"}`;
+    const body = `${message}\n\n- ${name} (${email})`;
+    window.open(emailDraftHref(subject, body), "_blank", "noopener,noreferrer");
   };
 
-  const copyEmail = async () => {
-    try {
-      await navigator.clipboard.writeText(personal.email);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
-    } catch {
-      window.location.href = `mailto:${personal.email}`;
-    }
+  const openEmailDraft = () => {
+    window.open(emailDraftHref("Portfolio contact", ""), "_blank", "noopener,noreferrer");
   };
 
   const copyDetail = async (value: string) => {
@@ -53,6 +51,17 @@ export default function Contact() {
       await navigator.clipboard.writeText(value);
       setCopiedDetail(value);
       window.setTimeout(() => setCopiedDetail(null), 1600);
+    } catch {}
+  };
+
+  const handleContactClick = async (method: (typeof contactMethods)[number], event: MouseEvent<HTMLAnchorElement>) => {
+    if (method.id !== "phone") return;
+    if (isPhoneCapable()) return;
+    event.preventDefault();
+    setPhoneNotice(true);
+    window.setTimeout(() => setPhoneNotice(false), 2400);
+    try {
+      await navigator.clipboard.writeText(personal.phone);
     } catch {}
   };
 
@@ -80,13 +89,18 @@ export default function Contact() {
                   <p className="text-sm font-semibold">Fastest way to reach me</p>
                   <p className="text-xs text-muted-foreground">{personal.email}</p>
                 </div>
-                <Button type="button" size="sm" className="gap-1.5" onClick={copyEmail}>
-                  {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-                  {copied ? "Copied" : "Copy Email"}
+                <Button type="button" size="sm" className="gap-1.5" onClick={openEmailDraft}>
+                  <MailOpen className="size-3.5" />
+                  Open Draft
                 </Button>
               </div>
             </CardContent>
           </Card>
+          {phoneNotice && (
+            <p className="rounded-md border border-border bg-popover px-3 py-2 text-xs text-muted-foreground">
+              This browser cannot place a call. I copied the number for you: {personal.phone}
+            </p>
+          )}
 
           <div className="flex flex-wrap justify-center gap-3">
             {contactMethods.map((method) => {
@@ -98,6 +112,7 @@ export default function Contact() {
                   target={method.external ? "_blank" : undefined}
                   rel="noopener noreferrer"
                   aria-label={method.label}
+                  onClick={(event) => void handleContactClick(method, event)}
                   className="size-11 rounded-lg bg-card border border-border hover:border-primary/50 hover:bg-primary-soft flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <Icon size={18} className="text-primary" />

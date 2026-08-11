@@ -54,6 +54,28 @@ test.describe("Yash assistant", () => {
     await expect(page.getByText(/day-to-day stack is pretty practical/i)).toBeVisible();
   });
 
+  test("answers individual skill questions", async ({ page }) => {
+    await page.goto("/");
+
+    await yashTrigger(page).click();
+    const input = page.getByPlaceholder("follow me | ask-yash --about projects");
+    await input.fill("Do you know SQL or not?");
+    await page.getByRole("button", { name: "Send message" }).click();
+
+    await expect(page.getByText(/Yes\. I work with SQL/i)).toBeVisible();
+  });
+
+  test("answers spoken languages separately from programming languages", async ({ page }) => {
+    await page.goto("/");
+
+    await yashTrigger(page).click();
+    const input = page.getByPlaceholder("follow me | ask-yash --about projects");
+    await input.fill("What languages do you speak?");
+    await page.getByRole("button", { name: "Send message" }).click();
+
+    await expect(page.getByText(/English, Hindi, and Telugu/i)).toBeVisible();
+  });
+
   test("follow me command switches on cursor-follow behavior", async ({ page }) => {
     await page.goto("/");
 

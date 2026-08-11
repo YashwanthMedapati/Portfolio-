@@ -40,6 +40,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setTheme((prev) => {
       const next: Theme = prev === "dark" ? "light" : "dark";
       document.documentElement.classList.toggle("dark", next === "dark");
+      if (next === "dark") {
+        window.dispatchEvent(new CustomEvent("portfolio:sound", { detail: { type: "batman" } }));
+      }
       try {
         localStorage.setItem(STORAGE_KEY, next);
       } catch {}

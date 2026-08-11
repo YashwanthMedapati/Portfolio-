@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { motion } from "framer-motion";
-import { ArrowDown, Brain, FileText, GraduationCap, Layers, Sparkles } from "lucide-react";
+import { ArrowDown, Brain, FileText, GraduationCap, Layers, Sparkles, Volume2 } from "lucide-react";
 import { personal, projects, sectionIds } from "@/data/resume";
 import { useJrYash } from "./JrYash/JrYashContext";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,14 @@ export default function Hero() {
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const playNamePronunciation = () => {
+    window.dispatchEvent(
+      new CustomEvent("portfolio:sound", {
+        detail: { type: "name-pronunciation" },
+      })
+    );
   };
 
   return (
@@ -47,11 +55,24 @@ export default function Hero() {
           transition={{ duration: 0.32 }}
           className="flex flex-col items-center"
         >
-          <LetterHoverText
-            as="h1"
-            text={personal.name}
-            className="glow-text text-4xl font-bold tracking-tight text-balance text-foreground drop-shadow-[0_12px_40px_rgba(0,0,0,0.45)] sm:text-6xl mb-4"
-          />
+          <div className="relative mb-4 inline-flex items-center justify-center gap-2 sm:gap-3">
+            <LetterHoverText
+              as="h1"
+              text={personal.name}
+              className="glow-text text-4xl font-bold tracking-tight text-balance text-foreground drop-shadow-[0_12px_40px_rgba(0,0,0,0.45)] sm:text-6xl"
+            />
+            <button
+              type="button"
+              onClick={playNamePronunciation}
+              aria-label="Play name pronunciation"
+              className="group/name-audio relative mt-1 grid size-8 shrink-0 place-items-center rounded-full border border-primary/35 bg-primary-soft text-primary transition hover:scale-110 hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:size-9"
+            >
+              <Volume2 className="size-4 sm:size-4.5" aria-hidden />
+              <span className="pointer-events-none absolute left-1/2 top-[calc(100%+0.55rem)] z-20 w-max -translate-x-1/2 rounded-md border border-border bg-popover px-3 py-2 font-mono text-[11px] text-foreground opacity-0 shadow-xl transition group-hover/name-audio:opacity-100 group-focus-visible/name-audio:opacity-100">
+                YASH-wanth RED-dee meh-duh-PAH-tee
+              </span>
+            </button>
+          </div>
 
           <p className="text-lg sm:text-xl bg-linear-to-r from-primary via-primary to-brand-cyan bg-clip-text text-transparent font-semibold mb-5 drop-shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
             {personal.positioning}
