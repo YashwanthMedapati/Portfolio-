@@ -26,7 +26,6 @@ export function Section({
     offset: ["start 90%", "start 40%"],
   });
 
-  const opacity = useTransform(scrollYProgress, [0.15, 0.9], [0, 1]);
   const y = useTransform(scrollYProgress, [0.15, 0.9], [26, 0]);
   const scale = useTransform(scrollYProgress, [0.15, 0.9], [0.99, 1]);
   const blurPx = useTransform(scrollYProgress, [0.15, 0.9], [5, 0]);
@@ -43,7 +42,7 @@ export function Section({
       ref={ref}
       id={id}
       aria-labelledby={`${id}-heading`}
-      style={reducedMotion ? undefined : { opacity, y, scale, filter }}
+      style={reducedMotion ? undefined : { y, scale, filter }}
       className={cn(
         "group/section relative scroll-mt-20 px-5 py-16 sm:px-6 sm:py-28 max-w-5xl mx-auto",
         className

@@ -84,6 +84,15 @@ test.describe("Resume", () => {
     expect(response.status()).toBe(200);
     expect(response.headers()["content-type"]).toContain("pdf");
   });
+
+  test("desktop resume preview does not show browser-plugin fallback text", async ({ page, isMobile }) => {
+    test.skip(isMobile, "mobile intentionally shows the download-first resume fallback");
+    await page.goto("/");
+
+    await page.locator(`#${sectionIds.resume}`).scrollIntoViewIfNeeded();
+    await expect(page.getByTitle("Yashwanth Medapati resume PDF preview")).toBeVisible();
+    await expect(page.getByText(/Preview unavailable in this browser/i)).toHaveCount(0);
+  });
 });
 
 test.describe("Projects", () => {

@@ -9,6 +9,7 @@ type PortfolioSoundType =
   | "name-pronunciation"
   | "batman"
   | "goodnight"
+  | "step"
   | "arcade-hit"
   | "grow";
 
@@ -48,6 +49,10 @@ const VOICE_SOUNDS: Partial<Record<PortfolioSoundType, string | string[]>> = {
   batman: ["/sounds/batman-im-batman.mp3", "/sounds/batman-vengeance.mp3"],
   goodnight: "/sounds/yash-goodnight.mp3",
 };
+
+function shouldQueueSound(type: PortfolioSoundType) {
+  return type === "hi";
+}
 
 function supportsAudio() {
   return (
@@ -161,7 +166,7 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
     voice.volume = 1;
     voice.currentTime = 0;
     void voice.play().catch(() => {
-      pendingSoundRef.current = type;
+      if (shouldQueueSound(type)) pendingSoundRef.current = type;
     });
     return true;
   }, []);
@@ -236,14 +241,14 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
     (type: PortfolioSoundType) => {
       if (!soundAllowedRef.current) return;
       if (!enabled) {
-        pendingSoundRef.current = type;
+        if (shouldQueueSound(type)) pendingSoundRef.current = type;
         return;
       }
       const audio = getAudio();
       if (unlockedRef.current && playVoiceSound(type)) return;
       if (!audio) return;
       if (!unlockedRef.current || audio.state === "suspended") {
-        pendingSoundRef.current = type;
+        if (shouldQueueSound(type)) pendingSoundRef.current = type;
         void audio.resume().then(() => {
           unlockedRef.current = true;
           window.dispatchEvent(new CustomEvent("portfolio:sound", { detail: { type } }));
@@ -269,6 +274,12 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
         // resolved for users who have not loaded the MP3 voice clip.
         tone(392, now, 0.22, { type: "sine", gain: 0.026, attack: 0.05, release: 0.16, chorus: true, filterHz: 1500 });
         tone(293.66, now + 0.24, 0.34, { type: "sine", gain: 0.022, attack: 0.07, release: 0.28, chorus: true, filterHz: 1200 });
+        return;
+      }
+
+      if (type === "step") {
+        tone(176, now, 0.035, { type: "triangle", gain: 0.018, attack: 0.003, release: 0.018, filterHz: 900 });
+        noise(now, 0.028, { gain: 0.012, frequency: 520, type: "lowpass" });
         return;
       }
 

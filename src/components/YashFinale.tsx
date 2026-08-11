@@ -33,7 +33,7 @@ const JUMP_PEAK_MS = JUMP_MS / 2;
 const HIT_MS = RUN_MS + JUMP_PEAK_MS;
 const DONE_MS = RUN_MS + JUMP_MS;
 
-function playPortfolioSound(type: "arcade-hit" | "grow" | "yash-click") {
+function playPortfolioSound(type: "arcade-hit" | "grow" | "step" | "yash-click") {
   window.dispatchEvent(new CustomEvent("portfolio:sound", { detail: { type } }));
 }
 
@@ -121,6 +121,10 @@ export function YashFinale() {
 
     const timers = [
       window.setTimeout(() => setIntroPhase("run"), 0),
+      window.setTimeout(() => playPortfolioSound("step"), 140),
+      window.setTimeout(() => playPortfolioSound("step"), 420),
+      window.setTimeout(() => playPortfolioSound("step"), 700),
+      window.setTimeout(() => playPortfolioSound("step"), 980),
       window.setTimeout(() => setIntroPhase("jump"), RUN_MS),
       window.setTimeout(() => {
         setBlockHit(true);

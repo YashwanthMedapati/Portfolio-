@@ -84,20 +84,12 @@ export default function Resume() {
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.5, delay: 0.05 }}
       >
-        <Card className="ring-0 border border-border p-0 overflow-hidden">
-          <object
-            data={`${personal.resumeFile}#view=FitH`}
-            type="application/pdf"
-            className="w-full h-[70vh] hidden sm:block"
-          >
-            <p className="p-8 text-sm text-muted-foreground">
-              Preview unavailable in this browser.{" "}
-              <a href={personal.resumeFile} className="text-primary underline">
-                Download the PDF
-              </a>{" "}
-              instead.
-            </p>
-          </object>
+        <Card className="ring-0 border border-border p-0 overflow-hidden bg-card">
+          <iframe
+            src={`${personal.resumeFile}#view=FitH&toolbar=0&navpanes=0`}
+            title="Yashwanth Medapati resume PDF preview"
+            className="hidden h-[70vh] w-full bg-card sm:block"
+          />
           <div className="sm:hidden p-8 text-center text-sm text-muted-foreground">
             PDF preview isn&apos;t supported on this device.{" "}
             <a href={personal.resumeFile} download className="text-primary underline">
