@@ -87,6 +87,49 @@ test.describe("Yash assistant", () => {
     await expect(page.getByText(/Follow mode is on/i)).toBeVisible();
   });
 
+  test("a question the fast intent-matcher can't resolve calls the AI backend and shows its answer", async ({
+    page,
+  }) => {
+    let requestBody: unknown = null;
+    await page.route("**/api/yash-chat", async (route) => {
+      requestBody = route.request().postDataJSON();
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ text: "Great question - my go-to is adding structured logging around the suspect boundary first.", cached: false }),
+      });
+    });
+
+    await page.goto("/");
+    await yashTrigger(page).click();
+    const input = page.getByPlaceholder("follow me | ask-yash --about projects");
+    await input.fill("Recommend a good espresso machine under $200.");
+    await page.getByRole("button", { name: "Send message" }).click();
+
+    await expect(page.getByText(/structured logging around the suspect boundary/i)).toBeVisible();
+    expect((requestBody as { query?: string } | null)?.query).toBe(
+      "Recommend a good espresso machine under $200."
+    );
+  });
+
+  test("falls back to the static message if the AI backend errors or is unconfigured", async ({ page }) => {
+    await page.route("**/api/yash-chat", async (route) => {
+      await route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "AI chat is not configured" }),
+      });
+    });
+
+    await page.goto("/");
+    await yashTrigger(page).click();
+    const input = page.getByPlaceholder("follow me | ask-yash --about projects");
+    await input.fill("Recommend a good espresso machine under $200.");
+    await page.getByRole("button", { name: "Send message" }).click();
+
+    await expect(page.getByText(/I do not know that from the portfolio data yet/i)).toBeVisible();
+  });
+
   test("closed panel does not linger and block clicks underneath it", async ({ page }) => {
     // Regression test: framer-motion's AnimatePresence can leave the exited
     // panel in the DOM at opacity:0 indefinitely. Without pointerEvents:none

@@ -323,7 +323,7 @@ const intents: Intent[] = [
   },
 ];
 
-const fallback: YashAnswer = {
+export const fallback: YashAnswer = {
   text: `I do not know that from the portfolio data yet. I can answer best about my projects, skills, education, resume, and contact info. I will take you to the contact section so you can ask me directly.`,
   action: { type: "scroll", target: "contact" },
   followUps: ["Contact me", "Show me my AI projects", "What tech stack do I use?"],
@@ -378,8 +378,11 @@ function individualSkillAnswer(query: string): YashAnswer | null {
   return null;
 }
 
-export function askJrYash(query: string): YashAnswer {
-  if (!query.trim()) return fallback;
+// Returns null (rather than the fallback) when nothing matches confidently,
+// so callers can decide what to do next - e.g. escalate to the AI backend -
+// instead of always landing on the canned "I don't know that" response.
+export function matchIntent(query: string): YashAnswer | null {
+  if (!query.trim()) return null;
   const spoken = spokenLanguageAnswer(query);
   if (spoken) return spoken;
   const skill = individualSkillAnswer(query);
@@ -397,7 +400,11 @@ export function askJrYash(query: string): YashAnswer {
   if (bestIntent && bestScore >= 3) {
     return bestIntent.answer();
   }
-  return fallback;
+  return null;
+}
+
+export function askJrYash(query: string): YashAnswer {
+  return matchIntent(query) ?? fallback;
 }
 
 export const suggestedPrompts = [

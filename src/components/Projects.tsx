@@ -9,6 +9,7 @@ import { GithubIcon } from "./icons";
 import { Section } from "./Section";
 import { SectionHeader } from "./SectionHeader";
 import { SectionWatermark } from "./SectionWatermark";
+import { DemoVideoModal } from "./DemoVideoModal";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardAction } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,8 @@ function ProjectProofPanel({ p }: { p: (typeof projects)[number] }) {
 }
 
 function ProjectCard({ p, index }: { p: (typeof projects)[number]; index: number }) {
+  const [videoOpen, setVideoOpen] = useState(false);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -119,7 +122,7 @@ function ProjectCard({ p, index }: { p: (typeof projects)[number]; index: number
             ))}
           </ul>
 
-          <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap gap-1.5">
               {p.stack.map((s) => (
                 <Badge key={s} variant="outline" className="font-mono text-muted-foreground font-normal">
@@ -129,11 +132,11 @@ function ProjectCard({ p, index }: { p: (typeof projects)[number]; index: number
             </div>
             {p.demoVideo && (
               <Button
+                type="button"
                 variant="outline"
                 size="sm"
                 className="ml-auto gap-1.5 border-primary/35 bg-primary-soft text-primary hover:bg-primary/15"
-                nativeButton={false}
-                render={<a href={p.demoVideo} target="_blank" rel="noopener noreferrer" />}
+                onClick={() => setVideoOpen(true)}
               >
                 <Play className="size-3.5 fill-current" />
                 Demo
@@ -143,6 +146,14 @@ function ProjectCard({ p, index }: { p: (typeof projects)[number]; index: number
         </CardContent>
         <ProjectProofPanel p={p} />
       </Card>
+      {p.demoVideo && (
+        <DemoVideoModal
+          src={p.demoVideo}
+          title={`${p.name} demo`}
+          open={videoOpen}
+          onOpenChange={setVideoOpen}
+        />
+      )}
     </motion.div>
   );
 }

@@ -54,12 +54,15 @@ const nextConfig: NextConfig = {
                 "img-src 'self' data:",
                 "font-src 'self' data:",
                 "connect-src 'self'",
-                "frame-ancestors 'none'",
+                // 'self' (not 'none'): the Resume section iframes the resume
+                // PDF for an inline preview - that's a same-origin frame,
+                // and this header applies to every response (including the
+                // PDF itself via the /:path* matcher below), so 'none' would
+                // block the site from framing its own PDF. X-Frame-Options:
+                // SAMEORIGIN above already stops third-party framing either way.
+                "frame-ancestors 'self'",
                 "base-uri 'self'",
                 "form-action 'self'",
-                // The Resume section embeds the resume PDF via <object> for
-                // an inline preview - that's a same-origin plugin load, so
-                // object-src can't be 'none' here without breaking it.
                 "object-src 'self'",
               ].join("; "),
             },

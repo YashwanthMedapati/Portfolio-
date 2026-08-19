@@ -146,7 +146,7 @@ export const education: Education[] = [
     school: "Binghamton University",
     college: "Thomas J. Watson College of Engineering and Applied Science, NY",
     gpa: "3.4/4.0",
-    dateRange: "Aug 2023 - May 2025",
+    dateRange: "Aug 2021 - May 2025",
   },
 ];
 

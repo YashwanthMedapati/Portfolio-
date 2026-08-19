@@ -27,7 +27,11 @@ export function SectionWatermark({
       aria-hidden
       strokeWidth={0.55}
       className={cn(
-        "pointer-events-none absolute z-0 size-32 text-primary opacity-[0.035] sm:size-44",
+        // Negative (not 0) z-index: a positioned element at z-0 still paints
+        // ABOVE non-positioned in-flow siblings (cards, panels) per CSS
+        // stacking order - only a negative z-index reliably guarantees this
+        // stays behind them, wherever a card's edge happens to land.
+        "pointer-events-none absolute -z-10 size-32 text-primary opacity-[0.035] sm:size-44",
         cornerClasses[corner]
       )}
       style={{ transform: `rotate(${rotate}deg)` }}

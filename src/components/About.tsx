@@ -54,7 +54,7 @@ export default function About() {
           transition={{ duration: 0.4, ease: "easeOut" }}
           className="mx-auto md:mx-0"
         >
-          <div className="relative size-44 overflow-hidden rounded-full border border-primary/35 bg-card p-1 shadow-[0_18px_48px_rgba(0,0,0,0.28)] sm:size-52 md:size-60">
+          <div className="group relative size-44 overflow-hidden rounded-full border border-primary/35 bg-card p-1 shadow-[0_18px_48px_rgba(0,0,0,0.28)] sm:size-52 md:size-60">
             <Image
               src="/profile/yash-profile.jpeg"
               alt="Profile photo of me, Yashwanth Reddy Medapati"
@@ -62,8 +62,19 @@ export default function About() {
               sizes="(min-width: 768px) 240px, 208px"
               quality={100}
               unoptimized
-              className="rounded-full object-cover"
+              className="rounded-full object-cover transition-opacity duration-300 group-hover:opacity-0"
               style={{ objectPosition: "52% 42%", transform: "scale(1.16)" }}
+            />
+            {/* 3D Yash swaps in on hover - same flat hover asset the Nav
+                logo already uses, so it's a plain crossfade, not the
+                cursor-tracking pupil rig YashFinale's full-size avatar needs. */}
+            <Image
+              src="/avatar/yash-nav-hover.png"
+              alt=""
+              aria-hidden
+              fill
+              sizes="(min-width: 768px) 240px, 208px"
+              className="scale-95 rounded-full object-cover opacity-0 transition-all duration-300 group-hover:scale-100 group-hover:opacity-100"
             />
           </div>
         </motion.div>

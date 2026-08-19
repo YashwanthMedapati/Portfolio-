@@ -1,7 +1,8 @@
 "use client";
 
 import { createContext, useCallback, useContext, useRef, useState, ReactNode } from "react";
-import { askJrYash, greeting, YashAnswer, NavAction } from "@/lib/jrYashBrain";
+import { matchIntent, fallback, greeting, YashAnswer, NavAction } from "@/lib/jrYashBrain";
+import { askYashAI } from "@/lib/askYashAI";
 import { personal } from "@/data/resume";
 
 export type ChatMessage = {
@@ -94,53 +95,80 @@ export function JrYashProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const ask = useCallback((query: string) => {
-    const normalized = query.trim().toLowerCase();
-    setIsOpen(true);
-    setMessages((prev) => [...prev, { id: nextId(), from: "user", text: query }]);
-    setIsTyping(true);
-    const isFollowCommand = normalized === "follow me";
-    const isStopFollowCommand = ["stop following", "stop follow", "stay there", "go back"].includes(normalized);
-    const isBreakCommand = /\bbreak\b/i.test(normalized);
-    const isPriyaCommand = /\bpriya\b/i.test(normalized);
-    const answer: YashAnswer = isFollowCommand
-      ? {
-          text: "Follow mode is on. Move your cursor and I will run after it from my little spot. You can also drag me anywhere to park me there. Type \"stop following\" if you want me to stop chasing the cursor.",
-          action: { type: "none" },
-          followUps: ["stop following", "What tech stack do I use?"],
-        }
-      : isStopFollowCommand
-        ? {
-            text: "Parking back in the corner. Type \"follow me\" anytime you want me to chase the cursor again.",
-            action: { type: "none" },
-          followUps: ["follow me", "Show me my AI projects"],
-        }
-      : isBreakCommand
-        ? {
-            text: "Hammer mode armed. Click anywhere on the site and I will crack the page for fun. Refresh the page when you want everything perfectly back in place.",
-            action: { type: "none" },
-            followUps: ["stop following", "Show me my AI projects"],
-          }
-        : isPriyaCommand
-          ? {
-              text: "Okay, that one gets the secret heart burst. I will keep it sweet and dramatic for a few seconds.",
-              action: { type: "none" },
-              followUps: ["break", "What tech stack do I use?"],
-            }
-      : askJrYash(query);
-    setTimeout(() => {
-      setIsTyping(false);
-      if (isFollowCommand) setIsFollowingCursor(true);
-      if (isStopFollowCommand) setIsFollowingCursor(false);
-      if (isBreakCommand) triggerEasterEgg("break");
-      if (isPriyaCommand) triggerEasterEgg("hearts");
-      setMessages((prev) => [
-        ...prev,
-        { id: nextId(), from: "yash", text: answer.text, followUps: answer.followUps },
-      ]);
-      runAction(answer.action);
-    }, 500);
+  const revealAnswer = useCallback((answer: YashAnswer, sideEffects?: () => void) => {
+    setIsTyping(false);
+    sideEffects?.();
+    setMessages((prev) => [
+      ...prev,
+      { id: nextId(), from: "yash", text: answer.text, followUps: answer.followUps },
+    ]);
+    runAction(answer.action);
   }, []);
+
+  const ask = useCallback(
+    (query: string) => {
+      const normalized = query.trim().toLowerCase();
+      setIsOpen(true);
+      setMessages((prev) => [...prev, { id: nextId(), from: "user", text: query }]);
+      setIsTyping(true);
+
+      const isFollowCommand = normalized === "follow me";
+      const isStopFollowCommand = ["stop following", "stop follow", "stay there", "go back"].includes(normalized);
+      const isBreakCommand = /\bbreak\b/i.test(normalized);
+      const isPriyaCommand = /\bpriya\b/i.test(normalized);
+
+      if (isFollowCommand || isStopFollowCommand || isBreakCommand || isPriyaCommand) {
+        const answer: YashAnswer = isFollowCommand
+          ? {
+              text: "Follow mode is on. Move your cursor and I will run after it from my little spot. You can also drag me anywhere to park me there. Type \"stop following\" if you want me to stop chasing the cursor.",
+              action: { type: "none" },
+              followUps: ["stop following", "What tech stack do I use?"],
+            }
+          : isStopFollowCommand
+            ? {
+                text: "Parking back in the corner. Type \"follow me\" anytime you want me to chase the cursor again.",
+                action: { type: "none" },
+                followUps: ["follow me", "Show me my AI projects"],
+              }
+            : isBreakCommand
+              ? {
+                  text: "Hammer mode armed. Click anywhere on the site and I will crack the page for fun. Refresh the page when you want everything perfectly back in place.",
+                  action: { type: "none" },
+                  followUps: ["stop following", "Show me my AI projects"],
+                }
+              : {
+                  text: "Okay, that one gets the secret heart burst. I will keep it sweet and dramatic for a few seconds.",
+                  action: { type: "none" },
+                  followUps: ["break", "What tech stack do I use?"],
+                };
+        window.setTimeout(() => {
+          revealAnswer(answer, () => {
+            if (isFollowCommand) setIsFollowingCursor(true);
+            if (isStopFollowCommand) setIsFollowingCursor(false);
+            if (isBreakCommand) triggerEasterEgg("break");
+            if (isPriyaCommand) triggerEasterEgg("hearts");
+          });
+        }, 500);
+        return;
+      }
+
+      // Fast path: known intents answer instantly from local data, same as
+      // before. Anything that doesn't match confidently escalates to the AI
+      // backend instead of landing straight on the static fallback - see
+      // /api/yash-chat, which itself caches answers so a repeated question
+      // (from anyone) comes back instantly next time too.
+      const fast = matchIntent(query);
+      if (fast) {
+        window.setTimeout(() => revealAnswer(fast), 500);
+        return;
+      }
+
+      askYashAI(query)
+        .then((text) => revealAnswer({ text, action: { type: "none" } }))
+        .catch(() => revealAnswer(fallback));
+    },
+    [revealAnswer]
+  );
 
   return (
     <JrYashContext.Provider
