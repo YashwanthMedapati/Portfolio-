@@ -55,7 +55,12 @@ export default function Hero() {
           transition={{ duration: 0.32 }}
           className="flex flex-col items-center"
         >
-          <div className="relative mb-4 inline-flex items-center justify-center gap-2 sm:gap-3">
+          {/* Column + centered on mobile: the name wraps to two lines at
+              this width, and an items-center row would vertically center
+              the button against that whole two-line block, leaving it
+              floating beside neither line. Row layout only once sm: width
+              actually fits the name on one line. */}
+          <div className="relative mb-4 flex flex-col items-center justify-center gap-2 sm:inline-flex sm:flex-row sm:gap-3">
             <LetterHoverText
               as="h1"
               text={personal.name}

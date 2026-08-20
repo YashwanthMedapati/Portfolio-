@@ -3,7 +3,8 @@ import { sectionIds } from "../src/data/resume";
 import { sectionIntros } from "../src/lib/sectionIntros";
 
 test.describe("Yash section bubbles", () => {
-  test("section intro bubble stays inside the viewport", async ({ page }) => {
+  test("section intro bubble stays inside the viewport", async ({ page, isMobile }) => {
+    test.skip(isMobile, "section-intro (and greeting) bubbles are desktop-only - mobile never shows them");
     await page.goto("/");
 
     const dismissGreeting = page.getByRole("button", { name: "Dismiss greeting" });

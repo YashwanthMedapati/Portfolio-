@@ -41,7 +41,8 @@ test.describe("Navigation", () => {
     await expect(page.getByRole("button", { name: "Turn sound off" })).toHaveAttribute("aria-pressed", "true");
   });
 
-  test("intro voice is requested on entry", async ({ page }) => {
+  test("intro voice is requested on entry", async ({ page, isMobile }) => {
+    test.skip(isMobile, "the entry greeting (and its voice cue) is desktop-only - mobile skips it to avoid popping over an already-tight layout");
     await page.addInitScript(() => {
       const originalPlay = HTMLMediaElement.prototype.play;
       const trackedWindow = window as unknown as Window & { __playedAudio: string[] };

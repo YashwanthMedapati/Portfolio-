@@ -66,7 +66,6 @@ export function YashCompanion() {
   const [now, setNow] = useState(() => Date.now());
   const [showSectionIntro, setShowSectionIntro] = useState(false);
   const lastIntroKeyRef = useRef<string | null>(null);
-  const sectionIntro = useActiveSectionIntro(sectionIntros, { enabled: !reducedMotion });
 
   const lastActivityRef = useRef(0);
   const overrideRef = useRef<Override | null>(null);
@@ -111,6 +110,11 @@ export function YashCompanion() {
     onActivity: handlePositionActivity,
   });
   const { x, y, isMobile, viewport, moveDir, hasCustomPosition, isDragging, isNearHero } = position;
+
+  // Section-intro bubbles are desktop-only: on narrow viewports they'd be
+  // yet another thing popping over already-tight layouts, so the hook
+  // isn't even enabled on mobile - sectionIntro stays null there.
+  const sectionIntro = useActiveSectionIntro(sectionIntros, { enabled: !reducedMotion && !isMobile });
 
   // The entry greeting and the goodnight are "must" episodes: scrolling
   // away no longer cuts the greeting short, and any real activity - not
@@ -157,9 +161,12 @@ export function YashCompanion() {
   // End the entrance wave (started via lazy initial state above) while the
   // greeting appears almost immediately. Browsers may still hold the MP3 until
   // the user has enabled/interacted with sound, but the site requests it on entry.
+  // The greeting BUBBLE is desktop-only - mobile still gets the wave, just
+  // not the popover text on top of an already-tight layout.
   useEffect(() => {
     if (reducedMotion) return;
     const t = setTimeout(() => setOverride(null), WAVE_DURATION);
+    if (isMobile) return () => clearTimeout(t);
     const g = setTimeout(() => {
       setShowGreeting(true);
     }, GREETING_DELAY_MS);
@@ -172,13 +179,15 @@ export function YashCompanion() {
       clearTimeout(g);
       clearTimeout(hide);
     };
-  }, [reducedMotion]);
+  }, [reducedMotion, isMobile]);
 
   useEffect(() => {
     if (theme !== "dark" || darkAwakeUntil <= 0) return;
     const sleepDelay = Math.max(darkAwakeUntil - Date.now(), 0);
     const noticeDelay = Math.max(sleepDelay - GOOD_NIGHT_LEAD_MS, 0);
-    const noticeTimer = setTimeout(() => setShowSleepNotice(true), noticeDelay);
+    // The "Good night" bubble is desktop-only; Yash still visually falls
+    // asleep on mobile (the sleepTimer below), just without the popover.
+    const noticeTimer = isMobile ? undefined : setTimeout(() => setShowSleepNotice(true), noticeDelay);
     const sleepTimer = setTimeout(() => {
       setShowSleepNotice(false);
       setNow(Date.now());
@@ -187,7 +196,7 @@ export function YashCompanion() {
       clearTimeout(noticeTimer);
       clearTimeout(sleepTimer);
     };
-  }, [theme, darkAwakeUntil]);
+  }, [theme, darkAwakeUntil, isMobile]);
 
   useEffect(() => {
     if (!showGreeting || dismissedGreeting || greetingSoundPlayedRef.current) return;

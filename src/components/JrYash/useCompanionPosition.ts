@@ -11,6 +11,16 @@ export const CORNER_PADDING = 12;
 
 const DESKTOP_EDGE_OFFSET = 204;
 const BOTTOM_OFFSET = 118;
+// Desktop's 118px offset was tuned to clear desktop-only chrome near the
+// bottom of the viewport. On mobile that much offset instead lands the
+// companion right on top of the Hero section's quick-facts row - a much
+// smaller offset tucks it into the true corner, clear of that content.
+const MOBILE_BOTTOM_OFFSET = 20;
+
+function restingY(mobile: boolean, viewportHeight: number, stageHeight: number) {
+  const offset = mobile ? MOBILE_BOTTOM_OFFSET : BOTTOM_OFFSET;
+  return clamp(viewportHeight - stageHeight - offset, CORNER_PADDING, viewportHeight - stageHeight - CORNER_PADDING);
+}
 const MOVE_THRESHOLD = 4;
 const STOP_RUNNING_DELAY = 280;
 const FOLLOW_GAP = 96;
@@ -112,7 +122,7 @@ export function useCompanionPosition({
       const stageWidth = mobile ? MOBILE_STAGE_WIDTH : DESKTOP_STAGE_WIDTH;
       const stageHeight = Math.round(spriteSize * 1.55);
       setX(restingX(mobile, window.innerWidth, stageWidth));
-      setY(clamp(window.innerHeight - stageHeight - BOTTOM_OFFSET, CORNER_PADDING, window.innerHeight - stageHeight - CORNER_PADDING));
+      setY(restingY(mobile, window.innerHeight, stageHeight));
     };
     onResize();
     window.addEventListener("resize", onResize);
@@ -239,7 +249,7 @@ export function useCompanionPosition({
       const stageWidth = isMobile ? MOBILE_STAGE_WIDTH : DESKTOP_STAGE_WIDTH;
       const stageHeight = Math.round(spriteSize * 1.55);
       setX(restingX(isMobile, window.innerWidth, stageWidth));
-      setY(clamp(window.innerHeight - stageHeight - BOTTOM_OFFSET, CORNER_PADDING, window.innerHeight - stageHeight - CORNER_PADDING));
+      setY(restingY(isMobile, window.innerHeight, stageHeight));
       setMoveDir(null);
     });
     return () => cancelAnimationFrame(frame);
