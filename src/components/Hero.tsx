@@ -35,7 +35,12 @@ export default function Hero() {
     <section
       id={sectionIds.hero}
       aria-label="Introduction"
-      className="relative min-h-[100svh] flex flex-col items-center justify-center px-5 sm:px-6 bg-grid overflow-hidden"
+      // pt/pb reserve clearance from the fixed header above and the
+      // scroll-down arrow below - without them, centered content has
+      // nothing keeping it clear of either, and content tall enough (or a
+      // real mobile browser's address bar eating into 100svh) pushes the
+      // boot line under the header and the quick-facts row into the arrow.
+      className="relative min-h-[100svh] flex flex-col items-center justify-center px-5 pt-24 pb-20 sm:px-6 bg-grid overflow-hidden"
     >
       <div
         aria-hidden
