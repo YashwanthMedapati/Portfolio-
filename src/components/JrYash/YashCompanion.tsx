@@ -380,7 +380,7 @@ export function YashCompanion() {
       break;
     default:
       frames = YASH_FRAMES.idle;
-      fps = 1.5;
+      fps = 2.5;
   }
 
   const handleClick = () => {
