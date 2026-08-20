@@ -18,7 +18,8 @@ export const YASH_FRAMES = {
   jump: namedFrames("jump", "jump_", 5),
   runLeft: namedFrames("run-left", "run_left_", 8),
   runRight: namedFrames("run-right", "run_right_", 8),
-  sleep: frames("sleep", 3),
+  sleepFalling: namedFrames("sleep-1", "falling_asleep_", 8),
+  sleep: namedFrames("sleep-2", "sleep_", 6),
   think: namedFrames("think", "thinking_", 8),
   emotes: frames("emote", 10),
 };

@@ -62,6 +62,8 @@ export function YashCompanion() {
   const [showGreeting, setShowGreeting] = useState(false);
   const [dismissedGreeting, setDismissedGreeting] = useState(false);
   const [showSleepNotice, setShowSleepNotice] = useState(false);
+  const [sleepPhase, setSleepPhase] = useState<"falling" | "asleep">("falling");
+  const wasSleepingRef = useRef(false);
   const [darkAwakeUntil, setDarkAwakeUntil] = useState(() => Date.now() + DARK_START_AWAKE_MS);
   const [now, setNow] = useState(() => Date.now());
   const [showSectionIntro, setShowSectionIntro] = useState(false);
@@ -202,6 +204,19 @@ export function YashCompanion() {
     };
   }, [theme, darkAwakeUntil, isMobile]);
 
+  // Sleep is two clips back to back: falling_asleep plays once, then hands
+  // off (via handleSpriteComplete) to the looping sleep clip. Re-entering
+  // sleep after being woken should replay the fall-asleep transition rather
+  // than resume mid-loop, so this resets the phase only on the wake->sleep
+  // edge, not on every render while already asleep.
+  useEffect(() => {
+    const sleeping = theme === "dark" && darkAwakeUntil <= now;
+    if (sleeping && !wasSleepingRef.current) {
+      setSleepPhase("falling");
+    }
+    wasSleepingRef.current = sleeping;
+  }, [theme, darkAwakeUntil, now]);
+
   useEffect(() => {
     if (!showGreeting || dismissedGreeting || greetingSoundPlayedRef.current) return;
     greetingSoundPlayedRef.current = true;
@@ -310,9 +325,14 @@ export function YashCompanion() {
       frames = [YASH_FRAMES.emotes[(override as Extract<Override, { type: "emote" }>).emoteIdx]];
       break;
     case "sleep":
-      frames = YASH_FRAMES.sleep;
-      fps = 1.2;
-      mode = "once";
+      if (sleepPhase === "falling") {
+        frames = YASH_FRAMES.sleepFalling;
+        fps = 3;
+        mode = "once";
+      } else {
+        frames = YASH_FRAMES.sleep;
+        fps = 1.5;
+      }
       break;
     case "think":
       frames = YASH_FRAMES.think;
@@ -351,6 +371,8 @@ export function YashCompanion() {
       toggle();
     } else if (override?.type === "wave") {
       setOverride(null);
+    } else if (displayAction === "sleep" && sleepPhase === "falling") {
+      setSleepPhase("asleep");
     }
   };
 
