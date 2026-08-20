@@ -6,6 +6,7 @@ type PortfolioSoundType =
   | "hi"
   | "need-help"
   | "yash-click"
+  | "bye"
   | "name-pronunciation"
   | "batman"
   | "goodnight"
@@ -43,8 +44,8 @@ const VOICE_SOUNDS: Partial<Record<PortfolioSoundType, string | string[]>> = {
     "/sounds/yash-need-help.mp3",
     "/sounds/yash-lets-go.mp3",
     "/sounds/yash-ask-question.mp3",
-    "/sounds/yash-bye.mp3",
   ],
+  bye: "/sounds/yash-bye.mp3",
   "name-pronunciation": "/sounds/yash-name-pronunciation.mp3",
   batman: ["/sounds/batman-im-batman.mp3", "/sounds/batman-vengeance.mp3"],
   goodnight: "/sounds/yash-goodnight.mp3",

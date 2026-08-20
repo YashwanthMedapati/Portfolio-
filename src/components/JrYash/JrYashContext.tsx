@@ -51,6 +51,10 @@ function triggerEasterEgg(name: "break" | "hearts") {
   window.dispatchEvent(new CustomEvent(eventName));
 }
 
+function playCloseSound() {
+  window.dispatchEvent(new CustomEvent("portfolio:sound", { detail: { type: "bye" } }));
+}
+
 export function JrYashProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [hasGreeted, setHasGreeted] = useState(false);
@@ -75,25 +79,32 @@ export function JrYashProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const close = useCallback(() => setIsOpen(false), []);
+  // Reads isOpen directly rather than via a setState updater callback:
+  // updater callbacks are meant to be pure (React can and does invoke them
+  // more than once, e.g. under StrictMode) - the close sound firing twice
+  // in dev was exactly that side-effect-in-an-updater trap.
+  const close = useCallback(() => {
+    if (isOpen) playCloseSound();
+    setIsOpen(false);
+  }, [isOpen]);
+
   const toggle = useCallback(() => {
-    setIsOpen((prev) => {
-      const next = !prev;
-      if (next && !greetedRef.current) {
-        greetedRef.current = true;
-        setHasGreeted(true);
-        setMessages([
-          {
-            id: nextId(),
-            from: "yash",
-            text: greeting.text,
-            followUps: greeting.followUps,
-          },
-        ]);
-      }
-      return next;
-    });
-  }, []);
+    const next = !isOpen;
+    if (next && !greetedRef.current) {
+      greetedRef.current = true;
+      setHasGreeted(true);
+      setMessages([
+        {
+          id: nextId(),
+          from: "yash",
+          text: greeting.text,
+          followUps: greeting.followUps,
+        },
+      ]);
+    }
+    if (!next) playCloseSound();
+    setIsOpen(next);
+  }, [isOpen]);
 
   const revealAnswer = useCallback((answer: YashAnswer, sideEffects?: () => void) => {
     setIsTyping(false);
