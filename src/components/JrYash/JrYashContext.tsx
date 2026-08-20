@@ -46,9 +46,14 @@ function runAction(action: NavAction) {
   }
 }
 
-function triggerEasterEgg(name: "break" | "hearts") {
-  const eventName = name === "break" ? "portfolio:arm-break" : "portfolio:hearts";
-  window.dispatchEvent(new CustomEvent(eventName));
+const EASTER_EGG_EVENTS = {
+  break: "portfolio:arm-break",
+  "revert-break": "portfolio:revert-break",
+  hearts: "portfolio:hearts",
+} as const;
+
+function triggerEasterEgg(name: keyof typeof EASTER_EGG_EVENTS) {
+  window.dispatchEvent(new CustomEvent(EASTER_EGG_EVENTS[name]));
 }
 
 function triggerYashPose(pose: "blush" | "cry") {
@@ -136,44 +141,52 @@ export function JrYashProvider({ children }: { children: ReactNode }) {
       const isFollowCommand = normalized === "follow me";
       const isStopFollowCommand = ["stop following", "stop follow", "stay there", "go back"].includes(normalized);
       const isBreakCommand = /\bbreak\b/i.test(normalized);
+      const isStopBreakCommand = ["stop break", "stop breaking", "revert", "undo break", "fix it", "fix the page"].includes(normalized);
       const isPriyaCommand = /\bpriya\b/i.test(normalized);
       const isMeanCommand = MEAN_PATTERN.test(normalized);
 
-      if (isFollowCommand || isStopFollowCommand || isBreakCommand || isPriyaCommand || isMeanCommand) {
+      if (isFollowCommand || isStopFollowCommand || isBreakCommand || isStopBreakCommand || isPriyaCommand || isMeanCommand) {
         const answer: YashAnswer = isFollowCommand
           ? {
               text: "Follow mode is on. Move your cursor and I will run after it from my little spot. You can also drag me anywhere to park me there. Type \"stop following\" if you want me to stop chasing the cursor.",
               action: { type: "none" },
-              followUps: ["stop following", "What tech stack do I use?"],
+              followUps: ["stop following", "What tech stack do you use?"],
             }
           : isStopFollowCommand
             ? {
                 text: "Parking back in the corner. Type \"follow me\" anytime you want me to chase the cursor again.",
                 action: { type: "none" },
-                followUps: ["follow me", "Show me my AI projects"],
+                followUps: ["follow me", "Show me your AI projects"],
               }
             : isBreakCommand
               ? {
-                  text: "Hammer mode armed. Click anywhere on the site and I will crack the page for fun. Refresh the page when you want everything perfectly back in place.",
+                  text: "Hammer mode armed. Click anywhere on the site and I will crack it more with every click. Say \"revert\" whenever you want it back to normal.",
                   action: { type: "none" },
-                  followUps: ["stop following", "Show me my AI projects"],
+                  followUps: ["revert", "Show me your AI projects"],
                 }
-              : isPriyaCommand
+              : isStopBreakCommand
                 ? {
-                    text: "Okay, that one gets the secret heart burst. I will keep it sweet and dramatic for a few seconds.",
+                    text: "Patched back up. The page is back to normal.",
                     action: { type: "none" },
-                    followUps: ["break", "What tech stack do I use?"],
+                    followUps: ["break", "Show me your AI projects"],
                   }
-                : {
-                    text: "Ouch, that one stung a little. I'll bounce back though - ask me something else?",
-                    action: { type: "none" },
-                    followUps: ["What tech stack do I use?", "Show me my AI projects"],
-                  };
+                : isPriyaCommand
+                  ? {
+                      text: "Okay, that one gets the secret heart burst. I will keep it sweet and dramatic for a few seconds.",
+                      action: { type: "none" },
+                      followUps: ["break", "What tech stack do you use?"],
+                    }
+                  : {
+                      text: "Ouch, that one stung a little. I'll bounce back though - ask me something else?",
+                      action: { type: "none" },
+                      followUps: ["What tech stack do you use?", "Show me your AI projects"],
+                    };
         window.setTimeout(() => {
           revealAnswer(answer, () => {
             if (isFollowCommand) setIsFollowingCursor(true);
             if (isStopFollowCommand) setIsFollowingCursor(false);
             if (isBreakCommand) triggerEasterEgg("break");
+            if (isStopBreakCommand) triggerEasterEgg("revert-break");
             if (isPriyaCommand) {
               triggerEasterEgg("hearts");
               triggerYashPose("blush");

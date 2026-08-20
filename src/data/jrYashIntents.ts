@@ -23,7 +23,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: `I would start with NutriDent AI and AI Resume Intelligence. NutriDent AI is my healthcare ML story: real NHANES data, caries-risk prediction, and a React + FastAPI app around it. AI Resume Intelligence is my NLP story: parsing resumes, comparing them to job descriptions, and ranking candidates. The nice thing is that both projects show me building the product around the model, not just stopping at the model.`,
       action: { type: "scroll", target: "projects" },
-      followUps: ["Which project best shows my ML skills?", "What tech stack do I use?"],
+      followUps: ["Which project best shows your ML skills?", "What tech stack do you use?"],
     }),
   },
   {
@@ -32,7 +32,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: `If this is for a recruiter, I would lead with NutriDent AI. It is the easiest project to explain quickly: real health data, a trained model, and a usable app around nutrition and dental risk. If the role is more NLP or hiring-tech focused, then AI Resume Intelligence deserves the spotlight because the resume parsing and semantic matching are more relevant.`,
       action: { type: "scroll", target: "projects" },
-      followUps: ["Show me my AI projects", "What tech stack do I use?"],
+      followUps: ["Show me your AI projects", "What tech stack do you use?"],
     }),
   },
   {
@@ -41,7 +41,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: `My day-to-day stack is pretty practical: Python and FastAPI for services, React for interfaces, PostgreSQL for data, and ML tools like scikit-learn or Sentence Transformers when the app needs intelligence. I also work with ${skills.Languages.join(", ")} and tools like ${skills["Databases, Cloud & Tools"].join(", ")}.`,
       action: { type: "scroll", target: "skills" },
-      followUps: ["Show me my AI projects", "What's my education background?"],
+      followUps: ["Show me your AI projects", "What's your education background?"],
     }),
   },
   {
@@ -50,7 +50,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: `I would pitch myself as someone who connects the pieces. A lot of junior portfolios show one layer. My work shows front ends, APIs, databases, data pipelines, and ML all talking to each other. That makes me a better fit for teams that need someone curious, adaptable, and willing to own the messy middle between idea and working product.`,
       action: { type: "scroll", target: "about" },
-      followUps: ["Open my resume", "Show me my AI projects"],
+      followUps: ["Open your resume", "Show me your AI projects"],
     }),
   },
   {
@@ -59,7 +59,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: `Sure. I will take you to the resume section, where you can preview it or download the PDF.`,
       action: { type: "resume" },
-      followUps: ["Why should we hire you?", "What's my education background?"],
+      followUps: ["Why should we hire you?", "What's your education background?"],
     }),
   },
   {
@@ -71,7 +71,7 @@ export const intents: Intent[] = [
           .map((e) => `${e.degree} (${e.track}) from ${e.school}, GPA ${e.gpa}, ${e.dateRange}`)
           .join(". ") + ". Both are from Binghamton University's Watson College of Engineering, so the academic story is very aligned with software, AI, and security.",
       action: { type: "scroll", target: "education" },
-      followUps: ["What certifications do I have?", "What tech stack do I use?"],
+      followUps: ["What certifications do you have?", "What tech stack do you use?"],
     }),
   },
   {
@@ -80,7 +80,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: `${certifications.map((c) => `${c.name} (${c.date})`).join("; ")}.`,
       action: { type: "scroll", target: "education" },
-      followUps: ["What's my education background?"],
+      followUps: ["What's your education background?"],
     }),
   },
   {
@@ -89,7 +89,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: `${experience[0].role} at ${experience[0].org} (${experience[0].dateRange}) gave me hands-on operations experience with real-time availability data across 36 campus parking lots. For engineering depth, I would still point people to my projects, because that is where my full-stack, ML, and data-pipeline work is easiest to evaluate.`,
       action: { type: "scroll", target: "about" },
-      followUps: ["Show me my AI projects", "What tech stack do I use?"],
+      followUps: ["Show me your AI projects", "What tech stack do you use?"],
     }),
   },
   {
@@ -110,7 +110,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: getFact("target-roles"),
       action: { type: "scroll", target: "resume" },
-      followUps: ["Do I need sponsorship?", "Why should we hire you?"],
+      followUps: ["Do you need sponsorship?", "Why should we hire you?"],
     }),
   },
   {
@@ -130,7 +130,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: getFact("sponsorship"),
       action: { type: "scroll", target: "contact" },
-      followUps: ["What roles am I applying for?", "Open my resume"],
+      followUps: ["What roles are you applying for?", "Open your resume"],
     }),
   },
   {
@@ -139,7 +139,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: getFact("age-height"),
       action: { type: "none" },
-      followUps: ["Where did I grow up?", "What languages do I speak?"],
+      followUps: ["Where did you grow up?", "What languages do you speak?"],
     }),
   },
   {
@@ -158,7 +158,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: getFact("origin-move"),
       action: { type: "none" },
-      followUps: ["What schools did I attend?", "What languages do I speak?"],
+      followUps: ["What schools did you attend?", "What languages do you speak?"],
     }),
   },
   {
@@ -178,7 +178,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: getFact("schools-personal"),
       action: { type: "scroll", target: "education" },
-      followUps: ["What's my education background?", "When did I move to the US?"],
+      followUps: ["What's your education background?", "When did you move to the US?"],
     }),
   },
   {
@@ -187,7 +187,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: getFact("languages-personal"),
       action: { type: "none" },
-      followUps: ["Where did I grow up?", "What roles am I applying for?"],
+      followUps: ["Where did you grow up?", "What roles are you applying for?"],
     }),
   },
   {
@@ -208,7 +208,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: getFact("hobbies-personal"),
       action: { type: "none" },
-      followUps: ["What are my hidden talents?", "What is my favorite anime?"],
+      followUps: ["What are your hidden talents?", "What is your favorite anime?"],
     }),
   },
   {
@@ -228,7 +228,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: getFact("talents-dreams"),
       action: { type: "none" },
-      followUps: ["What do I do outside coding?", "What is my favorite color?"],
+      followUps: ["What do you do outside coding?", "What is your favorite color?"],
     }),
   },
   {
@@ -247,7 +247,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: getFact("favorites-personal"),
       action: { type: "scroll", target: "contact" },
-      followUps: ["Contact me", "What do I do outside coding?"],
+      followUps: ["Contact me", "What do you do outside coding?"],
     }),
   },
   {
@@ -256,7 +256,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: `Best place is email: ${personal.email}. You can also call ${personal.phone}, connect with me on LinkedIn at ${personal.linkedinHandle}, message me on Instagram at ${personal.instagramHandle}, or check my code on GitHub at ${personal.githubHandle}.`,
       action: { type: "scroll", target: "contact" },
-      followUps: ["Why should we hire you?", "Open my resume"],
+      followUps: ["Why should we hire you?", "Open your resume"],
     }),
   },
   {
@@ -265,7 +265,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: personal.summary,
       action: { type: "scroll", target: "about" },
-      followUps: ["Show me my AI projects", "Why should we hire you?"],
+      followUps: ["Show me your AI projects", "Why should we hire you?"],
     }),
   },
   {
@@ -274,7 +274,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: `I'm Yash, the little portfolio guide. I can answer from the resume and project data here, and I can jump you to the right section when it helps. I try to be useful without making things up.`,
       action: { type: "none" },
-      followUps: ["Show me my AI projects", "What tech stack do I use?"],
+      followUps: ["Show me your AI projects", "What tech stack do you use?"],
     }),
   },
   {
@@ -297,7 +297,7 @@ export const intents: Intent[] = [
     answer: () => ({
       text: `I know a few personal basics now: I grew up in Hyderabad, moved to the US in 2023, speak English, Hindi, and Telugu, like cricket, games, anime, movies, series, and coding, and I am actively applying for ML Engineer, SDE, Software Engineer, and Data Analyst roles. If you want deeper personal details, contact me directly.`,
       action: { type: "scroll", target: "contact" },
-      followUps: ["Do I need sponsorship?", "What are my hidden talents?", "Contact me"],
+      followUps: ["Do you need sponsorship?", "What are your hidden talents?", "Contact me"],
     }),
   },
 ];

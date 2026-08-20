@@ -57,6 +57,11 @@ export function EasterEggs() {
 
   useEffect(() => {
     const armBreak = () => setHammerMode(true);
+    const revertBreak = () => {
+      setHammerMode(false);
+      setCracks([]);
+      delete document.documentElement.dataset.siteBroken;
+    };
     const burstHearts = () => {
       setHearts(makeHearts());
       window.setTimeout(() => setHearts([]), 5600);
@@ -66,18 +71,22 @@ export function EasterEggs() {
     };
     const breakSite = (event: PointerEvent) => {
       if (event.pointerType !== "mouse" || !hammerModeRef.current) return;
-      setHammerMode(false);
-      setCracks(makeCracks(event.clientX, event.clientY));
+      // Hammer mode stays armed across clicks - each hit adds more cracks
+      // on top of the last instead of replacing them, so the damage keeps
+      // building until the user says "revert" (or refreshes the page).
+      setCracks((prev) => [...prev, ...makeCracks(event.clientX, event.clientY)]);
       document.documentElement.dataset.siteBroken = "true";
     };
 
     window.addEventListener("portfolio:arm-break", armBreak);
+    window.addEventListener("portfolio:revert-break", revertBreak);
     window.addEventListener("portfolio:hearts", burstHearts);
     window.addEventListener("pointermove", moveHammer);
     window.addEventListener("pointerdown", breakSite);
 
     return () => {
       window.removeEventListener("portfolio:arm-break", armBreak);
+      window.removeEventListener("portfolio:revert-break", revertBreak);
       window.removeEventListener("portfolio:hearts", burstHearts);
       window.removeEventListener("pointermove", moveHammer);
       window.removeEventListener("pointerdown", breakSite);

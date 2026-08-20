@@ -94,6 +94,7 @@ export function useCompanionPosition({
     if (Math.abs(movementX) > 3 || Math.abs(nextY - positionRef.current.y) > 3) {
       dragRef.current.moved = true;
     }
+    positionRef.current = { x: nextX, y: nextY };
     setX(nextX);
     setY(nextY);
   }, [isMobile]);
@@ -166,6 +167,18 @@ export function useCompanionPosition({
     return () => window.clearTimeout(timer);
   }, [isFollowingCursor]);
 
+  // Dropping Yash mid-follow parks him in place instead of yanking him back
+  // to the cursor immediately - but that park was permanent (only cleared
+  // by fully stopping and restarting "follow me"), so any drag while
+  // following silently ended cursor-tracking for good. Un-park on the next
+  // real mouse movement instead, so following just resumes naturally.
+  useEffect(() => {
+    if (!dragParkedFollow || !isFollowingCursor || isDragging) return;
+    const onFirstMove = () => setDragParkedFollow(false);
+    window.addEventListener("mousemove", onFirstMove, { once: true });
+    return () => window.removeEventListener("mousemove", onFirstMove);
+  }, [dragParkedFollow, isFollowingCursor, isDragging]);
+
   useEffect(() => {
     if (!isDragging) return;
 
@@ -228,6 +241,12 @@ export function useCompanionPosition({
       if (Math.abs(movementX) >= MOVE_THRESHOLD) {
         setMoveDir(movementX < 0 ? "left" : "right");
       }
+      // Written synchronously (not left to the [x, y] effect below) since
+      // mousemove can fire many times before React commits a render - the
+      // effect's update would lag by one or more events, so the very next
+      // event in a fast-moving burst would compute its chase side (dx) off
+      // a stale position and could send Yash the wrong way.
+      positionRef.current = { x: nextX, y: nextY };
       setX(nextX);
       setY(nextY);
 

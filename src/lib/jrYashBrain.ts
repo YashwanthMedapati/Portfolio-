@@ -29,7 +29,7 @@ const skillLookup = new Map(
 export const fallback: YashAnswer = {
   text: `I do not know that from the portfolio data yet. I can answer best about my projects, skills, education, resume, and contact info. I will take you to the contact section so you can ask me directly.`,
   action: { type: "scroll", target: "contact" },
-  followUps: ["Contact me", "Show me my AI projects", "What tech stack do I use?"],
+  followUps: ["Contact me", "Show me your AI projects", "What tech stack do you use?"],
 };
 
 function score(query: string, keywords: string[]): number {
@@ -57,7 +57,7 @@ function spokenLanguageAnswer(query: string): YashAnswer | null {
   return {
     text: getFact("languages-personal"),
     action: { type: "none" },
-    followUps: ["Where did I grow up?", "What programming languages do I use?"],
+    followUps: ["Where did you grow up?", "What programming languages do you use?"],
   };
 }
 
@@ -74,7 +74,7 @@ function individualSkillAnswer(query: string): YashAnswer | null {
     return {
       text: `Yes. I work with ${displayName}. In this portfolio, ${displayName} fits into my broader stack across ${skills.Languages.join(", ")}, plus frameworks, ML libraries, databases, cloud, and tools like ${skills["Frameworks & Libraries"].slice(0, 5).join(", ")} and ${skills["Databases, Cloud & Tools"].slice(0, 4).join(", ")}.`,
       action: { type: "scroll", target: "skills" },
-      followUps: ["What tech stack do I use?", "Show me my AI projects"],
+      followUps: ["What tech stack do you use?", "Show me your AI projects"],
     };
   }
 
@@ -113,14 +113,14 @@ export function askJrYash(query: string): YashAnswer {
 export const suggestedPrompts = [
   "follow me",
   "break",
-  "Show me my AI projects",
-  "Do I need sponsorship?",
-  "What roles am I applying for?",
-  "Where did I grow up?",
-  "What tech stack do I use?",
+  "Show me your AI projects",
+  "Do you need sponsorship?",
+  "What roles are you applying for?",
+  "Where did you grow up?",
+  "What tech stack do you use?",
   "Why should we hire you?",
-  "Open my resume",
-  "Which project best shows my ML skills?",
+  "Open your resume",
+  "Which project best shows your ML skills?",
 ];
 
 export const greeting: YashAnswer = {
