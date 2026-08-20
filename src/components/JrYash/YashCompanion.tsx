@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -9,22 +9,19 @@ import { useJrYash } from "./JrYashContext";
 import { useTheme } from "@/components/ThemeContext";
 import { useActiveSectionIntro } from "@/lib/useActiveSectionIntro";
 import { sectionIntros } from "@/lib/sectionIntros";
+import {
+  useCompanionPosition,
+  clamp,
+  CORNER_PADDING,
+  DESKTOP_SPRITE_SIZE,
+  MOBILE_SPRITE_SIZE,
+  DESKTOP_STAGE_WIDTH,
+  MOBILE_STAGE_WIDTH,
+} from "./useCompanionPosition";
 
-const DESKTOP_SPRITE_SIZE = 92;
-const MOBILE_SPRITE_SIZE = 64;
-const DESKTOP_STAGE_WIDTH = 184;
-const MOBILE_STAGE_WIDTH = 132;
-const DESKTOP_EDGE_OFFSET = 204;
-const MOBILE_EDGE_OFFSET = 144;
-const BOTTOM_OFFSET = 118;
-const MOVE_THRESHOLD = 4;
-const STOP_RUNNING_DELAY = 280;
 const IDLE_EMOTE_AFTER = 12000;
 const EMOTE_DURATION = 1500;
 const WAVE_DURATION = 1350;
-const FOLLOW_GAP = 96;
-const REPEL_RADIUS = 86;
-const CORNER_PADDING = 12;
 const DARK_AWAKE_IDLE_MS = 150000;
 const DARK_START_AWAKE_MS = 14000;
 const GOOD_NIGHT_LEAD_MS = 2600;
@@ -54,24 +51,11 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
-function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max);
-}
-
 export function YashCompanion() {
   const { theme } = useTheme();
   const { isOpen, isTyping, toggle, isFollowingCursor } = useJrYash();
   const reducedMotion = usePrefersReducedMotion();
-  const [isMobile, setIsMobile] = useState(false);
-  const [viewport, setViewport] = useState({ width: 0, height: 0 });
 
-  // Must start null on both server and client's first render (SSR has no
-  // `window` to compute a position from) - this component renders nothing
-  // until the effect below places it, right after mount. That's what keeps
-  // hydration honest: no structural difference for React to reconcile.
-  const [x, setX] = useState<number | null>(null);
-  const [y, setY] = useState<number | null>(null);
-  const [moveDir, setMoveDir] = useState<"left" | "right" | null>(null);
   const [override, setOverride] = useState<Override | null>(() =>
     reducedMotion ? null : { type: "wave" }
   );
@@ -80,43 +64,28 @@ export function YashCompanion() {
   const [showSleepNotice, setShowSleepNotice] = useState(false);
   const [darkAwakeUntil, setDarkAwakeUntil] = useState(() => Date.now() + DARK_START_AWAKE_MS);
   const [now, setNow] = useState(() => Date.now());
-  const [hasCustomPosition, setHasCustomPosition] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragParkedFollow, setDragParkedFollow] = useState(false);
-  const [isNearHero, setIsNearHero] = useState(true);
   const [showSectionIntro, setShowSectionIntro] = useState(false);
   const lastIntroKeyRef = useRef<string | null>(null);
   const sectionIntro = useActiveSectionIntro(sectionIntros, { enabled: !reducedMotion });
 
   const lastActivityRef = useRef(0);
   const overrideRef = useRef<Override | null>(null);
-  const isOpenRef = useRef(isOpen);
   const previousThemeRef = useRef(theme);
   const greetingSoundPlayedRef = useRef(false);
   const sleepSoundPlayedRef = useRef(false);
-  const positionRef = useRef({ x: 0, y: 0 });
-  const dragRef = useRef({ offsetX: 0, offsetY: 0, moved: false, pointerId: -1 });
-
-  const applyDragPosition = useCallback((clientX: number, clientY: number) => {
-    const spriteSize = isMobile ? MOBILE_SPRITE_SIZE : DESKTOP_SPRITE_SIZE;
-    const stageWidth = isMobile ? MOBILE_STAGE_WIDTH : DESKTOP_STAGE_WIDTH;
-    const stageHeight = Math.round(spriteSize * 1.55);
-    const nextX = clamp(clientX - dragRef.current.offsetX, CORNER_PADDING, window.innerWidth - stageWidth - CORNER_PADDING);
-    const nextY = clamp(clientY - dragRef.current.offsetY, CORNER_PADDING, window.innerHeight - stageHeight - CORNER_PADDING);
-    const movementX = nextX - positionRef.current.x;
-    if (Math.abs(movementX) >= MOVE_THRESHOLD) {
-      setMoveDir(movementX < 0 ? "left" : "right");
-    }
-    if (Math.abs(movementX) > 3 || Math.abs(nextY - positionRef.current.y) > 3) {
-      dragRef.current.moved = true;
-    }
-    setX(nextX);
-    setY(nextY);
-  }, [isMobile]);
+  // Read inside the idle-emote interval below instead of depending on
+  // `isOpen` directly, so opening/closing the chat panel doesn't tear down
+  // and restart that interval - only the emote check needs the latest
+  // value, not a resubscribe every toggle.
+  const isOpenRef = useRef(isOpen);
 
   useEffect(() => {
     lastActivityRef.current = Date.now();
   }, []);
+
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
 
   const wakeDarkYash = useCallback(() => {
     if (theme !== "dark") return;
@@ -126,36 +95,22 @@ export function YashCompanion() {
     setShowSleepNotice(false);
   }, [theme]);
 
-  useEffect(() => {
-    const onResize = () => {
-      const mobile = window.innerWidth < 640;
-      setIsMobile(mobile);
-      setViewport({ width: window.innerWidth, height: window.innerHeight });
-      const edgeOffset = mobile ? MOBILE_EDGE_OFFSET : DESKTOP_EDGE_OFFSET;
-      const spriteSize = mobile ? MOBILE_SPRITE_SIZE : DESKTOP_SPRITE_SIZE;
-      const stageWidth = mobile ? MOBILE_STAGE_WIDTH : DESKTOP_STAGE_WIDTH;
-      const stageHeight = Math.round(spriteSize * 1.55);
-      setX(clamp(window.innerWidth - edgeOffset, CORNER_PADDING, window.innerWidth - stageWidth - CORNER_PADDING));
-      setY(clamp(window.innerHeight - stageHeight - BOTTOM_OFFSET, CORNER_PADDING, window.innerHeight - stageHeight - CORNER_PADDING));
-    };
-    onResize();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
+  // Position-hook activity callback: cursor-follow and drag-start both used
+  // to touch lastActivityRef directly - now that they live in the hook,
+  // this combined callback keeps that side effect without the hook needing
+  // to know idle-emote timing exists.
+  const handlePositionActivity = useCallback(() => {
+    lastActivityRef.current = Date.now();
+    wakeDarkYash();
+  }, [wakeDarkYash]);
 
-  useEffect(() => {
-    const updateSectionAwareness = () => {
-      setIsNearHero(window.scrollY < window.innerHeight * 0.45);
-    };
-
-    updateSectionAwareness();
-    window.addEventListener("scroll", updateSectionAwareness, { passive: true });
-    window.addEventListener("hashchange", updateSectionAwareness);
-    return () => {
-      window.removeEventListener("scroll", updateSectionAwareness);
-      window.removeEventListener("hashchange", updateSectionAwareness);
-    };
-  }, []);
+  const position = useCompanionPosition({
+    isFollowingCursor,
+    isOpen,
+    reducedMotion,
+    onActivity: handlePositionActivity,
+  });
+  const { x, y, isMobile, viewport, moveDir, hasCustomPosition, isDragging, isNearHero } = position;
 
   // The entry greeting and the goodnight are "must" episodes: scrolling
   // away no longer cuts the greeting short, and any real activity - not
@@ -184,48 +139,6 @@ export function YashCompanion() {
   useEffect(() => {
     overrideRef.current = override;
   }, [override]);
-
-  useEffect(() => {
-    isOpenRef.current = isOpen;
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (x !== null && y !== null) {
-      positionRef.current = { x, y };
-    }
-  }, [x, y]);
-
-  useEffect(() => {
-    if (isFollowingCursor) return;
-    const timer = window.setTimeout(() => setDragParkedFollow(false), 0);
-    return () => window.clearTimeout(timer);
-  }, [isFollowingCursor]);
-
-  useEffect(() => {
-    if (!isDragging) return;
-
-    const onPointerMove = (event: PointerEvent) => {
-      if (dragRef.current.pointerId !== event.pointerId) return;
-      applyDragPosition(event.clientX, event.clientY);
-    };
-
-    const onPointerUp = (event: PointerEvent) => {
-      if (dragRef.current.pointerId !== event.pointerId) return;
-      setIsDragging(false);
-      setHasCustomPosition(true);
-      if (isFollowingCursor) setDragParkedFollow(true);
-      window.setTimeout(() => setMoveDir(null), STOP_RUNNING_DELAY);
-    };
-
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("pointercancel", onPointerUp);
-    return () => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", onPointerUp);
-    };
-  }, [applyDragPosition, isDragging, isFollowingCursor]);
 
   useEffect(() => {
     if (reducedMotion || isMobile) {
@@ -261,57 +174,6 @@ export function YashCompanion() {
     };
   }, [reducedMotion]);
 
-  // Cursor follow mode: Yash trails the pointer, then dodges if it gets too close.
-  useEffect(() => {
-    if (reducedMotion || isMobile || !isFollowingCursor || dragParkedFollow || isDragging) {
-      const t = setTimeout(() => setMoveDir(null), 0);
-      return () => clearTimeout(t);
-    }
-    let stopTimer: ReturnType<typeof setTimeout> | undefined;
-
-    const onMove = (e: MouseEvent) => {
-      if (isOpenRef.current) return;
-      lastActivityRef.current = Date.now();
-      wakeDarkYash();
-      const spriteSize = DESKTOP_SPRITE_SIZE;
-      const stageWidth = DESKTOP_STAGE_WIDTH;
-      const stageHeight = Math.round(spriteSize * 1.55);
-      const currentX = positionRef.current.x;
-      const dx = e.clientX - (currentX + stageWidth / 2);
-      let targetX = e.clientX + (dx < 0 ? FOLLOW_GAP : -FOLLOW_GAP);
-      let targetY = e.clientY + 34;
-      const centerX = targetX + stageWidth / 2;
-      const centerY = targetY + spriteSize / 2;
-      const distanceX = centerX - e.clientX;
-      const distanceY = centerY - e.clientY;
-      const distance = Math.hypot(distanceX, distanceY);
-
-      if (distance < REPEL_RADIUS) {
-        const strength = (REPEL_RADIUS - Math.max(distance, 1)) * 0.8;
-        targetX += (distanceX / Math.max(distance, 1)) * strength;
-        targetY += (distanceY / Math.max(distance, 1)) * strength;
-      }
-
-      const nextX = clamp(targetX, CORNER_PADDING, window.innerWidth - stageWidth - CORNER_PADDING);
-      const nextY = clamp(targetY, CORNER_PADDING, window.innerHeight - stageHeight - CORNER_PADDING);
-      const movementX = nextX - currentX;
-      if (Math.abs(movementX) >= MOVE_THRESHOLD) {
-        setMoveDir(movementX < 0 ? "left" : "right");
-      }
-      setX(nextX);
-      setY(nextY);
-
-      clearTimeout(stopTimer);
-      stopTimer = setTimeout(() => setMoveDir(null), STOP_RUNNING_DELAY);
-    };
-
-    window.addEventListener("mousemove", onMove);
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      clearTimeout(stopTimer);
-    };
-  }, [dragParkedFollow, isDragging, isFollowingCursor, isMobile, reducedMotion, wakeDarkYash]);
-
   useEffect(() => {
     if (theme !== "dark" || darkAwakeUntil <= 0) return;
     const sleepDelay = Math.max(darkAwakeUntil - Date.now(), 0);
@@ -326,50 +188,6 @@ export function YashCompanion() {
       clearTimeout(sleepTimer);
     };
   }, [theme, darkAwakeUntil]);
-
-  useEffect(() => {
-    if (isFollowingCursor || hasCustomPosition || x === null) return;
-    const frame = requestAnimationFrame(() => {
-      const spriteSize = isMobile ? MOBILE_SPRITE_SIZE : DESKTOP_SPRITE_SIZE;
-      const stageWidth = isMobile ? MOBILE_STAGE_WIDTH : DESKTOP_STAGE_WIDTH;
-      const stageHeight = Math.round(spriteSize * 1.55);
-      const edgeOffset = isMobile ? MOBILE_EDGE_OFFSET : DESKTOP_EDGE_OFFSET;
-      setX(clamp(window.innerWidth - edgeOffset, CORNER_PADDING, window.innerWidth - stageWidth - CORNER_PADDING));
-      setY(clamp(window.innerHeight - stageHeight - BOTTOM_OFFSET, CORNER_PADDING, window.innerHeight - stageHeight - CORNER_PADDING));
-      setMoveDir(null);
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [hasCustomPosition, isFollowingCursor, isMobile, x]);
-
-  const startDrag = (event: React.PointerEvent<HTMLButtonElement>) => {
-    if (isOpen || event.button !== 0) return;
-    lastActivityRef.current = Date.now();
-    wakeDarkYash();
-    dragRef.current = {
-      offsetX: event.clientX - renderX,
-      offsetY: event.clientY - renderY,
-      moved: false,
-      pointerId: event.pointerId,
-    };
-    setIsDragging(true);
-    event.currentTarget.setPointerCapture(event.pointerId);
-  };
-
-  const moveDrag = (event: React.PointerEvent<HTMLButtonElement>) => {
-    if (!isDragging || dragRef.current.pointerId !== event.pointerId) return;
-    applyDragPosition(event.clientX, event.clientY);
-  };
-
-  const endDrag = (event: React.PointerEvent<HTMLButtonElement>) => {
-    if (!isDragging || dragRef.current.pointerId !== event.pointerId) return;
-    setIsDragging(false);
-    setHasCustomPosition(true);
-    if (isFollowingCursor) setDragParkedFollow(true);
-    window.setTimeout(() => setMoveDir(null), STOP_RUNNING_DELAY);
-    try {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    } catch {}
-  };
 
   useEffect(() => {
     if (!showGreeting || dismissedGreeting || greetingSoundPlayedRef.current) return;
@@ -427,7 +245,9 @@ export function YashCompanion() {
   const panelHeight = Math.min(viewport.height * 0.68, 540);
   const openX = clamp(viewport.width - stageWidth - 20, CORNER_PADDING, viewport.width - stageWidth - CORNER_PADDING);
   const openY = clamp(viewport.height - panelHeight - lockedStageHeight - 30, CORNER_PADDING, viewport.height - lockedStageHeight - CORNER_PADDING);
-  const dockX = clamp(viewport.width - stageWidth - 18, CORNER_PADDING, viewport.width - stageWidth - CORNER_PADDING);
+  const dockX = isMobile
+    ? clamp(18, CORNER_PADDING, viewport.width - stageWidth - CORNER_PADDING)
+    : clamp(viewport.width - stageWidth - 18, CORNER_PADDING, viewport.width - stageWidth - CORNER_PADDING);
   const dockY = clamp(viewport.height - lockedStageHeight - 12, CORNER_PADDING, viewport.height - lockedStageHeight - CORNER_PADDING);
   const renderX = isOpen && !isFollowingCursor ? openX : compactDock ? dockX : x;
   const renderY = isOpen && !isFollowingCursor ? openY : compactDock ? dockY : y;
@@ -498,10 +318,7 @@ export function YashCompanion() {
   }
 
   const handleClick = () => {
-    if (dragRef.current.moved) {
-      dragRef.current.moved = false;
-      return;
-    }
+    if (position.consumeDragMoved()) return;
     lastActivityRef.current = Date.now();
     wakeDarkYash();
     setShowGreeting(false);
@@ -603,10 +420,10 @@ export function YashCompanion() {
 
       <button
         onClick={handleClick}
-        onPointerDown={startDrag}
-        onPointerMove={moveDrag}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
+        onPointerDown={(e) => position.startDrag(e, renderX, renderY)}
+        onPointerMove={position.moveDrag}
+        onPointerUp={position.endDrag}
+        onPointerCancel={position.endDrag}
         onMouseEnter={wakeDarkYash}
         onFocus={wakeDarkYash}
         aria-label="Yash, an AI guide - click to chat"

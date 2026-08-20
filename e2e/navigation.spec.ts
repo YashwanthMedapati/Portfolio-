@@ -118,14 +118,7 @@ test.describe("Projects", () => {
     }
   });
 
-  test("a project demo opens an inline player, not a new tab", async ({ page, isMobile }) => {
-    // Known pre-existing gap, not caused by the video modal itself: on
-    // narrow viewports the roaming Yash companion's fixed bottom-right dock
-    // can genuinely overlap right-aligned card content (confirmed via direct
-    // getBoundingClientRect inspection - Yash's own trigger button shows up
-    // as the pointer-event interceptor). Worth fixing in YashCompanion's
-    // mobile positioning separately; skipping here rather than masking it.
-    test.skip(isMobile, "roaming Yash companion can overlap card buttons on narrow viewports - pre-existing, tracked separately");
+  test("a project demo opens an inline player, not a new tab", async ({ page }) => {
     const project = projects.find((p) => p.demoVideo);
     if (!project) test.skip();
 

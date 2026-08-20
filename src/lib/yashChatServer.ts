@@ -2,7 +2,11 @@ import "server-only";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
-const CACHE_TTL_SECONDS = 60 * 60 * 24 * 60; // 60 days - personal facts rarely change
+// 7 days, not months: a cached answer is served to every visitor who asks
+// something similar, with no rate limit on cache hits. A short TTL bounds
+// how long any single bad AI answer (an off-brand response, a successful
+// prompt-injection attempt) can keep circulating before it ages out.
+const CACHE_TTL_SECONDS = 60 * 60 * 24 * 7;
 const MAX_QUERY_LENGTH = 300;
 const MAX_OUTPUT_TOKENS = 220;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
