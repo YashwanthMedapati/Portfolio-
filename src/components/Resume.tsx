@@ -86,7 +86,7 @@ export default function Resume() {
       >
         <Card className="ring-0 border border-border p-0 overflow-hidden bg-card">
           <iframe
-            src={`${personal.resumeFile}#view=FitH&toolbar=0&navpanes=0`}
+            src={`${personal.resumeFile}#view=FitH&toolbar=1&navpanes=0`}
             title="Yashwanth Medapati resume PDF preview"
             className="hidden h-[70vh] w-full bg-card sm:block"
           />

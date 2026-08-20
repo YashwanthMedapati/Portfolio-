@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { motion, useInView, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
 import { Mail } from "lucide-react";
 import { personal } from "@/data/resume";
 import { useJrYash } from "@/components/JrYash/JrYashContext";
@@ -19,6 +19,20 @@ const stars = Array.from({ length: 72 }, (_, index) => ({
   size: 1 + ((index * 13) % 4),
   delay: (index % 9) * 0.35,
 }));
+
+// First entry stays the original quote so this is a swap-in-place upgrade,
+// not a rewrite - add, remove, or reorder freely, the rotation just cycles
+// through whatever's here.
+const QUOTES = [
+  "Learning, Living, and Leveling Up.",
+  "Still debugging life, one commit at a time.",
+  "Curious by default, relentless by choice.",
+  "Building the things I wished existed.",
+  "Ship it. Learn. Ship it better.",
+  "Every bug is just a lesson with bad timing.",
+];
+const QUOTE_INTERVAL_MS = 6000;
+const QUOTE_FADE_S = 0.6;
 
 type FinaleIntroPhase = "waiting" | "run" | "jump" | "done";
 
@@ -67,8 +81,20 @@ export function YashFinale() {
   const { open } = useJrYash();
   const [introPhase, setIntroPhase] = useState<FinaleIntroPhase>("waiting");
   const [blockHit, setBlockHit] = useState(false);
+  const [quoteIndex, setQuoteIndex] = useState(0);
   const pupilTargetRef = useRef({ x: 0, y: 0 });
   const pupilCurrentRef = useRef({ x: 0, y: 0 });
+
+  // Reduced motion means no auto-rotating content, not just no fade - the
+  // quote just stays on the first line instead of continuing to change
+  // itself in the background.
+  useEffect(() => {
+    if (reducedMotion) return;
+    const interval = setInterval(() => {
+      setQuoteIndex((i) => (i + 1) % QUOTES.length);
+    }, QUOTE_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [reducedMotion]);
 
   const openFromAvatar = () => {
     playPortfolioSound("yash-click");
@@ -179,10 +205,20 @@ export function YashFinale() {
           viewport={{ once: true }}
           transition={{ duration: 0.45 }}
         >
-          <LetterHoverText
-            text={'"Learning, Living, and Leveling Up."'}
-            className="mb-6 font-mono text-xl text-white/72 sm:text-3xl"
-          />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={quoteIndex}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: QUOTE_FADE_S }}
+            >
+              <LetterHoverText
+                text={`"${QUOTES[quoteIndex]}"`}
+                className="mb-6 font-mono text-xl text-white/72 sm:text-3xl"
+              />
+            </motion.div>
+          </AnimatePresence>
         </motion.div>
 
         <motion.button
