@@ -103,6 +103,7 @@ export default function Nav() {
           onMouseLeave={() => setLogoHovered(false)}
           onFocus={() => setLogoHovered(true)}
           onBlur={() => setLogoHovered(false)}
+          aria-label="Scroll to top"
           className="relative inline-flex h-12 w-[4.5rem] items-center justify-center overflow-hidden rounded-md font-mono text-sm font-semibold tracking-tight text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span
@@ -124,8 +125,8 @@ export default function Nav() {
             <Image
               src="/avatar/yash-nav-hover.png"
               alt=""
-              width={1024}
-              height={1024}
+              width={96}
+              height={96}
               className="size-12 rounded-md object-cover"
               priority={false}
             />

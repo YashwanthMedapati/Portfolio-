@@ -28,7 +28,7 @@ function SkillBadge({ name }: { name: string }) {
           `[&>svg]:size-3!` can't fight this hover-grow animation. */}
       {Logo && (
         <span className="-ml-1 inline-flex size-0 shrink-0 items-center justify-center overflow-hidden opacity-0 transition-all duration-200 ease-out group-hover/skill:ml-0 group-hover/skill:size-3.5 group-hover/skill:opacity-100">
-          <Logo className="size-3.5 text-primary" />
+          <Logo className="size-3.5 text-primary" aria-hidden />
         </span>
       )}
       {name}

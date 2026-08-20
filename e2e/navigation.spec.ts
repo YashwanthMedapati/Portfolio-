@@ -153,4 +153,23 @@ test.describe("Contact", () => {
       await expect(page.getByRole("link", { name: method.label })).toHaveAttribute("href", method.href);
     }
   });
+
+  test("contact form submits to the API and falls back to an email draft if it errors", async ({ page, context }) => {
+    await page.route("**/api/contact", async (route) => {
+      await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "not configured" }) });
+    });
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+
+    await page.goto("/");
+    await page.locator("#contact-name").fill("Test User");
+    await page.locator("#contact-email").fill("test@example.com");
+    await page.locator("#contact-message").fill("Hello, this is a test.");
+
+    const [popup] = await Promise.all([
+      context.waitForEvent("page"),
+      page.getByRole("button", { name: "Submit Message" }).click(),
+    ]);
+    expect(popup.url()).toContain("mail.google.com");
+    await expect(page.getByText(/Opened your email app instead/i)).toBeVisible();
+  });
 });

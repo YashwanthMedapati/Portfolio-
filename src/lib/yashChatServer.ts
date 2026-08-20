@@ -1,6 +1,5 @@
 import "server-only";
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
+import { checkRateLimit as checkRateLimitShared, getRedis } from "./redisClient";
 
 // 7 days, not months: a cached answer is served to every visitor who asks
 // something similar, with no rate limit on cache hits. A short TTL bounds
@@ -11,56 +10,8 @@ const MAX_QUERY_LENGTH = 300;
 const MAX_OUTPUT_TOKENS = 220;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
 
-let redis: Redis | null | undefined;
-
-// Upstash credentials are optional: without them the route still works, it
-// just skips the shared cache and falls back to a best-effort in-memory rate
-// limiter (fine for local dev, not reliable across serverless instances -
-// see README setup notes for why production should set these).
-function getRedis(): Redis | null {
-  if (redis !== undefined) return redis;
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  redis = url && token ? new Redis({ url, token }) : null;
-  return redis;
-}
-
-let ratelimiter: Ratelimit | null | undefined;
-function getRatelimiter(): Ratelimit | null {
-  if (ratelimiter !== undefined) return ratelimiter;
-  const client = getRedis();
-  ratelimiter = client
-    ? new Ratelimit({
-        redis: client,
-        limiter: Ratelimit.slidingWindow(8, "10 m"),
-        prefix: "yash-chat:ratelimit",
-      })
-    : null;
-  return ratelimiter;
-}
-
-// Per-instance fallback so local dev (no Upstash configured) still has some
-// protection. Not shared across instances/regions - not a substitute for the
-// real limiter in production.
-const memoryHits = new Map<string, { count: number; resetAt: number }>();
-const MEMORY_LIMIT = 8;
-const MEMORY_WINDOW_MS = 10 * 60 * 1000;
-
-function checkMemoryRateLimit(ip: string): { success: boolean } {
-  const now = Date.now();
-  const entry = memoryHits.get(ip);
-  if (!entry || entry.resetAt < now) {
-    memoryHits.set(ip, { count: 1, resetAt: now + MEMORY_WINDOW_MS });
-    return { success: true };
-  }
-  entry.count += 1;
-  return { success: entry.count <= MEMORY_LIMIT };
-}
-
 export async function checkRateLimit(ip: string): Promise<{ success: boolean }> {
-  const limiter = getRatelimiter();
-  if (limiter) return limiter.limit(ip);
-  return checkMemoryRateLimit(ip);
+  return checkRateLimitShared("yash-chat:ratelimit", ip, 8, "10 m");
 }
 
 export function normalizeQuery(query: string): string {

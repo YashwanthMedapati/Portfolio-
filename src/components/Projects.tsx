@@ -3,13 +3,14 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ExternalLink, Play, Sparkles } from "lucide-react";
+import { BookOpen, ExternalLink, Play, Sparkles } from "lucide-react";
 import { projects, sectionIds } from "@/data/resume";
 import { GithubIcon } from "./icons";
 import { Section } from "./Section";
 import { SectionHeader } from "./SectionHeader";
 import { SectionWatermark } from "./SectionWatermark";
 import { DemoVideoModal } from "./DemoVideoModal";
+import { CaseStudyModal } from "./CaseStudyModal";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardAction } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ function ProjectProofPanel({ p }: { p: (typeof projects)[number] }) {
 
 function ProjectCard({ p, index }: { p: (typeof projects)[number]; index: number }) {
   const [videoOpen, setVideoOpen] = useState(false);
+  const [caseStudyOpen, setCaseStudyOpen] = useState(false);
 
   return (
     <motion.div
@@ -130,17 +132,33 @@ function ProjectCard({ p, index }: { p: (typeof projects)[number]; index: number
                 </Badge>
               ))}
             </div>
-            {p.demoVideo && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="ml-auto gap-1.5 border-primary/35 bg-primary-soft text-primary hover:bg-primary/15"
-                onClick={() => setVideoOpen(true)}
-              >
-                <Play className="size-3.5 fill-current" />
-                Demo
-              </Button>
+            {(p.caseStudy || p.demoVideo) && (
+              <div className="ml-auto flex gap-2">
+                {p.caseStudy && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => setCaseStudyOpen(true)}
+                  >
+                    <BookOpen className="size-3.5" />
+                    Case Study
+                  </Button>
+                )}
+                {p.demoVideo && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 border-primary/35 bg-primary-soft text-primary hover:bg-primary/15"
+                    onClick={() => setVideoOpen(true)}
+                  >
+                    <Play className="size-3.5 fill-current" />
+                    Demo
+                  </Button>
+                )}
+              </div>
             )}
           </div>
         </CardContent>
@@ -153,6 +171,9 @@ function ProjectCard({ p, index }: { p: (typeof projects)[number]; index: number
           open={videoOpen}
           onOpenChange={setVideoOpen}
         />
+      )}
+      {p.caseStudy && (
+        <CaseStudyModal project={p} open={caseStudyOpen} onOpenChange={setCaseStudyOpen} />
       )}
     </motion.div>
   );

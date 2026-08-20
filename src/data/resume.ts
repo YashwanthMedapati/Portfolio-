@@ -36,6 +36,13 @@ export type Project = {
   bullets: string[];
   highlights: { label: string; value: string }[];
   mlFocused: boolean;
+  /** Optional deeper narrative for the project's "Case Study" modal. */
+  caseStudy?: {
+    challenge: string;
+    approach: string;
+    tradeoffs: string;
+    outcome: string;
+  };
 };
 
 export const projects: Project[] = [
@@ -66,6 +73,16 @@ export const projects: Project[] = [
       { label: "Model accuracy", value: "~70%" },
     ],
     mlFocused: true,
+    caseStudy: {
+      challenge:
+        "NHANES is real public-health survey data, not a clean benchmark dataset - it's messy, self-reported, and full of the kind of noise that doesn't show up in a tutorial. The harder problem underneath the model, though, was making a caries-risk score mean something to someone who isn't a dentist: a number alone isn't a product, it needed to be wrapped in food analysis and wellness tracking someone would actually use day to day.",
+      approach:
+        "I trained a Random Forest on 6,400+ NHANES records across 20+ dietary and lifestyle features, then built the React + FastAPI platform around it as 10+ modules rather than a single script - food analysis, wellness tracking, and the risk assessment itself as separate, composable pieces. Real-time nutrition data comes from USDA FoodData Central and Open Food Facts, with Google Vision API and barcode scanning so a user can log food without typing it in by hand.",
+      tradeoffs:
+        "A Random Forest over a deeper model was a deliberate choice for a dataset this size - it stays interpretable (which matters for a health-adjacent prediction) and trains fast enough to iterate on feature selection quickly, at the cost of some ceiling accuracy a larger, more complex model might eventually reach with more data.",
+      outcome:
+        "~70% accuracy is a solid baseline for a first pass on self-reported survey data, and the modular structure means the next real step - more training data, better feature engineering, or a feedback loop from actual usage - slots in without a rewrite.",
+    },
   },
   {
     slug: "ai-resume-intelligence",
@@ -93,6 +110,16 @@ export const projects: Project[] = [
       { label: "Parsing formats", value: "PDF + DOCX" },
     ],
     mlFocused: true,
+    caseStudy: {
+      challenge:
+        "Keyword-matching ATS tools miss the point: a resume can be a strong fit for a role without sharing exact phrasing with the job description. The other half of the problem was that candidates and hiring teams need genuinely different things from the same underlying analysis - one wants ATS feedback on their own resume, the other wants a ranked shortlist across many candidates.",
+      approach:
+        "I built separate workflows for each audience on top of the same core: PDF/DOCX parsing feeds Sentence Transformers embeddings, and cosine similarity between a resume's embedding and a job description's embedding drives both the candidate-facing feedback and the hiring-team ranking. I validated the ranking logic against 18 predefined test cases before trusting it on real batches.",
+      tradeoffs:
+        "Embedding similarity over a fully supervised ranking model was the right call for a personal project without a large labeled dataset of \"good\" resume-to-job matches to train on - it's fast enough for real-time feedback and scales cleanly to batch ranking, though a supervised model trained on real hiring outcomes could eventually capture nuance cosine similarity alone can't.",
+      outcome:
+        "All 18 predefined test cases pass, and the platform batch-ranks up to 50 resumes in one pass - enough to validate the approach end to end and make the two-workflow split (candidate vs. hiring team) feel like a real product decision, not just a demo script.",
+    },
   },
   {
     slug: "toxicity-analytics",

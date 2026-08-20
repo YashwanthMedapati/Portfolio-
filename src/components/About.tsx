@@ -8,6 +8,7 @@ import { Section } from "./Section";
 import { SectionHeader } from "./SectionHeader";
 import { SectionWatermark } from "./SectionWatermark";
 import { Card, CardContent } from "@/components/ui/card";
+import { GithubActivity } from "./GithubActivity";
 
 const pillars = [
   {
@@ -99,6 +100,8 @@ export default function About() {
           </motion.div>
         ))}
       </div>
+
+      <GithubActivity />
     </Section>
   );
 }

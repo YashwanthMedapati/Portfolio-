@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { ComponentType, MouseEvent } from "react";
 import { motion } from "framer-motion";
-import { Mail, MailOpen, Phone } from "lucide-react";
+import { Check, Loader2, Mail, MailOpen, Phone } from "lucide-react";
 import { personal, sectionIds } from "@/data/resume";
 import { contactMethods, ContactMethodId, emailDraftHref } from "@/lib/contactMethods";
 import { GithubIcon, InstagramIcon, LinkedinIcon } from "./icons";
@@ -30,16 +30,39 @@ export default function Contact() {
   const [message, setMessage] = useState("");
   const [copiedDetail, setCopiedDetail] = useState<string | null>(null);
   const [phoneNotice, setPhoneNotice] = useState(false);
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "fallback">("idle");
 
   const isPhoneCapable = () =>
     /Android|iPhone|iPad|iPod|Mobile/i.test(window.navigator.userAgent) ||
     window.matchMedia("(pointer: coarse)").matches;
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const openDraftFallback = () => {
     const subject = `Portfolio contact from ${name || "a visitor"}`;
     const body = `${message}\n\n- ${name} (${email})`;
     window.open(emailDraftHref(subject, body), "_blank", "noopener,noreferrer");
+    setStatus("fallback");
+  };
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus("sending");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message }),
+      });
+      if (!res.ok) throw new Error("send failed");
+      setStatus("sent");
+      setName("");
+      setEmail("");
+      setMessage("");
+    } catch {
+      // The form still works even if the email backend isn't configured or
+      // is briefly down - open the same email-draft fallback as before
+      // rather than losing what the visitor already typed.
+      openDraftFallback();
+    }
   };
 
   const openEmailDraft = () => {
@@ -178,12 +201,22 @@ export default function Contact() {
                     rows={4}
                   />
                 </div>
-                <Button type="submit" className="rounded-full gap-1.5 mt-1">
-                  <MailOpen className="size-4" />
-                  Open Email Draft
+                <Button type="submit" className="rounded-full gap-1.5 mt-1" disabled={status === "sending"}>
+                  {status === "sending" ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : status === "sent" ? (
+                    <Check className="size-4" />
+                  ) : (
+                    <MailOpen className="size-4" />
+                  )}
+                  {status === "sending" ? "Sending..." : status === "sent" ? "Sent" : "Submit Message"}
                 </Button>
-                <p className="text-xs text-muted-foreground -mt-2">
-                  Opens your email app with this message pre-filled - nothing is sent from here directly.
+                <p className="text-xs text-muted-foreground -mt-2" role="status">
+                  {status === "sent"
+                    ? "Thanks - your message is on its way to me."
+                    : status === "fallback"
+                      ? "Opened your email app instead so nothing you typed is lost - go ahead and send from there."
+                      : "Sends straight to my inbox."}
                 </p>
               </form>
             </CardContent>
