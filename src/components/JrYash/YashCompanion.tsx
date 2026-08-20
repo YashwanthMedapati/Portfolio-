@@ -19,8 +19,7 @@ import {
   MOBILE_STAGE_WIDTH,
 } from "./useCompanionPosition";
 
-const IDLE_EMOTE_AFTER = 12000;
-const EMOTE_DURATION = 1500;
+const IDLE_BACKFLIP_AFTER = 12000;
 const WAVE_DURATION = 1350;
 const DARK_AWAKE_IDLE_MS = 150000;
 const DARK_START_AWAKE_MS = 14000;
@@ -30,7 +29,13 @@ const GREETING_DELAY_MS = 350;
 const BUBBLE_MARGIN = 24;
 const BUBBLE_RESERVED_HEIGHT = 82;
 
-type Override = { type: "wave" } | { type: "jump" } | { type: "emote"; emoteIdx: number };
+type Override =
+  | { type: "wave" }
+  | { type: "jump" }
+  | { type: "emote"; emoteIdx: number }
+  | { type: "blush" }
+  | { type: "cry" }
+  | { type: "backflip" };
 
 function playPortfolioSound(type: "hi" | "goodnight" | "yash-click") {
   window.dispatchEvent(new CustomEvent("portfolio:sound", { detail: { type } }));
@@ -247,21 +252,34 @@ export function YashCompanion() {
     sleepSoundPlayedRef.current = false;
   }, [showSleepNotice]);
 
-  // Idle-too-long random emotes.
+  // Idle-too-long backflip. Clearing the override happens via
+  // handleSpriteComplete once the (mode: "once") clip actually finishes,
+  // rather than a guessed setTimeout duration.
   useEffect(() => {
     if (reducedMotion || isMobile) return;
     const iv = setInterval(() => {
       if (isOpenRef.current || overrideRef.current) return;
       if (theme === "dark" || isTyping || moveDir || isFollowingCursor) return;
-      if (Date.now() - lastActivityRef.current < IDLE_EMOTE_AFTER) return;
+      if (Date.now() - lastActivityRef.current < IDLE_BACKFLIP_AFTER) return;
 
       lastActivityRef.current = Date.now();
-      const emoteIdx = Math.floor(Math.random() * YASH_FRAMES.emotes.length);
-      setOverride({ type: "emote", emoteIdx });
-      setTimeout(() => setOverride(null), EMOTE_DURATION);
+      setOverride({ type: "backflip" });
     }, 1000);
     return () => clearInterval(iv);
   }, [theme, isTyping, moveDir, isMobile, reducedMotion, isFollowingCursor]);
+
+  // Chat-triggered poses (priya keyword -> blush, rude message -> cry),
+  // dispatched from JrYashContext since chat logic and the companion's
+  // visual state are decoupled. Same clear-on-complete pattern as backflip.
+  useEffect(() => {
+    const onPose = (e: Event) => {
+      const pose = (e as CustomEvent<{ pose: "blush" | "cry" }>).detail?.pose;
+      if (!pose || reducedMotion) return;
+      setOverride({ type: pose });
+    };
+    window.addEventListener("portfolio:yash-pose", onPose);
+    return () => window.removeEventListener("portfolio:yash-pose", onPose);
+  }, [reducedMotion]);
 
   if (x === null || y === null) return null;
   const compactDock = !isNearHero && !isFollowingCursor && !isDragging && !hasCustomPosition && !isOpen;
@@ -324,6 +342,21 @@ export function YashCompanion() {
     case "emote":
       frames = [YASH_FRAMES.emotes[(override as Extract<Override, { type: "emote" }>).emoteIdx]];
       break;
+    case "blush":
+      frames = YASH_FRAMES.blush;
+      fps = 4;
+      mode = "once";
+      break;
+    case "cry":
+      frames = YASH_FRAMES.cry;
+      fps = 4;
+      mode = "once";
+      break;
+    case "backflip":
+      frames = YASH_FRAMES.backflip;
+      fps = 11;
+      mode = "once";
+      break;
     case "sleep":
       if (sleepPhase === "falling") {
         frames = YASH_FRAMES.sleepFalling;
@@ -370,6 +403,12 @@ export function YashCompanion() {
       setOverride(null);
       toggle();
     } else if (override?.type === "wave") {
+      setOverride(null);
+    } else if (
+      override?.type === "blush" ||
+      override?.type === "cry" ||
+      override?.type === "backflip"
+    ) {
       setOverride(null);
     } else if (displayAction === "sleep" && sleepPhase === "falling") {
       setSleepPhase("asleep");

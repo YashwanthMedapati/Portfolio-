@@ -22,6 +22,9 @@ export const YASH_FRAMES = {
   sleep: namedFrames("sleep-2", "sleep_", 6),
   think: namedFrames("think", "thinking_", 8),
   emotes: frames("emote", 10),
+  blush: namedFrames("blush", "blush_", 6),
+  cry: namedFrames("cry", "crying_", 6),
+  backflip: namedFrames("backflip", "backflip_", 8),
 };
 
 // Every frame across every animation, flattened - fed to preloadYashFrames()

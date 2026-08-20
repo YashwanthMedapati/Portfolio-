@@ -51,6 +51,16 @@ function triggerEasterEgg(name: "break" | "hearts") {
   window.dispatchEvent(new CustomEvent(eventName));
 }
 
+function triggerYashPose(pose: "blush" | "cry") {
+  window.dispatchEvent(new CustomEvent("portfolio:yash-pose", { detail: { pose } }));
+}
+
+// Simple keyword heuristic, not sentiment analysis - just enough to catch
+// someone being openly rude to Yash and have him react (cry pose) instead
+// of answering as if nothing happened.
+const MEAN_PATTERN =
+  /\b(stupid|dumb|idiot|useless|worthless|pathetic|hate you|shut up|suck|sucks|ugly|trash|garbage|lame|loser|awful|terrible|annoying|dumbest|worst (bot|assistant|ai))\b/i;
+
 function playCloseSound() {
   window.dispatchEvent(new CustomEvent("portfolio:sound", { detail: { type: "bye" } }));
 }
@@ -127,8 +137,9 @@ export function JrYashProvider({ children }: { children: ReactNode }) {
       const isStopFollowCommand = ["stop following", "stop follow", "stay there", "go back"].includes(normalized);
       const isBreakCommand = /\bbreak\b/i.test(normalized);
       const isPriyaCommand = /\bpriya\b/i.test(normalized);
+      const isMeanCommand = MEAN_PATTERN.test(normalized);
 
-      if (isFollowCommand || isStopFollowCommand || isBreakCommand || isPriyaCommand) {
+      if (isFollowCommand || isStopFollowCommand || isBreakCommand || isPriyaCommand || isMeanCommand) {
         const answer: YashAnswer = isFollowCommand
           ? {
               text: "Follow mode is on. Move your cursor and I will run after it from my little spot. You can also drag me anywhere to park me there. Type \"stop following\" if you want me to stop chasing the cursor.",
@@ -147,17 +158,27 @@ export function JrYashProvider({ children }: { children: ReactNode }) {
                   action: { type: "none" },
                   followUps: ["stop following", "Show me my AI projects"],
                 }
-              : {
-                  text: "Okay, that one gets the secret heart burst. I will keep it sweet and dramatic for a few seconds.",
-                  action: { type: "none" },
-                  followUps: ["break", "What tech stack do I use?"],
-                };
+              : isPriyaCommand
+                ? {
+                    text: "Okay, that one gets the secret heart burst. I will keep it sweet and dramatic for a few seconds.",
+                    action: { type: "none" },
+                    followUps: ["break", "What tech stack do I use?"],
+                  }
+                : {
+                    text: "Ouch, that one stung a little. I'll bounce back though - ask me something else?",
+                    action: { type: "none" },
+                    followUps: ["What tech stack do I use?", "Show me my AI projects"],
+                  };
         window.setTimeout(() => {
           revealAnswer(answer, () => {
             if (isFollowCommand) setIsFollowingCursor(true);
             if (isStopFollowCommand) setIsFollowingCursor(false);
             if (isBreakCommand) triggerEasterEgg("break");
-            if (isPriyaCommand) triggerEasterEgg("hearts");
+            if (isPriyaCommand) {
+              triggerEasterEgg("hearts");
+              triggerYashPose("blush");
+            }
+            if (isMeanCommand) triggerYashPose("cry");
           });
         }, 500);
         return;
