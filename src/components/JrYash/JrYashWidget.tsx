@@ -124,7 +124,7 @@ export default function JrYashWidget() {
             {/* Identity strip */}
             <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-zinc-800 bg-[#0a0a0a]">
               {/* eslint-disable-next-line @next/next/no-img-element -- tiny static sprite frame, not worth next/image's overhead */}
-              <img src="/yash/idle/1.png" alt="" width={26} height={26} className="shrink-0" style={{ width: 26, height: "auto" }} />
+              <img src="/yash/idle/idle_01.png" alt="" width={26} height={26} className="shrink-0" style={{ width: 26, height: "auto" }} />
               <div className="min-w-0">
                 <p className="text-xs font-semibold leading-tight text-green-400">PS portfolio:\yash&gt; ready</p>
                 <p className="text-[11px] text-zinc-500 leading-tight">
