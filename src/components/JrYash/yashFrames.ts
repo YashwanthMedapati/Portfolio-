@@ -2,14 +2,24 @@ function frames(category: string, count: number): string[] {
   return Array.from({ length: count }, (_, i) => `/yash/${category}/${i + 1}.png`);
 }
 
+// Newer frame sets ship as zero-padded, prefixed filenames (e.g.
+// idle_01.png) rather than the plain 1.png/2.png the frames() helper above
+// expects - kept separate since sleep/emotes still use the old naming.
+function namedFrames(category: string, prefix: string, count: number): string[] {
+  return Array.from(
+    { length: count },
+    (_, i) => `/yash/${category}/${prefix}${String(i + 1).padStart(2, "0")}.png`
+  );
+}
+
 export const YASH_FRAMES = {
-  idle: frames("idle", 4),
-  wave: frames("wave", 4),
-  jump: frames("jump", 4),
-  runLeft: frames("run-left", 6),
-  runRight: frames("run-right", 6),
+  idle: namedFrames("idle", "idle_", 7),
+  wave: namedFrames("wave", "wave_", 8),
+  jump: namedFrames("jump", "jump_", 5),
+  runLeft: namedFrames("run-left", "run_left_", 8),
+  runRight: namedFrames("run-right", "run_right_", 8),
   sleep: frames("sleep", 3),
-  think: ["/yash/think/1.png"],
+  think: namedFrames("think", "thinking_", 8),
   emotes: frames("emote", 10),
 };
 
