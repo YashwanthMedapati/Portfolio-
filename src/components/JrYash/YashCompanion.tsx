@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { YashSprite, YashPlaybackMode } from "./YashSprite";
-import { YASH_FRAMES } from "./yashFrames";
+import { YASH_FRAMES, preloadYashFrames } from "./yashFrames";
 import { useJrYash } from "./JrYashContext";
 import { useTheme } from "@/components/ThemeContext";
 import { useActiveSectionIntro } from "@/lib/useActiveSectionIntro";
@@ -80,6 +80,10 @@ export function YashCompanion() {
 
   useEffect(() => {
     lastActivityRef.current = Date.now();
+    // As early as possible: the entrance wave starts almost immediately,
+    // and by the time it hands off to jump/run/sleep sequences later,
+    // every frame needs to already be cached - see preloadYashFrames().
+    preloadYashFrames();
   }, []);
 
   useEffect(() => {
