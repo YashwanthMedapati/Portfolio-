@@ -1,6 +1,6 @@
 # Portfolio Update Log
 
-This log tracks the major improvements made after the last external update, so the portfolio has a clear history instead of a pile of mystery edits.
+This log tracks the major portfolio improvements so the project has a clear history instead of a pile of mystery edits.
 
 ## Current Polish Round
 

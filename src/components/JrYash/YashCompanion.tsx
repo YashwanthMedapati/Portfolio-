@@ -72,6 +72,7 @@ export function YashCompanion() {
   const [darkAwakeUntil, setDarkAwakeUntil] = useState(() => Date.now() + DARK_START_AWAKE_MS);
   const [now, setNow] = useState(() => Date.now());
   const [showSectionIntro, setShowSectionIntro] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
   const lastIntroKeyRef = useRef<string | null>(null);
 
   const lastActivityRef = useRef(0);
@@ -79,6 +80,7 @@ export function YashCompanion() {
   const previousThemeRef = useRef(theme);
   const greetingSoundPlayedRef = useRef(false);
   const sleepSoundPlayedRef = useRef(false);
+  const scrollStopTimerRef = useRef<number | null>(null);
   // Read inside the idle-emote interval below instead of depending on
   // `isOpen` directly, so opening/closing the chat panel doesn't tear down
   // and restart that interval - only the emote check needs the latest
@@ -134,8 +136,24 @@ export function YashCompanion() {
   // scroll doesn't re-render on every pixel.
   useEffect(() => {
     let lastWakeCall = 0;
-    const onActivity = () => {
+    const onActivity = (event: Event) => {
+      const activityIsScroll = event.type === "scroll";
       lastActivityRef.current = Date.now();
+      if (activityIsScroll) {
+        setIsScrolling(true);
+        setShowSectionIntro(false);
+        if (window.scrollY > 24) {
+          setShowGreeting(false);
+          setDismissedGreeting(true);
+        }
+        if (scrollStopTimerRef.current) {
+          window.clearTimeout(scrollStopTimerRef.current);
+        }
+        scrollStopTimerRef.current = window.setTimeout(() => {
+          setIsScrolling(false);
+          scrollStopTimerRef.current = null;
+        }, 650);
+      }
       const now = Date.now();
       if (now - lastWakeCall < 1000) return;
       lastWakeCall = now;
@@ -148,6 +166,9 @@ export function YashCompanion() {
       window.removeEventListener("scroll", onActivity);
       window.removeEventListener("pointerdown", onActivity);
       window.removeEventListener("keydown", onActivity);
+      if (scrollStopTimerRef.current) {
+        window.clearTimeout(scrollStopTimerRef.current);
+      }
     };
   }, [wakeDarkYash]);
 
@@ -235,13 +256,13 @@ export function YashCompanion() {
   useEffect(() => {
     if (!sectionIntro) return;
     if (lastIntroKeyRef.current === sectionIntro.id) return;
-    if (showGreeting || showSleepNotice || isOpen) return;
+    if (showGreeting || showSleepNotice || isOpen || isScrolling) return;
     lastIntroKeyRef.current = sectionIntro.id;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reacting to an external IntersectionObserver-driven value, not derivable during render
     setShowSectionIntro(true);
     const hide = setTimeout(() => setShowSectionIntro(false), 4200);
     return () => clearTimeout(hide);
-  }, [sectionIntro, showGreeting, showSleepNotice, isOpen]);
+  }, [sectionIntro, showGreeting, showSleepNotice, isOpen, isScrolling]);
 
   useEffect(() => {
     if (showSleepNotice) {
@@ -431,7 +452,7 @@ export function YashCompanion() {
       }}
     >
       <AnimatePresence>
-        {showGreeting && !dismissedGreeting && !showSleepNotice && !isOpen && (
+        {showGreeting && !dismissedGreeting && !showSleepNotice && !isOpen && !isScrolling && (
           <motion.div
             key="yash-greeting"
             initial={{ opacity: 0, y: 8 }}
@@ -458,7 +479,7 @@ export function YashCompanion() {
             Hi, this is Yash. Tap me if you need anything.
           </motion.div>
         )}
-        {showSleepNotice && !isOpen && theme === "dark" && (
+        {showSleepNotice && !isOpen && theme === "dark" && !isScrolling && (
           <motion.div
             key="yash-sleep-notice"
             initial={{ opacity: 0, y: 8 }}
@@ -474,7 +495,7 @@ export function YashCompanion() {
             Good night. I&apos;ll be right here when you need me.
           </motion.div>
         )}
-        {showSectionIntro && sectionIntro && !isOpen && !showGreeting && !showSleepNotice && (
+        {showSectionIntro && sectionIntro && !isOpen && !showGreeting && !showSleepNotice && !isScrolling && (
           <motion.div
             key={`yash-intro-${sectionIntro.id}`}
             initial={{ opacity: 0, y: 8 }}

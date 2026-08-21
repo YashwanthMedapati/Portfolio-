@@ -73,8 +73,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ text: answer, cached: false });
   } catch (error) {
     if (error instanceof YashChatConfigError) {
-      return NextResponse.json({ error: "AI chat is not configured" }, { status: 503 });
+      return NextResponse.json({ error: "Yash chat is not configured" }, { status: 503 });
     }
-    return NextResponse.json({ error: "AI chat is temporarily unavailable" }, { status: 502 });
+    return NextResponse.json({ error: "Yash chat is temporarily unavailable" }, { status: 502 });
   }
 }

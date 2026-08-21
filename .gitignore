@@ -29,6 +29,7 @@
 .DS_Store
 *.pem
 AGENTS.md
+.claude/
 
 # debug
 npm-debug.log*

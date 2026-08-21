@@ -79,7 +79,7 @@ src/
     ui/                  # shadcn/ui and Base UI wrappers
   data/
     resume.ts            # Main portfolio content source
-    personalQuestions.ts # Approved personal FAQ content
+    personalFacts.ts     # Approved personal FAQ content
   lib/
     jrYashBrain.ts       # Deterministic answer and intent logic
     contactMethods.ts    # Contact links and copy values
@@ -102,7 +102,7 @@ Edit [`src/data/resume.ts`](src/data/resume.ts) for:
 - resume file path
 - social and contact links
 
-Edit [`src/data/personalQuestions.ts`](src/data/personalQuestions.ts) and [`src/lib/jrYashBrain.ts`](src/lib/jrYashBrain.ts) when adding new Yash answers. Keep answers factual, concise, and based only on approved information.
+Edit [`src/data/personalFacts.ts`](src/data/personalFacts.ts) and [`src/lib/jrYashBrain.ts`](src/lib/jrYashBrain.ts) when adding new Yash answers. Keep answers factual, concise, and based only on approved information.
 
 To add screenshots or demo media, place files under `public/` and reference them from the relevant project object.
 

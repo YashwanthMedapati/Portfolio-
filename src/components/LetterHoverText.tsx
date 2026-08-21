@@ -19,12 +19,7 @@ export function LetterHoverText({
   const parts = text.split(/(\s+)/);
 
   return (
-    <Tag className={className}>
-      {/* aria-label isn't valid on every role this can render as (e.g. a
-          plain paragraph) - a visually-hidden real text node works
-          everywhere, screen readers get the actual text since every
-          decorative letter-span below is aria-hidden. */}
-      <span className="sr-only">{text}</span>
+    <Tag className={className} aria-label={text}>
       {parts.map((part, partIndex) =>
         /^\s+$/.test(part) ? (
           <span key={`space-${partIndex}`} aria-hidden>
