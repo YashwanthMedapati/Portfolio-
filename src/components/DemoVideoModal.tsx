@@ -17,8 +17,6 @@ export function DemoVideoModal({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Stop playback the instant the modal closes - otherwise the video keeps
-  // running (and making sound) off-screen after the user has "left."
   useEffect(() => {
     if (!open) videoRef.current?.pause();
   }, [open]);
@@ -37,11 +35,6 @@ export function DemoVideoModal({
               <X className="size-4" />
             </Dialog.Close>
           </div>
-          {/*
-            Native <video controls> gives play/pause, volume/mute, a
-            scrubber, and fullscreen for free - all accessible and already
-            familiar to users, rather than reimplementing them by hand.
-          */}
           <div className="bg-black">
             {open && (
               <video

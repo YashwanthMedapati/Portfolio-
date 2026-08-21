@@ -1,9 +1,5 @@
 export type PersonalFact = { id: string; question: string; answer: string };
 
-// The single source of truth for Yash's personal-fact answers. Both the
-// fast keyword-matched intents (jrYashIntents.ts, via getFact()) and the AI
-// system prompt (yashSystemPrompt.ts) read from here, so there is exactly
-// one place to update a fact instead of two or three copies drifting apart.
 export const personalFacts: PersonalFact[] = [
   {
     id: "age-height",
@@ -97,8 +93,6 @@ export const personalFacts: PersonalFact[] = [
 
 const factsById = new Map(personalFacts.map((fact) => [fact.id, fact.answer]));
 
-// Throws on a typo'd id rather than silently rendering "undefined" in an
-// answer - any caller mistyping an id fails at first render, not in prod.
 export function getFact(id: string): string {
   const answer = factsById.get(id);
   if (!answer) throw new Error(`Unknown personal fact id: "${id}"`);

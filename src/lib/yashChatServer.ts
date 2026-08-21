@@ -1,10 +1,6 @@
 import "server-only";
 import { checkRateLimit as checkRateLimitShared, getRedis } from "./redisClient";
 
-// 7 days, not months: a cached answer is served to every visitor who asks
-// something similar, with no rate limit on cache hits. A short TTL bounds
-// how long any single bad AI answer (an off-brand response, a successful
-// prompt-injection attempt) can keep circulating before it ages out.
 const CACHE_TTL_SECONDS = 60 * 60 * 24 * 7;
 const MAX_QUERY_LENGTH = 300;
 const MAX_OUTPUT_TOKENS = 220;

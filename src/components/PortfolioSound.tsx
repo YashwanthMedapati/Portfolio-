@@ -26,12 +26,7 @@ type ToneOptions = {
   attack?: number;
   release?: number;
   detune?: number;
-  // A couple of cents-detuned voices summed together read as a warm, sung
-  // "aah" instead of one bare oscillator's flat, robotic buzz - the same
-  // trick real synths use for chorus/unison patches.
   chorus?: boolean;
-  // Rolls off the harsh upper harmonics a raw oscillator produces, which is
-  // most of what makes a single tone sound synthetic/robotic in the first place.
   filterHz?: number;
 };
 
@@ -75,10 +70,6 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
   const pendingSoundRef = useRef<PortfolioSoundType | null>(null);
   const soundAllowedRef = useRef(true);
   const unlockedRef = useRef(false);
-  // Must start false on both server and client's first render - SSR has no
-  // localStorage, so a lazy initializer reading it here is exactly what
-  // caused the SoundToggle hydration mismatch (server always rendered
-  // "off," client could immediately render "on"). Corrected via effect below.
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
@@ -260,9 +251,6 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
       const now = audio.currentTime;
 
       if (type === "hi") {
-        // A soft, sung-feeling greeting blip: chorus voices instead of one
-        // bare oscillator, gentler triangle/sine waves (no square anywhere
-        // here), a slower attack, and a lowpass to round off the buzz.
         tone(523.25, now, 0.09, { type: "triangle", gain: 0.036, attack: 0.03, release: 0.045, chorus: true, filterHz: 2600 });
         tone(659.25, now + 0.08, 0.09, { type: "triangle", gain: 0.035, attack: 0.03, release: 0.045, chorus: true, filterHz: 2600 });
         tone(783.99, now + 0.17, 0.16, { type: "sine", gain: 0.038, attack: 0.035, release: 0.09, chorus: true, filterHz: 3200 });
@@ -271,8 +259,6 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
       }
 
       if (type === "goodnight") {
-        // A soft, descending two-note "mm, night" cadence - warm and
-        // resolved for users who have not loaded the MP3 voice clip.
         tone(392, now, 0.22, { type: "sine", gain: 0.026, attack: 0.05, release: 0.16, chorus: true, filterHz: 1500 });
         tone(293.66, now + 0.24, 0.34, { type: "sine", gain: 0.022, attack: 0.07, release: 0.28, chorus: true, filterHz: 1200 });
         return;
@@ -285,9 +271,6 @@ export function PortfolioSoundProvider({ children }: { children: React.ReactNode
       }
 
       if (type === "arcade-hit") {
-        // A bright, snappy "tink-tink" - the classic ? -block tap - instead
-        // of a low descending thud. Percussive on purpose: this one voice
-        // should stay a crisp mechanical bonk, not warmed up like the others.
         tone(1046.5, now, 0.028, { type: "square", gain: 0.03, attack: 0.002, release: 0.012 });
         tone(830.61, now + 0.024, 0.032, { type: "square", gain: 0.026, attack: 0.002, release: 0.016 });
         noise(now, 0.035, { gain: 0.022, frequency: 2400, type: "highpass" });

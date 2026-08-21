@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useRef, useState, ReactNode } from "react";
 import { matchIntent, fallback, greeting, YashAnswer, NavAction } from "@/lib/jrYashBrain";
-import { askYashAI } from "@/lib/askYashAI";
+import { askYashChat } from "@/lib/askYashChat";
 import { personal } from "@/data/resume";
 
 export type ChatMessage = {
@@ -60,9 +60,6 @@ function triggerYashPose(pose: "blush" | "cry") {
   window.dispatchEvent(new CustomEvent("portfolio:yash-pose", { detail: { pose } }));
 }
 
-// Simple keyword heuristic, not sentiment analysis - just enough to catch
-// someone being openly rude to Yash and have him react (cry pose) instead
-// of answering as if nothing happened.
 const MEAN_PATTERN =
   /\b(stupid|dumb|idiot|useless|worthless|pathetic|hate you|shut up|suck|sucks|ugly|trash|garbage|lame|loser|awful|terrible|annoying|dumbest|worst (bot|assistant|ai))\b/i;
 
@@ -94,10 +91,6 @@ export function JrYashProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Reads isOpen directly rather than via a setState updater callback:
-  // updater callbacks are meant to be pure (React can and does invoke them
-  // more than once, e.g. under StrictMode) - the close sound firing twice
-  // in dev was exactly that side-effect-in-an-updater trap.
   const close = useCallback(() => {
     if (isOpen) playCloseSound();
     setIsOpen(false);
@@ -197,18 +190,13 @@ export function JrYashProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Fast path: known intents answer instantly from local data, same as
-      // before. Anything that doesn't match confidently escalates to the AI
-      // backend instead of landing straight on the static fallback - see
-      // /api/yash-chat, which itself caches answers so a repeated question
-      // (from anyone) comes back instantly next time too.
       const fast = matchIntent(query);
       if (fast) {
         window.setTimeout(() => revealAnswer(fast), 500);
         return;
       }
 
-      askYashAI(query)
+      askYashChat(query)
         .then((text) => revealAnswer({ text, action: { type: "none" } }))
         .catch(() => revealAnswer(fallback));
     },

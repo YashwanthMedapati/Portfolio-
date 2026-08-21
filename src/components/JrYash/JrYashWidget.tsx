@@ -105,7 +105,6 @@ export default function JrYashWidget() {
             id="jr-yash-panel"
             className="h-[70svh] max-h-[540px] w-full max-w-md bg-[#050505] border border-zinc-700 rounded-md shadow-2xl shadow-black/70 flex flex-col overflow-hidden font-mono text-zinc-100 sm:w-[92vw]"
           >
-            {/* Terminal tab bar */}
             <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-zinc-700 bg-[#111111]">
               <div className="flex items-center gap-2.5 min-w-0">
                 <TerminalDots />
@@ -121,7 +120,6 @@ export default function JrYashWidget() {
               </Button>
             </div>
 
-            {/* Identity strip */}
             <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-zinc-800 bg-[#0a0a0a]">
               {/* eslint-disable-next-line @next/next/no-img-element -- tiny static sprite frame, not worth next/image's overhead */}
               <img src="/yash/idle/idle_01.png" alt="" width={26} height={26} className="shrink-0" style={{ width: 26, height: "auto" }} />

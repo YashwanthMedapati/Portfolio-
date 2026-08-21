@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-// Sizing constants live here (not in YashCompanion.tsx) since they're what
-// this hook's position math is computed from - the component imports them
-// back for its own render-time layout (dock/open sizing, bubble placement).
 export const DESKTOP_SPRITE_SIZE = 92;
 export const MOBILE_SPRITE_SIZE = 64;
 export const DESKTOP_STAGE_WIDTH = 184;
@@ -11,10 +8,6 @@ export const CORNER_PADDING = 12;
 
 const DESKTOP_EDGE_OFFSET = 204;
 const BOTTOM_OFFSET = 118;
-// Desktop's 118px offset was tuned to clear desktop-only chrome near the
-// bottom of the viewport. On mobile that much offset instead lands the
-// companion right on top of the Hero section's quick-facts row - a much
-// smaller offset tucks it into the true corner, clear of that content.
 const MOBILE_BOTTOM_OFFSET = 20;
 
 function restingY(mobile: boolean, viewportHeight: number, stageHeight: number) {
@@ -30,23 +23,12 @@ export function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
-// Desktop docks to the bottom-right with room to spare. Mobile docks to
-// the bottom-LEFT instead: every section's own call-to-action buttons
-// (Demo/Code on project cards, form submits, etc.) are right-aligned, so
-// a right-docked companion on a narrow screen sits right on top of them -
-// left is the side that's actually clear of content across every section.
 function restingX(mobile: boolean, viewportWidth: number, stageWidth: number) {
   return mobile
     ? clamp(CORNER_PADDING, CORNER_PADDING, viewportWidth - stageWidth - CORNER_PADDING)
     : clamp(viewportWidth - DESKTOP_EDGE_OFFSET, CORNER_PADDING, viewportWidth - stageWidth - CORNER_PADDING);
 }
 
-// Owns "where does the roaming Yash sprite currently think it is": mobile
-// vs desktop sizing, its resting/roam position, cursor-follow, and
-// drag-to-reposition. Deliberately does NOT know about dock/open-panel
-// layout (compactDock, openX/Y) - those depend on chat and scroll state
-// that live outside positioning proper, so YashCompanion.tsx still derives
-// the final on-screen position from what this hook returns.
 export function useCompanionPosition({
   isFollowingCursor,
   isOpen,
@@ -167,11 +149,6 @@ export function useCompanionPosition({
     return () => window.clearTimeout(timer);
   }, [isFollowingCursor]);
 
-  // Dropping Yash mid-follow parks him in place instead of yanking him back
-  // to the cursor immediately - but that park was permanent (only cleared
-  // by fully stopping and restarting "follow me"), so any drag while
-  // following silently ended cursor-tracking for good. Un-park on the next
-  // real mouse movement instead, so following just resumes naturally.
   useEffect(() => {
     if (!dragParkedFollow || !isFollowingCursor || isDragging) return;
     const onFirstMove = () => setDragParkedFollow(false);
@@ -205,7 +182,6 @@ export function useCompanionPosition({
     };
   }, [applyDragPosition, isDragging, isFollowingCursor]);
 
-  // Cursor follow mode: Yash trails the pointer, then dodges if it gets too close.
   useEffect(() => {
     if (reducedMotion || isMobile || !isFollowingCursor || dragParkedFollow || isDragging) {
       const t = setTimeout(() => setMoveDir(null), 0);
@@ -241,11 +217,6 @@ export function useCompanionPosition({
       if (Math.abs(movementX) >= MOVE_THRESHOLD) {
         setMoveDir(movementX < 0 ? "left" : "right");
       }
-      // Written synchronously (not left to the [x, y] effect below) since
-      // mousemove can fire many times before React commits a render - the
-      // effect's update would lag by one or more events, so the very next
-      // event in a fast-moving burst would compute its chase side (dx) off
-      // a stale position and could send Yash the wrong way.
       positionRef.current = { x: nextX, y: nextY };
       setX(nextX);
       setY(nextY);
@@ -312,9 +283,6 @@ export function useCompanionPosition({
     [isDragging, isFollowingCursor]
   );
 
-  // handleClick needs to distinguish "this was a click" from "this was the
-  // end of a drag" - consuming the flag (read + reset in one call) keeps
-  // that state private to this hook rather than exposing the raw ref.
   const consumeDragMoved = useCallback(() => {
     const moved = dragRef.current.moved;
     dragRef.current.moved = false;

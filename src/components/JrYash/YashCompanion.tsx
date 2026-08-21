@@ -81,17 +81,10 @@ export function YashCompanion() {
   const greetingSoundPlayedRef = useRef(false);
   const sleepSoundPlayedRef = useRef(false);
   const scrollStopTimerRef = useRef<number | null>(null);
-  // Read inside the idle-emote interval below instead of depending on
-  // `isOpen` directly, so opening/closing the chat panel doesn't tear down
-  // and restart that interval - only the emote check needs the latest
-  // value, not a resubscribe every toggle.
   const isOpenRef = useRef(isOpen);
 
   useEffect(() => {
     lastActivityRef.current = Date.now();
-    // As early as possible: the entrance wave starts almost immediately,
-    // and by the time it hands off to jump/run/sleep sequences later,
-    // every frame needs to already be cached - see preloadYashFrames().
     preloadYashFrames();
   }, []);
 
@@ -107,10 +100,6 @@ export function YashCompanion() {
     setShowSleepNotice(false);
   }, [theme]);
 
-  // Position-hook activity callback: cursor-follow and drag-start both used
-  // to touch lastActivityRef directly - now that they live in the hook,
-  // this combined callback keeps that side effect without the hook needing
-  // to know idle-emote timing exists.
   const handlePositionActivity = useCallback(() => {
     lastActivityRef.current = Date.now();
     wakeDarkYash();
@@ -124,16 +113,8 @@ export function YashCompanion() {
   });
   const { x, y, isMobile, viewport, moveDir, hasCustomPosition, isDragging, isNearHero } = position;
 
-  // Section-intro bubbles are desktop-only: on narrow viewports they'd be
-  // yet another thing popping over already-tight layouts, so the hook
-  // isn't even enabled on mobile - sectionIntro stays null there.
   const sectionIntro = useActiveSectionIntro(sectionIntros, { enabled: !reducedMotion && !isMobile });
 
-  // The entry greeting and the goodnight are "must" episodes: scrolling
-  // away no longer cuts the greeting short, and any real activity - not
-  // just hovering Yash directly - counts as "not idle" so he only sleeps
-  // once the user has genuinely stepped away. Throttled so a continuous
-  // scroll doesn't re-render on every pixel.
   useEffect(() => {
     let lastWakeCall = 0;
     const onActivity = (event: Event) => {
@@ -190,11 +171,6 @@ export function YashCompanion() {
     previousThemeRef.current = theme;
   }, [theme, isMobile, reducedMotion]);
 
-  // End the entrance wave (started via lazy initial state above) while the
-  // greeting appears almost immediately. Browsers may still hold the MP3 until
-  // the user has enabled/interacted with sound, but the site requests it on entry.
-  // The greeting BUBBLE is desktop-only - mobile still gets the wave, just
-  // not the popover text on top of an already-tight layout.
   useEffect(() => {
     if (reducedMotion) return;
     const t = setTimeout(() => setOverride(null), WAVE_DURATION);
@@ -217,8 +193,6 @@ export function YashCompanion() {
     if (theme !== "dark" || darkAwakeUntil <= 0) return;
     const sleepDelay = Math.max(darkAwakeUntil - Date.now(), 0);
     const noticeDelay = Math.max(sleepDelay - GOOD_NIGHT_LEAD_MS, 0);
-    // The "Good night" bubble is desktop-only; Yash still visually falls
-    // asleep on mobile (the sleepTimer below), just without the popover.
     const noticeTimer = isMobile ? undefined : setTimeout(() => setShowSleepNotice(true), noticeDelay);
     const sleepTimer = setTimeout(() => {
       setShowSleepNotice(false);
@@ -230,11 +204,6 @@ export function YashCompanion() {
     };
   }, [theme, darkAwakeUntil, isMobile]);
 
-  // Sleep is two clips back to back: falling_asleep plays once, then hands
-  // off (via handleSpriteComplete) to the looping sleep clip. Re-entering
-  // sleep after being woken should replay the fall-asleep transition rather
-  // than resume mid-loop, so this resets the phase only on the wake->sleep
-  // edge, not on every render while already asleep.
   useEffect(() => {
     const sleeping = theme === "dark" && darkAwakeUntil <= now;
     if (sleeping && !wasSleepingRef.current) {
@@ -249,10 +218,6 @@ export function YashCompanion() {
     playPortfolioSound("hi");
   }, [dismissedGreeting, showGreeting]);
 
-  // A brief, one-line intro bubble each time a new section scrolls in -
-  // gated behind the entry greeting, the sleep notice, and the chat panel
-  // so it never stacks with them, and only re-fires on an actual section
-  // change (lastIntroKeyRef), not on every intersection tick.
   useEffect(() => {
     if (!sectionIntro) return;
     if (lastIntroKeyRef.current === sectionIntro.id) return;
@@ -273,9 +238,6 @@ export function YashCompanion() {
     sleepSoundPlayedRef.current = false;
   }, [showSleepNotice]);
 
-  // Idle-too-long backflip. Clearing the override happens via
-  // handleSpriteComplete once the (mode: "once") clip actually finishes,
-  // rather than a guessed setTimeout duration.
   useEffect(() => {
     if (reducedMotion || isMobile) return;
     const iv = setInterval(() => {
@@ -289,9 +251,6 @@ export function YashCompanion() {
     return () => clearInterval(iv);
   }, [theme, isTyping, moveDir, isMobile, reducedMotion, isFollowingCursor]);
 
-  // Chat-triggered poses (priya keyword -> blush, rude message -> cry),
-  // dispatched from JrYashContext since chat logic and the companion's
-  // visual state are decoupled. Same clear-on-complete pattern as backflip.
   useEffect(() => {
     const onPose = (e: Event) => {
       const pose = (e as CustomEvent<{ pose: "blush" | "cry" }>).detail?.pose;
@@ -521,7 +480,7 @@ export function YashCompanion() {
         onPointerCancel={position.endDrag}
         onMouseEnter={wakeDarkYash}
         onFocus={wakeDarkYash}
-        aria-label="Yash, an AI guide - click to chat"
+        aria-label="Yash guide - click to chat"
         aria-haspopup="dialog"
         aria-controls="jr-yash-panel"
         tabIndex={isOpen ? -1 : 0}

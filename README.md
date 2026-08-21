@@ -19,7 +19,7 @@ The site focuses on roles in:
 ## Highlights
 
 - **Resume-grounded content:** projects, skills, education, experience, contact methods, and metadata are driven from typed data in [`src/data/resume.ts`](src/data/resume.ts).
-- **Yash assistant:** a PowerShell-style chat guide that answers approved resume and personal questions, opens relevant sections, and stays available without blocking the page.
+- **Yash guide:** a PowerShell-style chat panel that answers approved resume and personal questions, opens relevant sections, and stays available without blocking the page.
 - **Project proof panels:** each project includes title, timeline, stack, proof bullets, metrics, repository links, and optional demo video links.
 - **Animated character system:** 2D Yash sprite frames, a draggable guide, cursor-follow behavior, and a bottom finale scene with a larger 3D Yash avatar.
 - **Recruiter-safe polish:** first-person copy, direct contact methods, resume preview, download path, opt-in sound, theme toggle, mobile navigation, and accessible controls.
@@ -36,7 +36,7 @@ Visitors can scan the site normally, or interact with Yash to ask questions such
 - Tell me about your background.
 - How can I contact you?
 
-The assistant uses curated local data instead of inventing answers. If a question is outside the approved information, it redirects the visitor toward the contact section.
+Yash uses curated local data instead of inventing answers. If a question is outside the approved information, it redirects the visitor toward the contact section.
 
 ## Tech Stack
 
@@ -135,7 +135,7 @@ Recent coverage includes:
 - project repository links
 - project demo video availability
 - contact link correctness
-- Yash assistant open, close, prompt, response, and follow-mode behavior
+- Yash guide open, close, prompt, response, and follow-mode behavior
 
 ## Deployment Notes
 

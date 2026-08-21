@@ -81,9 +81,6 @@ function individualSkillAnswer(query: string): YashAnswer | null {
   return null;
 }
 
-// Returns null (rather than the fallback) when nothing matches confidently,
-// so callers can decide what to do next - e.g. escalate to the AI backend -
-// instead of always landing on the canned "I don't know that" response.
 export function matchIntent(query: string): YashAnswer | null {
   if (!query.trim()) return null;
   const spoken = spokenLanguageAnswer(query);

@@ -2,13 +2,6 @@
 
 import { ReactNode, useRef } from "react";
 import { motion, useMotionTemplate, useScroll, useTransform, useReducedMotion } from "framer-motion";
-
-// Wraps About -> Contact and paints one continuous, slowly-drifting wash
-// behind them - two soft brand-colored blobs that migrate across the
-// section as you scroll - instead of six independently-triggered section
-// animations sitting on an otherwise flat, identical background. Hero and
-// the finale keep their own bespoke treatments; this is scoped to exactly
-// this block via useScroll's target ref, so it never bleeds into either.
 export function AmbientBackdrop({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();

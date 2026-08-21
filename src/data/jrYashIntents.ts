@@ -2,11 +2,6 @@ import { personal, skills, education, certifications, experience } from "@/data/
 import { getFact } from "@/data/personalFacts";
 import type { Intent } from "@/lib/jrYashBrain";
 
-// The content Jr Yash's fast keyword-matcher answers from. Kept separate
-// from the matching/scoring logic in jrYashBrain.ts so that file stays
-// "how do we match a query", not "what do we say" - and personal facts are
-// pulled from getFact() rather than repeating the text here, so there's one
-// place (personalFacts.ts) to update when a fact changes.
 export const intents: Intent[] = [
   {
     id: "ml-projects",

@@ -1,4 +1,4 @@
-export class YashAIError extends Error {
+export class YashChatError extends Error {
   status?: number;
   constructor(message: string, status?: number) {
     super(message);
@@ -6,7 +6,7 @@ export class YashAIError extends Error {
   }
 }
 
-export async function askYashAI(query: string): Promise<string> {
+export async function askYashChat(query: string): Promise<string> {
   const response = await fetch("/api/yash-chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -15,10 +15,10 @@ export async function askYashAI(query: string): Promise<string> {
 
   if (!response.ok) {
     const body = await response.json().catch(() => null);
-    throw new YashAIError(body?.error || "AI chat request failed", response.status);
+    throw new YashChatError(body?.error || "Yash chat request failed", response.status);
   }
 
   const data = await response.json();
-  if (typeof data?.text !== "string") throw new YashAIError("AI chat returned no answer");
+  if (typeof data?.text !== "string") throw new YashChatError("Yash chat returned no answer");
   return data.text;
 }

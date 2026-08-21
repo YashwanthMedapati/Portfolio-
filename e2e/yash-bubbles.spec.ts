@@ -23,7 +23,7 @@ test.describe("Yash section bubbles", () => {
     expect(box!.x + box!.width).toBeLessThanOrEqual(viewport!.width);
 
     const triggerBox = await page
-      .getByRole("button", { name: "Yash, an AI guide - click to chat" })
+      .getByRole("button", { name: "Yash guide - click to chat" })
       .boundingBox();
     expect(triggerBox).toBeTruthy();
     const gapToYash = triggerBox!.y - (box!.y + box!.height);

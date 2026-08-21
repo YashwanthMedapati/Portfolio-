@@ -1,6 +1,6 @@
 # Portfolio Update Log
 
-This log tracks the major portfolio improvements so the project has a clear history instead of a pile of mystery edits.
+This log tracks the major portfolio improvements so the project has a clear history.
 
 ## Current Polish Round
 
@@ -20,7 +20,7 @@ This log tracks the major portfolio improvements so the project has a clear hist
 
 ## Yash Assistant
 
-- Renamed Jr Yash to Yash across the interface.
+- Renamed the guide to Yash across the interface.
 - Reworked the chat window into a compact PowerShell-style terminal.
 - Expanded Yash's answers using resume facts plus approved personal details, including background, languages, work authorization, hobbies, and target roles.
 - Added command-style behavior such as `follow me`.

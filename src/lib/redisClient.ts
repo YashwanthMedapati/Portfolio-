@@ -37,9 +37,6 @@ function checkMemoryRateLimit(prefix: string, key: string, limit: number, window
   return { success: entry.count <= limit };
 }
 
-// Sliding-window rate limit, shared across any route that needs one. Each
-// caller gets its own counter namespace via `prefix` so e.g. the AI chat
-// and the contact form don't share a budget.
 export async function checkRateLimit(
   prefix: string,
   key: string,

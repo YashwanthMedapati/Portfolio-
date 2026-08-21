@@ -1,13 +1,10 @@
 ﻿import { test, expect } from "@playwright/test";
 
-// The roaming Yash sprite is used as the trigger throughout since, unlike the
-// Nav's "Ask Yash" button, it's always visible regardless of viewport
-// (the desktop nav button is hidden below the md breakpoint).
 function yashTrigger(page: import("@playwright/test").Page) {
-  return page.getByRole("button", { name: "Yash, an AI guide - click to chat" });
+  return page.getByRole("button", { name: "Yash guide - click to chat" });
 }
 
-test.describe("Yash assistant", () => {
+test.describe("Yash guide", () => {
   test("opens on click (after the jump), greets, and can be closed with the close button", async ({ page }) => {
     await page.goto("/");
 
@@ -87,7 +84,7 @@ test.describe("Yash assistant", () => {
     await expect(page.getByText(/Follow mode is on/i)).toBeVisible();
   });
 
-  test("a question the fast intent-matcher can't resolve calls the AI backend and shows its answer", async ({
+  test("a question the fast intent-matcher cannot resolve calls the chat backend and shows its answer", async ({
     page,
   }) => {
     let requestBody: unknown = null;
@@ -112,12 +109,12 @@ test.describe("Yash assistant", () => {
     );
   });
 
-  test("falls back to the static message if the AI backend errors or is unconfigured", async ({ page }) => {
+  test("falls back to the static message if the chat backend errors or is unconfigured", async ({ page }) => {
     await page.route("**/api/yash-chat", async (route) => {
       await route.fulfill({
         status: 503,
         contentType: "application/json",
-        body: JSON.stringify({ error: "AI chat is not configured" }),
+        body: JSON.stringify({ error: "Yash chat is not configured" }),
       });
     });
 

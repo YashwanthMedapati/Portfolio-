@@ -20,9 +20,6 @@ const stars = Array.from({ length: 72 }, (_, index) => ({
   delay: (index % 9) * 0.35,
 }));
 
-// First entry stays the original quote so this is a swap-in-place upgrade,
-// not a rewrite - add, remove, or reorder freely, the rotation just cycles
-// through whatever's here.
 const QUOTES = [
   "Learning, Living, and Leveling Up.",
   "Still debugging life, one commit at a time.",
@@ -36,11 +33,6 @@ const QUOTE_FADE_S = 0.6;
 
 type FinaleIntroPhase = "waiting" | "run" | "jump" | "done";
 
-// Named timeline instead of magic-number setTimeout delays: RUN is the
-// dash-in, JUMP is the leap arc, and HIT is the exact instant little-Yash's
-// head reaches the block (half the jump, since the arc is symmetric) - the
-// sound effect and the block's own bump react off HIT_MS, not a guessed
-// fixed offset, so they can never drift out of sync with the visual again.
 const RUN_MS = 1200;
 const JUMP_MS = 1000;
 const JUMP_PEAK_MS = JUMP_MS / 2;
@@ -85,9 +77,6 @@ export function YashFinale() {
   const pupilTargetRef = useRef({ x: 0, y: 0 });
   const pupilCurrentRef = useRef({ x: 0, y: 0 });
 
-  // Reduced motion means no auto-rotating content, not just no fade - the
-  // quote just stays on the first line instead of continuing to change
-  // itself in the background.
   useEffect(() => {
     if (reducedMotion) return;
     const interval = setInterval(() => {
@@ -256,10 +245,6 @@ export function YashFinale() {
             animate={
               littleYashVisible
                 ? {
-                    // x/y share the same 3-keyframe shape (liftoff, peak, landing) so
-                    // the horizontal and vertical apex land on the SAME instant -
-                    // that instant is tuned to put Yash's head into the block's
-                    // underside, not just somewhere in its general vicinity.
                     x: introPhase === "jump" ? [52, 98, 90] : [-390, -210, -70, 52],
                     y: introPhase === "jump" ? [0, -44, 0] : 0,
                     opacity: 1,
@@ -292,9 +277,6 @@ export function YashFinale() {
               introPhase === "run" || introPhase === "jump"
                 ? {
                     opacity: 1,
-                    // The block only reacts once blockHit flips true, which the
-                    // timeline fires at HIT_MS - the exact moment little-Yash's
-                    // arc peaks - instead of guessing a fixed early delay.
                     y: blockHit ? [0, -14, 0] : 0,
                   }
                 : { opacity: 0, y: 0 }

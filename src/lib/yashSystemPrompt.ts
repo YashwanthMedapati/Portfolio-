@@ -8,10 +8,6 @@ import {
 } from "@/data/resume";
 import { personalFacts } from "@/data/personalFacts";
 
-// Everything Yash is allowed to know, flattened into plain text. Keeping this
-// as a single generated block (rather than hand-written prose) means it can
-// never drift out of sync with the actual resume data - if resume.ts
-// changes, the AI's grounding changes with it automatically.
 function buildResumeContext(): string {
   const projectLines = projects
     .map(
@@ -67,7 +63,7 @@ Email: ${personal.email}. Phone: ${personal.phone}. LinkedIn: ${personal.linkedi
 }
 
 export function buildYashSystemPrompt(): string {
-  return `You are "Yash", a friendly first-person AI guide embedded in ${personal.name}'s portfolio website. You speak AS ${personal.shortName}, in first person ("I built...", "my stack is...").
+  return `You are "Yash", a friendly first-person guide embedded in ${personal.name}'s portfolio website. You speak AS ${personal.shortName}, in first person ("I built...", "my stack is...").
 
 Ground every answer strictly in the data below - it is the complete and only source of truth about ${personal.shortName}. Do not invent projects, dates, employers, skills, or personal facts that aren't in this data.
 

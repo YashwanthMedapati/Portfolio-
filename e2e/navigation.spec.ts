@@ -140,7 +140,10 @@ test.describe("Projects", () => {
     await page.goto("/");
 
     const mlCount = projects.filter((p) => p.mlFocused).length;
-    await page.getByRole("tab", { name: /ML-Focused/ }).click();
+    const tab = page.getByRole("tab", { name: /ML-Focused/ });
+    await tab.scrollIntoViewIfNeeded();
+    await tab.click({ trial: true });
+    await tab.click();
     await expect(page.getByRole("button", { name: "Code" })).toHaveCount(mlCount);
   });
 });
@@ -155,6 +158,18 @@ test.describe("Contact", () => {
   });
 
   test("contact form submits to the API and falls back to an email draft if it errors", async ({ page, context }) => {
+    await page.addInitScript(() => {
+      const openedUrls: string[] = [];
+      Object.defineProperty(window, "__openedUrls", {
+        value: openedUrls,
+        configurable: true,
+      });
+      const open = window.open.bind(window);
+      window.open = (url?: string | URL, target?: string, features?: string) => {
+        if (url) openedUrls.push(String(url));
+        return open("about:blank", target, features);
+      };
+    });
     await page.route("**/api/contact", async (route) => {
       await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "not configured" }) });
     });
@@ -169,7 +184,16 @@ test.describe("Contact", () => {
       context.waitForEvent("page"),
       page.getByRole("button", { name: "Submit Message" }).click(),
     ]);
-    expect(popup.url()).toContain("mail.google.com");
+    await popup.waitForLoadState("domcontentloaded");
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          ((window as Window & { __openedUrls?: string[] }).__openedUrls ?? []).some((url) =>
+            url.includes("mail.google.com")
+          )
+        )
+      )
+      .toBe(true);
     await expect(page.getByText(/Opened your email app instead/i)).toBeVisible();
   });
 });

@@ -66,9 +66,6 @@ export default function About() {
               className="rounded-full object-cover transition-opacity duration-300 group-hover:opacity-0"
               style={{ objectPosition: "52% 42%", transform: "scale(1.16)" }}
             />
-            {/* 3D Yash swaps in on hover - same flat hover asset the Nav
-                logo already uses, so it's a plain crossfade, not the
-                cursor-tracking pupil rig YashFinale's full-size avatar needs. */}
             <Image
               src="/avatar/yash-nav-hover.png"
               alt=""

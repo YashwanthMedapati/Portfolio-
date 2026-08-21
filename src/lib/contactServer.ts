@@ -25,9 +25,6 @@ export function isValidContactPayload(body: unknown): body is ContactPayload {
   );
 }
 
-// Stricter than the AI chat's limit: every valid submission here sends a
-// real email against a metered provider quota, with no cache path to
-// absorb repeats.
 export async function checkContactRateLimit(ip: string): Promise<{ success: boolean }> {
   return checkRateLimit("contact:ratelimit", ip, 3, "10 m");
 }
