@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useRef, useState, ReactNode } from "react";
-import { matchIntent, fallback, greeting, YashAnswer, NavAction } from "@/lib/jrYashBrain";
+import { matchIntent, aiUnavailable, greeting, YashAnswer, NavAction } from "@/lib/jrYashBrain";
 import { askYashChat } from "@/lib/askYashChat";
 import { personal } from "@/data/resume";
 
@@ -198,7 +198,7 @@ export function JrYashProvider({ children }: { children: ReactNode }) {
 
       askYashChat(query)
         .then((text) => revealAnswer({ text, action: { type: "none" } }))
-        .catch(() => revealAnswer(fallback));
+        .catch(() => revealAnswer(aiUnavailable));
     },
     [revealAnswer]
   );

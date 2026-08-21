@@ -32,6 +32,16 @@ export const fallback: YashAnswer = {
   followUps: ["Contact me", "Show me your AI projects", "What tech stack do you use?"],
 };
 
+// Shown when the AI call itself fails (network hiccup, rate limit, upstream
+// error) - distinct from `fallback` above, which is for "I don't have that
+// data" and was previously reused here too, misleadingly implying a
+// knowledge gap for what's usually just a transient backend issue.
+export const aiUnavailable: YashAnswer = {
+  text: `I'm having trouble reaching my AI brain for that one - might be a brief hiccup. Try asking again in a few seconds, or ask me about my projects, skills, education, resume, or contact info and I can usually answer right away.`,
+  action: { type: "none" },
+  followUps: ["Show me your AI projects", "What tech stack do you use?"],
+};
+
 function score(query: string, keywords: string[]): number {
   const q = query.toLowerCase();
   let best = 0;

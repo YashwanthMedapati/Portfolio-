@@ -124,7 +124,7 @@ test.describe("Yash guide", () => {
     await input.fill("Recommend a good espresso machine under $200.");
     await page.getByRole("button", { name: "Send message" }).click();
 
-    await expect(page.getByText(/I do not know that from the portfolio data yet/i)).toBeVisible();
+    await expect(page.getByText(/having trouble reaching my AI brain/i)).toBeVisible();
   });
 
   test("closed panel does not linger and block clicks underneath it", async ({ page }) => {

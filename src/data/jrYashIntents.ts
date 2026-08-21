@@ -14,6 +14,13 @@ export const intents: Intent[] = [
       "ml work",
       "projects",
       "portfolio",
+      "nutridentai",
+      "nutrident",
+      "nutri dent",
+      "caries",
+      "ai resume intelligence",
+      "resume intelligence",
+      "resume parser",
     ],
     answer: () => ({
       text: `I would start with NutriDent AI and AI Resume Intelligence. NutriDent AI is my healthcare ML story: real NHANES data, caries-risk prediction, and a React + FastAPI app around it. AI Resume Intelligence is my NLP story: parsing resumes, comparing them to job descriptions, and ranking candidates. The nice thing is that both projects show me building the product around the model, not just stopping at the model.`,
