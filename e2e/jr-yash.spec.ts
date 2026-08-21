@@ -36,7 +36,7 @@ test.describe("Yash guide", () => {
     await yashTrigger(page).click();
     await page.getByRole("button", { name: /Show me your AI projects/ }).click();
 
-    await expect(page.getByText(/start with NutriDent AI/i)).toBeVisible();
+    await expect(page.getByText(/three projects worth a look/i)).toBeVisible();
     await expect(page.locator("#projects")).toBeInViewport({ timeout: 5000 });
   });
 

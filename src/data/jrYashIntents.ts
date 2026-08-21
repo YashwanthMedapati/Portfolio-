@@ -1,6 +1,20 @@
-import { personal, skills, education, certifications, experience } from "@/data/resume";
+import { personal, skills, education, certifications, experience, projects } from "@/data/resume";
 import { getFact } from "@/data/personalFacts";
-import type { Intent } from "@/lib/jrYashBrain";
+import type { Intent, YashAnswer } from "@/lib/jrYashBrain";
+
+// Built from the same `projects` data the project cards render, instead of
+// separately hand-written prose - so a detailed answer can't drift from the
+// real numbers (dataset size, accuracy, test cases passed, etc.) and stays
+// in sync automatically if a project's facts change.
+function projectDetailAnswer(slug: string, followUps: string[]): YashAnswer {
+  const project = projects.find((p) => p.slug === slug);
+  if (!project) throw new Error(`Unknown project slug: ${slug}`);
+  return {
+    text: `${project.name} (${project.tagline}, ${project.dateRange}): ${project.bullets.join(" ")} Built with ${project.stack.join(", ")}.`,
+    action: { type: "scroll", target: "projects" },
+    followUps,
+  };
+}
 
 export const intents: Intent[] = [
   {
@@ -14,19 +28,56 @@ export const intents: Intent[] = [
       "ml work",
       "projects",
       "portfolio",
+    ],
+    answer: () => ({
+      text: `I have three projects worth a look. NutriDent AI is my healthcare ML story: real NHANES data, caries-risk prediction, and a React + FastAPI app around it. AI Resume Intelligence is my NLP story: parsing resumes, comparing them to job descriptions, and ranking candidates. Multi-Platform Toxicity Analytics is a group project: a pipeline processing thousands of Reddit and 4chan posts a day through Google's Perspective API. Ask me about any one by name and I will go into the technical detail.`,
+      action: { type: "scroll", target: "projects" },
+      followUps: ["Explain NutriDent AI in detail", "Explain AI Resume Intelligence in detail", "Explain the toxicity analytics project"],
+    }),
+  },
+  {
+    id: "nutridentai-detail",
+    keywords: [
       "nutridentai",
       "nutrident",
       "nutri dent",
       "caries",
+      "caries risk",
+      "dental risk",
+      "nutrition tracking",
+      "nutrition app",
+    ],
+    answer: () =>
+      projectDetailAnswer("nutridentai", ["Explain AI Resume Intelligence in detail", "What tech stack do you use?"]),
+  },
+  {
+    id: "ai-resume-intelligence-detail",
+    keywords: [
       "ai resume intelligence",
       "resume intelligence",
       "resume parser",
+      "resume ranking",
+      "ats feedback",
+      "candidate ranking",
+      "resume analysis platform",
     ],
-    answer: () => ({
-      text: `I would start with NutriDent AI and AI Resume Intelligence. NutriDent AI is my healthcare ML story: real NHANES data, caries-risk prediction, and a React + FastAPI app around it. AI Resume Intelligence is my NLP story: parsing resumes, comparing them to job descriptions, and ranking candidates. The nice thing is that both projects show me building the product around the model, not just stopping at the model.`,
-      action: { type: "scroll", target: "projects" },
-      followUps: ["Which project best shows your ML skills?", "What tech stack do you use?"],
-    }),
+    answer: () =>
+      projectDetailAnswer("ai-resume-intelligence", ["Explain NutriDent AI in detail", "What tech stack do you use?"]),
+  },
+  {
+    id: "toxicity-analytics-detail",
+    keywords: [
+      "toxicity analytics",
+      "toxicity project",
+      "reddit 4chan",
+      "reddit and 4chan",
+      "perspective api",
+      "multi-platform toxicity",
+      "toxicity pipeline",
+      "4chan",
+    ],
+    answer: () =>
+      projectDetailAnswer("toxicity-analytics", ["Explain NutriDent AI in detail", "Show me your AI projects"]),
   },
   {
     id: "best-ml-project",
